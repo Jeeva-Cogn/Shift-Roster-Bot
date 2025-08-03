@@ -1,13 +1,15 @@
 {
-  "name": "shiftbot-webapp",
+  "name": "shift-roster-bot-webapp",
   "version": "1.0.0",
-  "description": "AI-powered shift roster management web application",
+  "description": "ShiftBot - AI-powered shift roster management web application",
   "main": "server.js",
   "scripts": {
-    "start": "node ../server.js",
-    "dev": "nodemon ../server.js",
-    "build": "echo \"Static files ready for deployment\"",
-    "test": "echo \"No tests specified\" && exit 0"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "install-client": "cd shiftbot && npm install",
+    "build": "echo \"Building web app...\" && npm run install-client",
+    "test": "echo \"No tests specified\" && exit 0",
+    "postinstall": "npm run build"
   },
   "keywords": [
     "roster",
@@ -16,7 +18,9 @@
     "ai",
     "javascript",
     "webapp",
-    "express"
+    "express",
+    "qa",
+    "dod"
   ],
   "author": "Jeeva-Cogn",
   "license": "MIT",

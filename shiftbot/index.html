@@ -4,7 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered shift roster management for QA&DOD teams">
+    <meta name="keywords" content="shift roster, workforce management, QA, DOD, scheduling">
+    <meta name="author" content="Jeeva-Cogn">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ShiftBot">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="ShiftBot - AI Roster Management">
+    <meta property="og:description" content="AI-powered shift roster management for QA&DOD teams">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/Jeeva-Cogn/Shift-Roster-Bot">
+    
     <title>ShiftBot - AI Roster Management</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMjU2M2ViIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIzIi8+PHBhdGggZD0iTTEyIDFWM20wIDE4djJtMTEtMTJoLTJNNSAxMkgzbTEwLjUtNi41TDE2IDRNNy41IDE3LjVMNiAxOW0wLTEzTDcuNSA3LjVtMTEgMUwxNyAxNy41Ii8+PC9zdmc+">
+    
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
@@ -117,5 +140,20 @@
     <div id="toast-container"></div>
 
     <script type="module" src="js/app.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('🚀 ShiftBot SW registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('❌ SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+
 import { generateId, deepClone } from './utils.js';
 
 const LOCAL_STORAGE_KEY = 'shiftBotData';
@@ -11,6 +12,7 @@ const defaultData = {
             name: 'Dinesh Anbalagan', 
             department: 'NPE',
             position: 'Team Lead',
+            skills: ['Java', 'API Testing', 'Leadership'], 
             daysOff: [0],
             role: 'Lead'
         },
@@ -20,6 +22,7 @@ const defaultData = {
             name: 'Mano Kumar', 
             department: 'NPE',
             position: 'Shift Lead',
+            skills: ['Python', 'Performance Testing', 'Leadership'], 
             daysOff: [6],
             role: 'Lead'
         },
@@ -29,6 +32,7 @@ const defaultData = {
             name: 'Jeyakaran S', 
             department: 'NPE',
             position: 'Shift Lead',
+            skills: ['Java', 'UI Testing', 'Leadership'], 
             daysOff: [0],
             role: 'Lead'
         },
@@ -40,6 +44,7 @@ const defaultData = {
             name: 'Karthikeyan R', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Java', 'API Testing'], 
             daysOff: [0, 6],
             role: 'Associate'
         },
@@ -49,6 +54,7 @@ const defaultData = {
             name: 'Jeeva Subramaniam', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Python', 'UI Testing'], 
             daysOff: [6],
             role: 'Associate'
         },
@@ -58,6 +64,7 @@ const defaultData = {
             name: 'Praveenkumar Sridharan', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Java', 'API Testing'], 
             daysOff: [0],
             role: 'Associate'
         },
@@ -67,6 +74,7 @@ const defaultData = {
             name: 'Dinesh Kumar', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Python', 'Performance Testing'], 
             daysOff: [0, 6],
             role: 'Associate'
         },
@@ -76,6 +84,7 @@ const defaultData = {
             name: 'Rajesh Kannan', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Java', 'UI Testing'], 
             daysOff: [6],
             role: 'Associate'
         },
@@ -85,6 +94,7 @@ const defaultData = {
             name: 'Suresh Babu', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Python', 'API Testing'], 
             daysOff: [0],
             role: 'Associate'
         },
@@ -94,6 +104,7 @@ const defaultData = {
             name: 'Venkatesh Kumar', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Java', 'Performance Testing'], 
             daysOff: [0, 6],
             role: 'Associate'
         },
@@ -103,6 +114,7 @@ const defaultData = {
             name: 'Arun Prakash', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Python', 'UI Testing'], 
             daysOff: [6],
             role: 'Associate'
         },
@@ -112,6 +124,7 @@ const defaultData = {
             name: 'Santhosh Kumar', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Java', 'API Testing'], 
             daysOff: [0],
             role: 'Associate'
         }
@@ -122,44 +135,158 @@ const defaultData = {
             name: 'S1 - Morning', 
             startTime: '06:00', 
             endTime: '14:00', 
+            requiredSkills: ['Java', 'Python'], 
             requiredRoles: { 'Lead': 1, 'Associate': 2 }, 
-            totalRequired: 3,
-            description: '06:00 AM TO 02:00 PM IST'
+            totalRequired: 3 
         },
         { 
             id: 'S2', 
             name: 'S2 - Afternoon', 
             startTime: '14:00', 
             endTime: '22:00', 
+            requiredSkills: ['Java', 'Python'], 
             requiredRoles: { 'Lead': 1, 'Associate': 1 }, 
-            totalRequired: 2,
-            description: '02:00 PM TO 10:00 PM IST'
+            totalRequired: 2 
         },
         { 
             id: 'S3', 
             name: 'S3 - Night', 
             startTime: '22:00', 
             endTime: '06:00', 
+            requiredSkills: ['Java', 'Python'], 
             requiredRoles: { 'Lead': 1, 'Associate': 2 }, 
-            totalRequired: 3,
-            description: '10:00 PM TO 06:00 AM IST'
+            totalRequired: 3 
         },
         { 
             id: 'S4', 
             name: 'S4 - Special', 
             startTime: '10:00', 
             endTime: '18:00', 
+            requiredSkills: ['Java', 'Python'], 
             requiredRoles: { 'Lead': 1, 'Associate': 1 }, 
             totalRequired: 2, 
-            isRare: true,
-            description: '10:00 AM TO 06:00 PM IST (Rare/Special Coverage)'
+            isRare: true 
         }
     ],
     rules: [
-        { id: generateId(), type: 'MIN_REST_HOURS', value: 10, description: 'Minimum 10 hours rest between shifts' },
-        { id: generateId(), type: 'MAX_CONSECUTIVE_DAYS', value: 5, description: 'Maximum 5 consecutive work days' },
-        { id: generateId(), type: 'REQUIRED_SKILL', value: 1, description: 'Employee must have required skills for shift' },
-        { id: generateId(), type: 'DAY_OFF', value: 1, description: 'Respect employee preferred days off' }
+            shiftCode: 'S1'
+        },
+        { 
+            id: 'S2', 
+            name: 'S2 - Afternoon Shift', 
+            startTime: '13:00', 
+            endTime: '23:00', 
+            duration: 10,
+            requiredSkills: ['General', 'UAT'], 
+            description: '01:00 PM TO 11:00 PM IST',
+            breakTime: '16:00-16:30, 19:00-20:00',
+            shiftCode: 'S2'
+        },
+        { 
+            id: 'S3', 
+            name: 'S3 - Night Shift', 
+            startTime: '22:00', 
+            endTime: '08:00', 
+            duration: 10,
+            requiredSkills: ['General', 'UAT'], 
+            description: '10:00 PM TO 08:00 AM IST',
+            breakTime: '01:00-01:30, 04:00-05:00',
+            shiftCode: 'S3'
+        },
+        { 
+            id: 'S4', 
+            name: 'S4 - Extended Afternoon', 
+            startTime: '12:30', 
+            endTime: '22:30', 
+            duration: 10,
+            requiredSkills: ['General', 'UAT'], 
+            description: '12:30 PM TO 10:30 PM IST',
+            breakTime: '15:30-16:00, 18:30-19:30',
+            shiftCode: 'S4'
+        },
+        { 
+            id: 'G', 
+            name: 'G - General Shift', 
+            startTime: '09:00', 
+            endTime: '19:00', 
+            duration: 10,
+            requiredSkills: ['General'], 
+            description: '09:00 AM TO 07:00 PM IST',
+            breakTime: '12:00-13:00, 15:30-16:00',
+            shiftCode: 'G'
+        },
+        { 
+            id: 'P', 
+            name: 'P - Production Shift', 
+            startTime: '18:30', 
+            endTime: '04:30', 
+            duration: 10,
+            requiredSkills: ['General', 'Production'], 
+            description: '06:30 PM TO 04:30 AM IST',
+            breakTime: '21:30-22:00, 01:00-02:00',
+            shiftCode: 'P'
+        },
+        { 
+            id: 'HIH', 
+            name: 'HIH - Hybrid Shift', 
+            startTime: '11:30', 
+            endTime: '20:30', 
+            duration: 9,
+            requiredSkills: ['General'], 
+            description: '11:30 AM TO 08:30 PM IST',
+            breakTime: '14:30-15:00, 17:30-18:00',
+            shiftCode: 'HIH'
+        }
+    ],
+    rules: [
+        { 
+            id: 'RUL001', 
+            type: 'MIN_REST_HOURS', 
+            value: 12, 
+            description: 'Minimum 12 hours rest between shifts',
+            priority: 'High',
+            category: 'Labor Law'
+        },
+        { 
+            id: 'RUL002', 
+            type: 'MAX_CONSECUTIVE_DAYS', 
+            value: 6, 
+            description: 'Maximum 6 consecutive work days',
+            priority: 'High',
+            category: 'Labor Law'
+        },
+        { 
+            id: 'RUL003', 
+            type: 'MAX_HOURS_PER_DAY', 
+            value: 12, 
+            description: 'Maximum 12 hours work per day',
+            priority: 'High',
+            category: 'Labor Law'
+        },
+        { 
+            id: 'RUL004', 
+            type: 'SKILL_REQUIREMENT', 
+            value: true, 
+            description: 'Employee must have required skills for shift',
+            priority: 'Medium',
+            category: 'Operational'
+        },
+        { 
+            id: 'RUL005', 
+            type: 'DAY_OFF_PREFERENCE', 
+            value: true, 
+            description: 'Respect employee day-off preferences',
+            priority: 'Medium',
+            category: 'Employee Preference'
+        },
+        { 
+            id: 'RUL006', 
+            type: 'SUPERVISOR_REQUIRED', 
+            value: true, 
+            description: 'At least one supervisor per shift',
+            priority: 'High',
+            category: 'Operational'
+        }
     ],
     schedule: null,
 };

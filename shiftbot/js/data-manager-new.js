@@ -11,6 +11,7 @@ const defaultData = {
             name: 'Dinesh Anbalagan', 
             department: 'NPE',
             position: 'Team Lead',
+            skills: ['Java', 'API Testing', 'Leadership'], 
             daysOff: [0],
             role: 'Lead'
         },
@@ -20,6 +21,7 @@ const defaultData = {
             name: 'Mano Kumar', 
             department: 'NPE',
             position: 'Shift Lead',
+            skills: ['Python', 'Performance Testing', 'Leadership'], 
             daysOff: [6],
             role: 'Lead'
         },
@@ -29,6 +31,7 @@ const defaultData = {
             name: 'Jeyakaran S', 
             department: 'NPE',
             position: 'Shift Lead',
+            skills: ['Java', 'UI Testing', 'Leadership'], 
             daysOff: [0],
             role: 'Lead'
         },
@@ -40,6 +43,7 @@ const defaultData = {
             name: 'Karthikeyan R', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Java', 'API Testing'], 
             daysOff: [0, 6],
             role: 'Associate'
         },
@@ -49,6 +53,7 @@ const defaultData = {
             name: 'Jeeva Subramaniam', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Python', 'UI Testing'], 
             daysOff: [6],
             role: 'Associate'
         },
@@ -58,6 +63,7 @@ const defaultData = {
             name: 'Praveenkumar Sridharan', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Java', 'API Testing'], 
             daysOff: [0],
             role: 'Associate'
         },
@@ -67,6 +73,7 @@ const defaultData = {
             name: 'Dinesh Kumar', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Python', 'Performance Testing'], 
             daysOff: [0, 6],
             role: 'Associate'
         },
@@ -76,6 +83,7 @@ const defaultData = {
             name: 'Rajesh Kannan', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Java', 'UI Testing'], 
             daysOff: [6],
             role: 'Associate'
         },
@@ -85,6 +93,7 @@ const defaultData = {
             name: 'Suresh Babu', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Python', 'API Testing'], 
             daysOff: [0],
             role: 'Associate'
         },
@@ -94,6 +103,7 @@ const defaultData = {
             name: 'Venkatesh Kumar', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Java', 'Performance Testing'], 
             daysOff: [0, 6],
             role: 'Associate'
         },
@@ -103,6 +113,7 @@ const defaultData = {
             name: 'Arun Prakash', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Python', 'UI Testing'], 
             daysOff: [6],
             role: 'Associate'
         },
@@ -112,6 +123,7 @@ const defaultData = {
             name: 'Santhosh Kumar', 
             department: 'NPE',
             position: 'Associate',
+            skills: ['Java', 'API Testing'], 
             daysOff: [0],
             role: 'Associate'
         }
@@ -122,6 +134,7 @@ const defaultData = {
             name: 'S1 - Morning', 
             startTime: '06:00', 
             endTime: '14:00', 
+            requiredSkills: ['Java', 'Python'], 
             requiredRoles: { 'Lead': 1, 'Associate': 2 }, 
             totalRequired: 3,
             description: '06:00 AM TO 02:00 PM IST'
@@ -131,6 +144,7 @@ const defaultData = {
             name: 'S2 - Afternoon', 
             startTime: '14:00', 
             endTime: '22:00', 
+            requiredSkills: ['Java', 'Python'], 
             requiredRoles: { 'Lead': 1, 'Associate': 1 }, 
             totalRequired: 2,
             description: '02:00 PM TO 10:00 PM IST'
@@ -140,6 +154,7 @@ const defaultData = {
             name: 'S3 - Night', 
             startTime: '22:00', 
             endTime: '06:00', 
+            requiredSkills: ['Java', 'Python'], 
             requiredRoles: { 'Lead': 1, 'Associate': 2 }, 
             totalRequired: 3,
             description: '10:00 PM TO 06:00 AM IST'
@@ -149,6 +164,7 @@ const defaultData = {
             name: 'S4 - Special', 
             startTime: '10:00', 
             endTime: '18:00', 
+            requiredSkills: ['Java', 'Python'], 
             requiredRoles: { 'Lead': 1, 'Associate': 1 }, 
             totalRequired: 2, 
             isRare: true,

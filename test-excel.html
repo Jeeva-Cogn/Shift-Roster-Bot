@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Excel Export Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h1>Excel Export Test</h1>
+    <button onclick="testExport()">Test Excel Export</button>
+    <p id="status"></p>
+
+    <script>
+        function testExport() {
+            try {
+                document.getElementById('status').textContent = 'Testing Excel export...';
+                
+                // Check if XLSX is loaded
+                if (typeof XLSX === 'undefined') {
+                    document.getElementById('status').textContent = 'ERROR: XLSX library not loaded';
+                    return;
+                }
+
+                // Create simple workbook
+                const workbook = XLSX.utils.book_new();
+                const data = [
+                    ['Name', 'Role', 'Shift'],
+                    ['Test User', 'Lead', 'S1'],
+                    ['Test User 2', 'Associate', 'S2']
+                ];
+                
+                const worksheet = XLSX.utils.aoa_to_sheet(data);
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Test');
+                
+                // Export
+                const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                const blob = new Blob([wbout], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                });
+                
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'test-export.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                document.getElementById('status').textContent = 'Excel file should have downloaded!';
+                
+            } catch (error) {
+                document.getElementById('status').textContent = 'ERROR: ' + error.message;
+                console.error('Export error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

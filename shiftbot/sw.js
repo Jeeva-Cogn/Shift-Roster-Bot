@@ -1,16 +1,18 @@
-const CACHE_NAME = 'shiftbot-v1.0.0';
+const CACHE_NAME = 'shiftbot-v2.0.0-excel';
 const urlsToCache = [
   '/',
   '/css/style.css',
   '/js/app.js',
   '/js/data-manager.js',
+  '/js/excel-manager.js',
   '/js/schedule-generator.js',
   '/js/reports.js',
   '/js/rule-engine.js',
   '/js/utils.js',
   '/manifest.json',
   'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js'
+  'https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
 ];
 
 // Install Service Worker

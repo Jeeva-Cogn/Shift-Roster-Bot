@@ -4,23 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AI-powered shift roster management for QA&DOD teams">
-    <meta name="keywords" content="shift roster, workforce management, QA, DOD, scheduling">
+    <meta name="description" content="AI-powered shift roster management for NPE teams">
+    <meta name="keywords" content="shift roster, workforce management, NPE, scheduling">
     <meta name="author" content="Jeeva-Cogn">
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="ShiftBot">
+    <meta name="apple-mobile-web-app-title" content="NPE ShiftBot">
     
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="ShiftBot - AI Roster Management">
-    <meta property="og:description" content="AI-powered shift roster management for QA&DOD teams">
+    <meta property="og:title" content="NPE ShiftBot - AI Roster Management">
+    <meta property="og:description" content="AI-powered shift roster management for NPE teams">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://github.com/Jeeva-Cogn/Shift-Roster-Bot">
     
-    <title>ShiftBot - AI Roster Management</title>
+    <title>NPE ShiftBot - AI Roster Management</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -31,54 +31,86 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="app-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h1>ShiftBot</h1>
+                <h1>NPE ShiftBot</h1>
+                <p style="font-size: 12px; color: #666; margin: 5px 0 0 0;">Team Roster Management</p>
             </div>
             <nav class="sidebar-nav">
                 <a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a>
-                <a href="#employees" class="nav-link" data-section="employees">Employees</a>
+                <a href="#employees" class="nav-link" data-section="employees">NPE Team</a>
                 <a href="#shifts" class="nav-link" data-section="shifts">Shifts</a>
                 <a href="#rules" class="nav-link" data-section="rules">AI Rules</a>
                 <a href="#generator" class="nav-link" data-section="generator">Schedule Generator</a>
                 <a href="#reports" class="nav-link" data-section="reports">Reports</a>
             </nav>
             <div class="sidebar-footer">
-                <button id="export-data-btn">Export Data</button>
-                <button id="import-data-btn">Import Data</button>
-                <input type="file" id="import-file-input" style="display: none;" accept=".json">
+                <button id="export-data-btn">📊 Export Excel</button>
+                <button id="import-data-btn">📁 Import Excel</button>
+                <button id="download-template-btn">📄 Download Template</button>
+                <input type="file" id="import-file-input" style="display: none;" accept=".xlsx,.xls">
             </div>
         </aside>
 
         <main class="main-content">
             <!-- Dashboard Section -->
             <section id="dashboard" class="content-section active">
-                <h2>Dashboard</h2>
+                <h2>NPE Team Dashboard</h2>
                 <div class="stats-grid">
-                    <div class="stat-card"><h3>Total Employees</h3><p id="total-employees-stat">0</p></div>
-                    <div class="stat-card"><h3>Defined Shifts</h3><p id="total-shifts-stat">0</p></div>
+                    <div class="stat-card"><h3>NPE Team Members</h3><p id="total-employees-stat">0</p></div>
+                    <div class="stat-card"><h3>Shift Types</h3><p id="total-shifts-stat">0</p></div>
                     <div class="stat-card"><h3>Active Rules</h3><p id="total-rules-stat">0</p></div>
-                    <div class="stat-card"><h3>Compliance Score</h3><p id="compliance-score-stat">N/A</p></div>
+                    <div class="stat-card"><h3>Schedule Status</h3><p id="schedule-status-stat">No Schedule</p></div>
                 </div>
+                
+                <!-- Schedule Analytics Section -->
+                <div id="schedule-analytics" class="analytics-section" style="display: none;">
+                    <h3>Schedule Analytics</h3>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h4>Team Assignment Summary</h4>
+                            <div class="chart-container">
+                                <canvas id="team-summary-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <h4>Individual Member Analysis</h4>
+                            <div class="member-analysis-container">
+                                <div id="member-analysis-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="chart-container">
-                    <h3>Workload Distribution</h3>
+                    <h3>NPE Team Workload Distribution</h3>
                     <canvas id="workload-chart"></canvas>
                 </div>
             </section>
 
             <!-- Employees Section -->
             <section id="employees" class="content-section">
-                <h2>Employee Management</h2>
-                <button id="add-employee-btn">Add New Employee</button>
+                <h2>NPE Team Management</h2>
+                <p style="color: #666; margin-bottom: 20px;">
+                    Manage NPE team members. Current structure: 3 Leads + 9 Associates for S1/S3 (1 Lead + 2 Associates), S2 (1 Lead + 1 Associate).
+                </p>
+                <button id="add-employee-btn">Add New Team Member</button>
                 <div id="employee-list" class="card-grid"></div>
             </section>
 
             <!-- Shifts Section -->
             <section id="shifts" class="content-section">
-                <h2>Shift Management</h2>
+                <h2>NPE Shift Management</h2>
+                <p style="color: #666; margin-bottom: 20px;">
+                    <strong>S1 - Morning:</strong> 06:00-14:00 (1 Lead + 2 Associates)<br>
+                    <strong>S2 - Afternoon:</strong> 14:00-22:00 (1 Lead + 1 Associate)<br>
+                    <strong>S3 - Night:</strong> 22:00-06:00 (1 Lead + 2 Associates)<br>
+                    <strong>S4 - Special:</strong> 10:00-18:00 (Rare coverage)
+                </p>
                 <button id="add-shift-btn">Add New Shift</button>
                 <div id="shift-list" class="card-grid"></div>
             </section>
@@ -141,8 +173,9 @@
 
     <script type="module" src="js/app.js"></script>
     
-    <!-- PWA Service Worker Registration -->
+    <!-- PWA Service Worker Registration - Temporarily disabled for testing -->
     <script>
+        /*
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
@@ -154,6 +187,8 @@
                     });
             });
         }
+        */
+        console.log('Service Worker disabled for testing');
     </script>
 </body>
 </html>

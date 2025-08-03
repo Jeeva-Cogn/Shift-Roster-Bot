@@ -1,13 +1,23 @@
-import { employees, shifts, rules, schedule, getData, importData } from './data-manager.js';
+import { employees, shifts, rules, schedule, getData } from './data-manager.js';
 import { generateSchedule } from './schedule-generator.js';
 import { generateComplianceReport, generateEmployeeHoursReport } from './reports.js';
+import { exportToExcel, importFromExcel, initializeExcelSupport, downloadTemplate } from './excel-manager.js';
 import { showToast } from './utils.js';
 
 const { DateTime } = luxon;
 let workloadChart = null;
 
 // --- Navigation ---
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize Excel support
+    try {
+        await initializeExcelSupport();
+        console.log('Excel support initialized');
+    } catch (error) {
+        console.error('Failed to initialize Excel support:', error);
+        showToast('Excel functionality unavailable', 'error');
+    }
+    
     initNav();
     initDashboard();
     initEmployees();
@@ -16,12 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initGenerator();
     initReports();
     initDataIO();
-
+    
     // Initial Render
     renderAll();
-});
-
-function initNav() {
+});function initNav() {
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('.content-section');
 
@@ -59,13 +67,15 @@ function updateDashboard() {
 
     const currentSchedule = schedule.get();
     if(currentSchedule) {
-        const complianceReport = generateComplianceReport(currentSchedule);
-        const totalViolations = complianceReport.filter(r => r !== 'No violations found.').length;
-        const totalAssignments = Object.values(currentSchedule.assignments).flatMap(Object.values).filter(Boolean).length;
-        const score = totalAssignments > 0 ? Math.max(0, 100 * (1 - totalViolations / totalAssignments)) : 100;
-        document.getElementById('compliance-score-stat').textContent = `${score.toFixed(0)}%`;
+        document.getElementById('schedule-status-stat').textContent = 'Loaded';
         
-        // Update chart
+        // Show analytics section
+        document.getElementById('schedule-analytics').style.display = 'block';
+        
+        // Update analytics
+        updateScheduleAnalytics(currentSchedule);
+        
+        // Update workload chart
         const hoursReport = generateEmployeeHoursReport(currentSchedule);
         if (workloadChart) workloadChart.destroy();
         const ctx = document.getElementById('workload-chart').getContext('2d');
@@ -76,14 +86,180 @@ function updateDashboard() {
                 datasets: [{
                     label: 'Scheduled Hours',
                     data: hoursReport.map(r => r.hours),
-                    backgroundColor: 'rgba(74, 144, 226, 0.7)',
+                    backgroundColor: 'rgba(139, 95, 191, 0.7)',
+                    borderColor: 'rgba(139, 95, 191, 1)',
+                    borderWidth: 1
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#6b4c87'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            color: '#6b4c87'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#6b4c87'
+                        }
+                    }
+                }
+            }
         });
     } else {
-        document.getElementById('compliance-score-stat').textContent = 'N/A';
+        document.getElementById('schedule-status-stat').textContent = 'No Schedule';
+        document.getElementById('schedule-analytics').style.display = 'none';
     }
+}
+
+// Schedule Analytics Functions
+function updateScheduleAnalytics(currentSchedule) {
+    try {
+        const allEmployees = employees.getAll();
+        
+        // Generate team summary chart
+        updateTeamSummaryChart(currentSchedule, allEmployees);
+        
+        // Generate individual member analysis
+        updateMemberAnalysis(currentSchedule, allEmployees);
+    } catch (error) {
+        console.error('Error updating analytics:', error);
+        showToast('Error updating analytics dashboard', 'error');
+    }
+}
+
+function updateTeamSummaryChart(currentSchedule, allEmployees) {
+    try {
+        const shiftCounts = { S1: 0, S2: 0, S3: 0, S4: 0, OFF: 0 };
+        
+        // Count all shift assignments safely
+        allEmployees.forEach(emp => {
+            const assignments = currentSchedule.assignments[emp.id] || {};
+            Object.values(assignments).forEach(assignment => {
+                if (assignment && shiftCounts.hasOwnProperty(assignment)) {
+                    shiftCounts[assignment]++;
+                }
+            });
+        });
+        
+        const chartElement = document.getElementById('team-summary-chart');
+        if (!chartElement) return;
+        
+        // Destroy existing chart if it exists
+        if (window.teamSummaryChart) {
+            window.teamSummaryChart.destroy();
+        }
+        
+        const ctx = chartElement.getContext('2d');
+        window.teamSummaryChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['S1 - Morning', 'S2 - Afternoon', 'S3 - Night', 'S4 - Special', 'Off Days'],
+                datasets: [{
+                    data: [shiftCounts.S1, shiftCounts.S2, shiftCounts.S3, shiftCounts.S4, shiftCounts.OFF],
+                    backgroundColor: [
+                        '#8b5fbf',
+                        '#a374d0',
+                        '#6b4c87',
+                        '#b794d1',
+                        '#e8dff0'
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#6b4c87',
+                            usePointStyle: true,
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error updating team summary chart:', error);
+    }
+}
+
+function updateMemberAnalysis(currentSchedule, allEmployees) {
+    try {
+        const memberAnalysisList = document.getElementById('member-analysis-list');
+        if (!memberAnalysisList) return;
+        
+        memberAnalysisList.innerHTML = '';
+        
+        allEmployees.forEach(emp => {
+            const assignments = currentSchedule.assignments[emp.id] || {};
+            const analysis = analyzeEmployeeSchedule(emp, assignments);
+            
+            const memberItem = document.createElement('div');
+            memberItem.className = 'member-analysis-item';
+            memberItem.innerHTML = `
+                <div class="member-name">${emp.name} (${emp.role})</div>
+                <div class="member-stats">
+                    <div class="stat-item night-shifts">
+                        <span class="label">Night Shifts</span>
+                        <span class="value">${analysis.nightShifts}</span>
+                    </div>
+                    <div class="stat-item off-days">
+                        <span class="label">Off Days</span>
+                        <span class="value">${analysis.offDays}</span>
+                    </div>
+                    <div class="stat-item leaves">
+                        <span class="label">Total Shifts</span>
+                        <span class="value">${analysis.totalShifts}</span>
+                    </div>
+                </div>
+            `;
+            
+            memberAnalysisList.appendChild(memberItem);
+        });
+    } catch (error) {
+        console.error('Error updating member analysis:', error);
+    }
+}
+
+function analyzeEmployeeSchedule(employee, assignments) {
+    let nightShifts = 0;
+    let offDays = 0;
+    let totalShifts = 0;
+    
+    try {
+        Object.values(assignments).forEach(assignment => {
+            if (assignment === 'S3') {
+                nightShifts++;
+                totalShifts++;
+            } else if (assignment === 'OFF') {
+                offDays++;
+            } else if (assignment && assignment !== 'OFF') {
+                totalShifts++;
+            }
+        });
+    } catch (error) {
+        console.error('Error analyzing employee schedule:', error);
+    }
+    
+    return {
+        nightShifts,
+        offDays,
+        totalShifts
+    };
 }
 
 // --- CRUD UI ---
@@ -118,12 +294,10 @@ function renderEmployeeList() {
     list.innerHTML = '';
     employees.getAll().forEach(emp => {
         const content = `
-            <p><strong>Employee ID:</strong> ${emp.id}</p>
             <p><strong>CTS ID:</strong> ${emp.ctsId || 'Not specified'}</p>
-            <p><strong>Department:</strong> ${emp.department || 'Not specified'}</p>
+            <p><strong>Department:</strong> ${emp.department || 'NPE'}</p>
             <p><strong>Position:</strong> ${emp.position || 'Not specified'}</p>
-            <p><strong>Role:</strong> ${emp.role || 'Not specified'}</p>
-            <p><strong>Skills:</strong> ${emp.skills.join(', ')}</p>
+            <p><strong>Role:</strong> ${emp.role || 'Associate'}</p>
             <p><strong>Days Off:</strong> ${emp.daysOff.map(d => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d]).join(', ') || 'None'}</p>`;
         const actions = `<button class="edit-btn" data-id="${emp.id}">Edit</button> <button class="delete-btn danger" data-id="${emp.id}">Delete</button>`;
         const card = createCard(emp.name, content, actions);
@@ -144,11 +318,11 @@ function showEmployeeForm(emp = null) {
         <input type="hidden" name="id" value="${emp?.id || ''}">
         <div class="form-group">
             <label>Employee ID</label>
-            <input type="text" name="employeeId" value="${emp?.id || ''}" ${emp ? 'readonly' : ''} placeholder="e.g., 593300">
+            <input type="text" name="employeeId" value="${emp?.id || ''}" ${emp ? 'readonly' : ''} placeholder="e.g., NPE001">
         </div>
         <div class="form-group">
             <label>CTS ID</label>
-            <input type="text" name="ctsId" value="${emp?.ctsId || ''}" placeholder="e.g., EH0647">
+            <input type="text" name="ctsId" value="${emp?.ctsId || ''}" placeholder="e.g., EH0647" required>
         </div>
         <div class="form-group">
             <label>Name</label>
@@ -156,23 +330,33 @@ function showEmployeeForm(emp = null) {
         </div>
         <div class="form-group">
             <label>Department</label>
-            <input type="text" name="department" value="${emp?.department || 'QA&DOD'}" placeholder="e.g., QA&DOD">
+            <input type="text" name="department" value="${emp?.department || 'NPE'}" readonly>
         </div>
         <div class="form-group">
             <label>Position</label>
-            <input type="text" name="position" value="${emp?.position || ''}" placeholder="e.g., Lead, Shift Lead, Executive">
-        </div>
-        <div class="form-group">
-            <label>Role</label>
-            <select name="role">
-                <option value="Lead" ${emp?.role === 'Lead' ? 'selected' : ''}>Lead</option>
-                <option value="Shift Lead" ${emp?.role === 'Shift Lead' ? 'selected' : ''}>Shift Lead</option>
-                <option value="Executive" ${emp?.role === 'Executive' ? 'selected' : ''}>Executive</option>
+            <select name="position" required>
+                <option value="Team Lead" ${emp?.position === 'Team Lead' ? 'selected' : ''}>Team Lead</option>
+                <option value="Shift Lead" ${emp?.position === 'Shift Lead' ? 'selected' : ''}>Shift Lead</option>
+                <option value="Associate" ${emp?.position === 'Associate' ? 'selected' : ''}>Associate</option>
             </select>
         </div>
         <div class="form-group">
-            <label>Skills (comma-separated)</label>
-            <input type="text" name="skills" value="${emp?.skills?.join(', ') || 'General, UAT'}">
+            <label>Role</label>
+            <select name="role" required>
+                <option value="Lead" ${emp?.role === 'Lead' ? 'selected' : ''}>Lead</option>
+                <option value="Associate" ${emp?.role === 'Associate' ? 'selected' : ''}>Associate</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Days Off</label>
+            <div class="checkbox-group">
+                ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day, index) => `
+                    <label>
+                        <input type="checkbox" name="daysOff" value="${index}" ${emp?.daysOff?.includes(index) ? 'checked' : ''}>
+                        ${day}
+                    </label>
+                `).join('')}
+            </div>
         </div>
         <button type="submit">${emp ? 'Update' : 'Add'} Employee</button>
     </form>`;
@@ -181,8 +365,10 @@ function showEmployeeForm(emp = null) {
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
-        data.skills = data.skills.split(',').map(s => s.trim()).filter(Boolean);
-        data.daysOff = emp?.daysOff || [0, 6]; // Default weekend off
+        
+        // Handle days off checkboxes
+        const daysOffCheckboxes = e.target.querySelectorAll('input[name="daysOff"]:checked');
+        data.daysOff = Array.from(daysOffCheckboxes).map(cb => parseInt(cb.value));
         
         // Handle custom ID for new employees
         if (!emp && data.employeeId) {
@@ -210,14 +396,20 @@ function renderShiftList() {
     const list = document.getElementById('shift-list');
     list.innerHTML = '';
     shifts.getAll().forEach(s => {
+        const requiredRolesText = s.requiredRoles ? 
+            Object.entries(s.requiredRoles).map(([role, count]) => `${role}: ${count}`).join(', ') : 
+            'Not specified';
+        
         const content = `
-            <p><strong>Shift Code:</strong> ${s.shiftCode || s.id}</p>
             <p><strong>Time:</strong> ${s.startTime} - ${s.endTime}</p>
-            <p><strong>Duration:</strong> ${s.duration || '8'} hours</p>
-            <p><strong>Required Skills:</strong> ${s.requiredSkills.join(', ')}</p>
+            <p><strong>Required Roles:</strong> ${requiredRolesText}</p>
+            <p><strong>Total Required:</strong> ${s.totalRequired || 'Not specified'}</p>
             <p><strong>Description:</strong> ${s.description || 'No description'}</p>
-            <p><strong>Break Times:</strong> ${s.breakTime || 'Not specified'}</p>`;
-        const actions = `<button class="edit-btn" data-id="${s.id}">Edit</button> <button class="delete-btn danger" data-id="${s.id}">Delete</button>`;
+            ${s.isRare ? '<p><strong>⚠️ Rare/Special Shift</strong></p>' : ''}`;
+        const actions = `
+            <button class="edit-btn" data-id="${s.id}">Edit</button>
+            <button class="delete-btn danger" data-id="${s.id}">Delete</button>
+        `;
         const card = createCard(s.name, content, actions);
         list.appendChild(card);
     });
@@ -236,7 +428,6 @@ function showShiftForm(s = null) {
         <div class="form-group"><label>Name</label><input type="text" name="name" value="${s?.name || ''}" required></div>
         <div class="form-group"><label>Start Time</label><input type="time" name="startTime" value="${s?.startTime || ''}" required></div>
         <div class="form-group"><label>End Time</label><input type="time" name="endTime" value="${s?.endTime || ''}" required></div>
-        <div class="form-group"><label>Required Skills (comma-separated)</label><input type="text" name="requiredSkills" value="${s?.requiredSkills.join(', ') || ''}"></div>
         <button type="submit">${s ? 'Update' : 'Add'} Shift</button>
     </form>`;
     openModal(s ? 'Edit Shift' : 'Add Shift', formHtml);
@@ -244,7 +435,6 @@ function showShiftForm(s = null) {
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
-        data.requiredSkills = data.requiredSkills.split(',').map(s => s.trim()).filter(Boolean);
         if (s) {
             shifts.update(s.id, data);
             showToast('Shift updated.', 'success');
@@ -400,38 +590,86 @@ function renderReports() {
 
 // --- Data I/O ---
 function initDataIO() {
+    // Export to Excel
     document.getElementById('export-data-btn').addEventListener('click', () => {
-        const dataStr = JSON.stringify(getData(), null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `shiftbot-data-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast('Data exported.', 'success');
+        try {
+            exportToExcel();
+        } catch (error) {
+            console.error('Export error:', error);
+            showToast('Failed to export Excel file.', 'error');
+        }
     });
 
+    // Import from Excel
     document.getElementById('import-data-btn').addEventListener('click', () => {
         document.getElementById('import-file-input').click();
     });
 
-    document.getElementById('import-file-input').addEventListener('change', (e) => {
+    document.getElementById('import-file-input').addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                if (importData(event.target.result)) {
-                    renderAll();
-                    showToast('Data imported successfully!', 'success');
-                } else {
-                    showToast('Invalid or corrupted data file.', 'error');
-                }
-            };
-            reader.readAsText(file);
+            // Check if it's an Excel file
+            if (!file.name.toLowerCase().match(/\.(xlsx|xls)$/)) {
+                showToast('Please select an Excel file (.xlsx or .xls)', 'error');
+                return;
+            }
+            
+            try {
+                await importFromExcel(file);
+                renderAll();
+                updateDashboard(); // Update analytics after import
+            } catch (error) {
+                console.error('Import error:', error);
+                // Error message is already shown in importFromExcel
+            }
         }
     });
+    
+    // Add download template button functionality if it exists
+    const templateBtn = document.getElementById('download-template-btn');
+    if (templateBtn) {
+        templateBtn.addEventListener('click', () => {
+            try {
+                downloadTemplate();
+            } catch (error) {
+                console.error('Template download error:', error);
+                showToast('Failed to download template.', 'error');
+            }
+        });
+    }
 }
+
+// Load NPE sample roster for testing
+async function loadNPESampleRoster() {
+    try {
+        const response = await fetch('./npe-august-2025-roster.json');
+        const rosterData = await response.json();
+        schedule.set(rosterData);
+        showToast('NPE August 2025 roster loaded successfully!', 'success');
+        updateRosterView();
+        return true;
+    } catch (error) {
+        console.error('Failed to load NPE sample roster:', error);
+        showToast('Failed to load sample roster.', 'error');
+        return false;
+    }
+}
+
+// Add button to load sample roster (for testing)
+document.addEventListener('DOMContentLoaded', () => {
+    // Add load sample button after other initialization
+    setTimeout(() => {
+        const dataIOSection = document.querySelector('#settings .data-section');
+        if (dataIOSection) {
+            const loadButton = document.createElement('button');
+            loadButton.textContent = 'Load NPE Sample Roster';
+            loadButton.className = 'btn btn-secondary';
+            loadButton.style.marginTop = '10px';
+            loadButton.onclick = loadNPESampleRoster;
+            dataIOSection.appendChild(loadButton);
+        }
+    }, 1000);
+});
 
 function initDashboard() {
     // Initial setup for dashboard elements if needed

@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShiftBot - AI Roster Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>ShiftBot</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a>
+                <a href="#employees" class="nav-link" data-section="employees">Employees</a>
+                <a href="#shifts" class="nav-link" data-section="shifts">Shifts</a>
+                <a href="#rules" class="nav-link" data-section="rules">AI Rules</a>
+                <a href="#generator" class="nav-link" data-section="generator">Schedule Generator</a>
+                <a href="#reports" class="nav-link" data-section="reports">Reports</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="export-data-btn">Export Data</button>
+                <button id="import-data-btn">Import Data</button>
+                <input type="file" id="import-file-input" style="display: none;" accept=".json">
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <h2>Dashboard</h2>
+                <div class="stats-grid">
+                    <div class="stat-card"><h3>Total Employees</h3><p id="total-employees-stat">0</p></div>
+                    <div class="stat-card"><h3>Defined Shifts</h3><p id="total-shifts-stat">0</p></div>
+                    <div class="stat-card"><h3>Active Rules</h3><p id="total-rules-stat">0</p></div>
+                    <div class="stat-card"><h3>Compliance Score</h3><p id="compliance-score-stat">N/A</p></div>
+                </div>
+                <div class="chart-container">
+                    <h3>Workload Distribution</h3>
+                    <canvas id="workload-chart"></canvas>
+                </div>
+            </section>
+
+            <!-- Employees Section -->
+            <section id="employees" class="content-section">
+                <h2>Employee Management</h2>
+                <button id="add-employee-btn">Add New Employee</button>
+                <div id="employee-list" class="card-grid"></div>
+            </section>
+
+            <!-- Shifts Section -->
+            <section id="shifts" class="content-section">
+                <h2>Shift Management</h2>
+                <button id="add-shift-btn">Add New Shift</button>
+                <div id="shift-list" class="card-grid"></div>
+            </section>
+
+            <!-- AI Rules Section -->
+            <section id="rules" class="content-section">
+                <h2>AI Bot Training Rules</h2>
+                <button id="add-rule-btn">Add New Rule</button>
+                <div id="rule-list" class="card-grid"></div>
+            </section>
+
+            <!-- Schedule Generator Section -->
+            <section id="generator" class="content-section">
+                <h2>Schedule Generator</h2>
+                <div class="generator-controls">
+                    <label for="schedule-start-date">Start Date:</label>
+                    <input type="date" id="schedule-start-date">
+                    <label for="schedule-days">Number of Days:</label>
+                    <input type="number" id="schedule-days" value="7" min="1" max="31">
+                    <button id="generate-schedule-btn">Generate Schedule</button>
+                </div>
+                <div id="schedule-output" class="schedule-output-container">
+                    <h3>Generated Schedule</h3>
+                    <div id="schedule-table-container"></div>
+                </div>
+                 <div id="generation-log"></div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports" class="content-section">
+                <h2>Reports & Analytics</h2>
+                <div id="reports-content">
+                    <div class="report-item">
+                        <h3>Compliance Report</h3>
+                        <ul id="compliance-report-list"></ul>
+                    </div>
+                    <div class="report-item">
+                        <h3>Employee Hours</h3>
+                        <table id="employee-hours-table">
+                           <thead><tr><th>Employee</th><th>Scheduled Hours</th></tr></thead>
+                           <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-backdrop" class="modal-backdrop hidden"></div>
+    <div id="main-modal" class="modal hidden">
+        <div class="modal-header">
+            <h3 id="modal-title">Modal Title</h3>
+            <button id="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+    </div>
+    
+    <div id="toast-container"></div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

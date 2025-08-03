@@ -1,0 +1,23 @@
+{
+  "name": "shiftbot",
+  "version": "1.0.0",
+  "description": "AI-powered shift roster management system",
+  "main": "index.html",
+  "scripts": {
+    "start": "echo \"Open index.html in your browser to start.\" && exit 0"
+  },
+  "keywords": [
+    "roster",
+    "schedule",
+    "workforce-management",
+    "ai",
+    "javascript"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/shiftbot.git"
+  },
+  "homepage": "https://YOUR_USERNAME.github.io/shiftbot"
+}

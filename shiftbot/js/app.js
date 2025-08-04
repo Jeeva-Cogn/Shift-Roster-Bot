@@ -6,6 +6,7 @@ import { showToast } from './utils.js';
 
 const { DateTime } = luxon;
 let workloadChart = null;
+let leaveChart = null;
 
 // --- Navigation ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -75,20 +76,21 @@ function updateDashboard() {
         // Update analytics
         updateScheduleAnalytics(currentSchedule);
         
-        // Update workload chart
+        // Update workload chart (smaller size)
         const hoursReport = generateEmployeeHoursReport(currentSchedule);
         if (workloadChart) workloadChart.destroy();
         const ctx = document.getElementById('workload-chart').getContext('2d');
         workloadChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: hoursReport.map(r => r.name),
+                labels: hoursReport.map(r => r.name.split(' ')[0]), // First name only for space
                 datasets: [{
                     label: 'Scheduled Hours',
                     data: hoursReport.map(r => r.hours),
-                    backgroundColor: 'rgba(139, 95, 191, 0.7)',
+                    backgroundColor: 'rgba(139, 95, 191, 0.8)',
                     borderColor: 'rgba(139, 95, 191, 1)',
-                    borderWidth: 1
+                    borderWidth: 2,
+                    borderRadius: 4
                 }]
             },
             options: { 
@@ -96,28 +98,42 @@ function updateDashboard() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        labels: {
-                            color: '#6b4c87'
-                        }
+                        display: false // Remove legend to save space
                     }
                 },
                 scales: {
                     y: {
+                        beginAtZero: true,
                         ticks: {
-                            color: '#6b4c87'
+                            color: '#6b4c87',
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            color: 'rgba(139, 95, 191, 0.1)'
                         }
                     },
                     x: {
                         ticks: {
-                            color: '#6b4c87'
+                            color: '#6b4c87',
+                            font: { size: 10 },
+                            maxRotation: 45
+                        },
+                        grid: {
+                            display: false
                         }
                     }
                 }
             }
         });
+
+        // Update leave analytics chart
+        updateLeaveAnalyticsChart();
     } else {
         document.getElementById('schedule-status-stat').textContent = 'No Schedule';
         document.getElementById('schedule-analytics').style.display = 'none';
+        
+        // Still show leave analytics even without schedule
+        updateLeaveAnalyticsChart();
     }
 }
 
@@ -262,6 +278,75 @@ function analyzeEmployeeSchedule(employee, assignments) {
     };
 }
 
+// Leave Analytics Chart
+function updateLeaveAnalyticsChart() {
+    try {
+        const allEmployees = employees.getAll();
+        
+        // Filter employees who have applied for leaves (> 0)
+        const employeesWithLeaves = allEmployees.filter(emp => emp.leavesApplied && emp.leavesApplied > 0);
+        
+        if (employeesWithLeaves.length === 0) {
+            // Hide the chart container if no one has applied for leaves
+            const chartContainer = document.getElementById('leave-chart').parentElement;
+            chartContainer.style.display = 'none';
+            return;
+        }
+        
+        // Show the chart container
+        const chartContainer = document.getElementById('leave-chart').parentElement;
+        chartContainer.style.display = 'block';
+        
+        // Destroy existing chart if it exists
+        if (leaveChart) {
+            leaveChart.destroy();
+        }
+        
+        const ctx = document.getElementById('leave-chart').getContext('2d');
+        leaveChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: employeesWithLeaves.map(emp => emp.name.split(' ')[0]), // First name only
+                datasets: [{
+                    data: employeesWithLeaves.map(emp => emp.leavesApplied),
+                    backgroundColor: [
+                        '#8b5fbf', '#a374d0', '#6b4c87', '#b794d1', 
+                        '#e8dff0', '#d4c5e0', '#c9b3dd', '#be9fd6',
+                        '#b38bce', '#a877c7', '#9d63c0', '#924fb9'
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#6b4c87',
+                            usePointStyle: true,
+                            padding: 10,
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const employee = employeesWithLeaves[context.dataIndex];
+                                return `${employee.name}: ${employee.leavesApplied} leaves`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error updating leave analytics chart:', error);
+    }
+}
+
 // --- CRUD UI ---
 function openModal(title, content) {
     document.getElementById('modal-title').textContent = title;
@@ -298,7 +383,8 @@ function renderEmployeeList() {
             <p><strong>Department:</strong> ${emp.department || 'NPE'}</p>
             <p><strong>Position:</strong> ${emp.position || 'Not specified'}</p>
             <p><strong>Role:</strong> ${emp.role || 'Associate'}</p>
-            <p><strong>Days Off:</strong> ${emp.daysOff.map(d => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d]).join(', ') || 'None'}</p>`;
+            <p><strong>Days Off:</strong> ${emp.daysOff.map(d => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d]).join(', ') || 'None'}</p>
+            <p><strong>Leaves Applied:</strong> ${emp.leavesApplied || 0}</p>`;
         const actions = `<button class="edit-btn" data-id="${emp.id}">Edit</button> <button class="delete-btn danger" data-id="${emp.id}">Delete</button>`;
         const card = createCard(emp.name, content, actions);
         list.appendChild(card);
@@ -358,6 +444,10 @@ function showEmployeeForm(emp = null) {
                 `).join('')}
             </div>
         </div>
+        <div class="form-group">
+            <label>Leaves Applied</label>
+            <input type="number" name="leavesApplied" value="${emp?.leavesApplied || 0}" min="0" max="30" placeholder="Number of leaves applied">
+        </div>
         <button type="submit">${emp ? 'Update' : 'Add'} Employee</button>
     </form>`;
     openModal(emp ? 'Edit Employee' : 'Add Employee', formHtml);
@@ -369,6 +459,9 @@ function showEmployeeForm(emp = null) {
         // Handle days off checkboxes
         const daysOffCheckboxes = e.target.querySelectorAll('input[name="daysOff"]:checked');
         data.daysOff = Array.from(daysOffCheckboxes).map(cb => parseInt(cb.value));
+        
+        // Handle leaves applied as number
+        data.leavesApplied = parseInt(data.leavesApplied) || 0;
         
         // Handle custom ID for new employees
         if (!emp && data.employeeId) {

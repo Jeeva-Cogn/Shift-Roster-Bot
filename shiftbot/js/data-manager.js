@@ -12,7 +12,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Team Lead',
             daysOff: [0],
-            role: 'Lead'
+            role: 'Lead',
+            leavesApplied: 3
         },
         { 
             id: 'NPE002', 
@@ -21,7 +22,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Shift Lead',
             daysOff: [6],
-            role: 'Lead'
+            role: 'Lead',
+            leavesApplied: 0
         },
         { 
             id: 'NPE003', 
@@ -30,7 +32,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Shift Lead',
             daysOff: [0],
-            role: 'Lead'
+            role: 'Lead',
+            leavesApplied: 1
         },
         
         // NPE Team - Associates
@@ -41,7 +44,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Associate',
             daysOff: [0, 6],
-            role: 'Associate'
+            role: 'Associate',
+            leavesApplied: 2
         },
         { 
             id: 'NPE005', 
@@ -50,7 +54,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Associate',
             daysOff: [6],
-            role: 'Associate'
+            role: 'Associate',
+            leavesApplied: 5
         },
         { 
             id: 'NPE006', 
@@ -59,7 +64,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Associate',
             daysOff: [0],
-            role: 'Associate'
+            role: 'Associate',
+            leavesApplied: 0
         },
         { 
             id: 'NPE007', 
@@ -68,7 +74,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Associate',
             daysOff: [0, 6],
-            role: 'Associate'
+            role: 'Associate',
+            leavesApplied: 1
         },
         { 
             id: 'NPE008', 
@@ -77,7 +84,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Associate',
             daysOff: [6],
-            role: 'Associate'
+            role: 'Associate',
+            leavesApplied: 4
         },
         { 
             id: 'NPE009', 
@@ -86,7 +94,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Associate',
             daysOff: [0],
-            role: 'Associate'
+            role: 'Associate',
+            leavesApplied: 0
         },
         { 
             id: 'NPE010', 
@@ -95,7 +104,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Associate',
             daysOff: [0, 6],
-            role: 'Associate'
+            role: 'Associate',
+            leavesApplied: 2
         },
         { 
             id: 'NPE011', 
@@ -104,7 +114,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Associate',
             daysOff: [6],
-            role: 'Associate'
+            role: 'Associate',
+            leavesApplied: 3
         },
         { 
             id: 'NPE012', 
@@ -113,7 +124,8 @@ const defaultData = {
             department: 'NPE',
             position: 'Associate',
             daysOff: [0],
-            role: 'Associate'
+            role: 'Associate',
+            leavesApplied: 0
         }
     ],
     shifts: [

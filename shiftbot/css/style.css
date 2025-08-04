@@ -148,10 +148,24 @@ h2 {
 }
 
 .chart-container {
-    background-color: var(--card-bg);
-    padding: 20px;
-    border-radius: 8px;
+    background: linear-gradient(135deg, #f8f6fb 0%, #ede7f3 100%);
+    padding: 15px;
+    border-radius: 12px;
     box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    margin: 15px 0;
+}
+
+.chart-container h3 {
+    margin: 0 0 10px 0;
+    color: var(--purple-dark);
+    font-size: 16px;
+    text-align: center;
+}
+
+.chart-container canvas {
+    max-height: 200px !important;
+    height: 200px !important;
 }
 
 /* Cards */
@@ -471,7 +485,7 @@ button.danger:hover {
 .analytics-section {
     margin: 30px 0;
     padding: 25px;
-    background: var(--card-bg);
+    background: linear-gradient(135deg, #f8f6fb 0%, #ede7f3 100%);
     border-radius: 12px;
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
@@ -485,7 +499,7 @@ button.danger:hover {
 }
 
 .analytics-card {
-    background: var(--purple-light);
+    background: linear-gradient(135deg, #f3f0f8 0%, #e8dff0 100%);
     border-radius: 10px;
     padding: 20px;
     border: 1px solid var(--border-color);
@@ -503,7 +517,7 @@ button.danger:hover {
 }
 
 .member-analysis-item {
-    background: white;
+    background: linear-gradient(135deg, #ffffff 0%, #faf9fc 100%);
     margin: 10px 0;
     padding: 15px;
     border-radius: 8px;
@@ -526,9 +540,10 @@ button.danger:hover {
 
 .stat-item {
     text-align: center;
-    padding: 5px;
-    border-radius: 4px;
-    background: var(--background-color);
+    padding: 8px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #f8f6fb 0%, #ede7f3 100%);
+    border: 1px solid rgba(139, 95, 191, 0.1);
 }
 
 .stat-item .label {

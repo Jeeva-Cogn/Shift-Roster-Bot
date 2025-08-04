@@ -1229,48 +1229,169 @@
             }
         }
 
-        // Export all data as backup
+        // Export all data as Excel backup
         function exportBackup() {
-            const backup = {
-                version: '1.0.0',
-                timestamp: new Date().toISOString(),
-                data: {
-                    leaveRequests,
-                    scheduleData,
-                    teamData: npeTeamData
-                }
-            };
+            const wb = XLSX.utils.book_new();
             
-            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `NPE-ShiftBot-Backup-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
+            // Export Team Data
+            const teamData = [
+                ['ID', 'Name', 'Role', 'Status', 'Preferred Days Off']
+            ];
+            npeTeamData.forEach(member => {
+                const daysOffText = member.daysOff.map(day => {
+                    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                    return days[day];
+                }).join(', ');
+                teamData.push([member.id, member.name, member.role, member.status, daysOffText]);
+            });
+            const teamWs = XLSX.utils.aoa_to_sheet(teamData);
+            XLSX.utils.book_append_sheet(wb, teamWs, 'Team Data');
+            
+            // Export Leave Requests
+            const leaveData = [
+                ['Request ID', 'Employee ID', 'Employee Name', 'Date', 'Type', 'Reason', 'Status', 'Request Date']
+            ];
+            leaveRequests.forEach(leave => {
+                leaveData.push([
+                    leave.id, 
+                    leave.employeeId, 
+                    leave.employeeName, 
+                    leave.date, 
+                    leave.type, 
+                    leave.reason || '', 
+                    leave.status, 
+                    leave.requestDate
+                ]);
+            });
+            const leaveWs = XLSX.utils.aoa_to_sheet(leaveData);
+            XLSX.utils.book_append_sheet(wb, leaveWs, 'Leave Requests');
+            
+            // Export Schedule Data (if exists)
+            if (scheduleData) {
+                const scheduleDataArray = [
+                    ['Date', 'S1 Leads', 'S1 Associates', 'S2 Leads', 'S2 Associates', 'S3 Leads', 'S3 Associates']
+                ];
+                
+                Object.keys(scheduleData).forEach(date => {
+                    const daySchedule = scheduleData[date];
+                    const row = [date];
+                    
+                    ['S1', 'S2', 'S3'].forEach(shift => {
+                        const leads = daySchedule[shift]['Lead'] || [];
+                        const associates = daySchedule[shift]['Associate'] || [];
+                        row.push(leads.join(', '), associates.join(', '));
+                    });
+                    
+                    scheduleDataArray.push(row);
+                });
+                
+                const scheduleWs = XLSX.utils.aoa_to_sheet(scheduleDataArray);
+                XLSX.utils.book_append_sheet(wb, scheduleWs, 'Generated Schedule');
+            }
+            
+            // Add metadata sheet
+            const metaData = [
+                ['Property', 'Value'],
+                ['Export Date', new Date().toISOString()],
+                ['Version', '1.0.0'],
+                ['Total Team Members', npeTeamData.length],
+                ['Total Leave Requests', leaveRequests.length],
+                ['Application', 'NPE ShiftBot - AI Roster Management']
+            ];
+            const metaWs = XLSX.utils.aoa_to_sheet(metaData);
+            XLSX.utils.book_append_sheet(wb, metaWs, 'Metadata');
+            
+            XLSX.writeFile(wb, `NPE-ShiftBot-Backup-${new Date().toISOString().split('T')[0]}.xlsx`);
         }
 
-        // Import backup data
+        // Import backup data from Excel
         function importBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
             
+            if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+                alert('Please select an Excel file (.xlsx or .xls)');
+                return;
+            }
+            
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
-                    const backup = JSON.parse(e.target.result);
-                    if (backup.data) {
-                        leaveRequests = backup.data.leaveRequests || [];
-                        scheduleData = backup.data.scheduleData || null;
-                        autoSave();
-                        alert('Backup imported successfully!');
-                        location.reload();
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Import Leave Requests
+                    if (workbook.SheetNames.includes('Leave Requests')) {
+                        const leaveSheet = workbook.Sheets['Leave Requests'];
+                        const leaveData = XLSX.utils.sheet_to_json(leaveSheet, { header: 1 });
+                        
+                        // Skip header row
+                        const importedLeaves = [];
+                        for (let i = 1; i < leaveData.length; i++) {
+                            const row = leaveData[i];
+                            if (row.length >= 8) {
+                                importedLeaves.push({
+                                    id: row[0] || Date.now().toString() + Math.random(),
+                                    employeeId: row[1],
+                                    employeeName: row[2],
+                                    date: row[3],
+                                    type: row[4],
+                                    reason: row[5] || '',
+                                    status: row[6] || 'pending',
+                                    requestDate: row[7] || new Date().toISOString()
+                                });
+                            }
+                        }
+                        
+                        if (importedLeaves.length > 0) {
+                            leaveRequests = importedLeaves;
+                        }
                     }
+                    
+                    // Import Schedule Data
+                    if (workbook.SheetNames.includes('Generated Schedule')) {
+                        const scheduleSheet = workbook.Sheets['Generated Schedule'];
+                        const scheduleDataArray = XLSX.utils.sheet_to_json(scheduleSheet, { header: 1 });
+                        
+                        const importedSchedule = {};
+                        for (let i = 1; i < scheduleDataArray.length; i++) {
+                            const row = scheduleDataArray[i];
+                            if (row.length >= 7) {
+                                const date = row[0];
+                                importedSchedule[date] = {
+                                    'S1': {
+                                        'Lead': row[1] ? row[1].split(', ').filter(name => name.trim()) : [],
+                                        'Associate': row[2] ? row[2].split(', ').filter(name => name.trim()) : []
+                                    },
+                                    'S2': {
+                                        'Lead': row[3] ? row[3].split(', ').filter(name => name.trim()) : [],
+                                        'Associate': row[4] ? row[4].split(', ').filter(name => name.trim()) : []
+                                    },
+                                    'S3': {
+                                        'Lead': row[5] ? row[5].split(', ').filter(name => name.trim()) : [],
+                                        'Associate': row[6] ? row[6].split(', ').filter(name => name.trim()) : []
+                                    }
+                                };
+                            }
+                        }
+                        
+                        if (Object.keys(importedSchedule).length > 0) {
+                            scheduleData = importedSchedule;
+                        }
+                    }
+                    
+                    autoSave();
+                    alert('Excel backup imported successfully!\n\n' +
+                          `• Leave Requests: ${leaveRequests.length}\n` +
+                          `• Schedule Data: ${scheduleData ? Object.keys(scheduleData).length + ' days' : 'None'}`);
+                    location.reload();
+                    
                 } catch (error) {
-                    alert('Invalid backup file!');
+                    console.error('Import error:', error);
+                    alert('Error importing Excel file. Please check the file format and try again.');
                 }
             };
-            reader.readAsText(file);
+            reader.readAsArrayBuffer(file);
         }
 
         // Add backup/restore functionality to UI
@@ -1281,17 +1402,17 @@
             
             const exportBtn = document.createElement('button');
             exportBtn.className = 'btn btn-secondary';
-            exportBtn.innerHTML = '💾 Export Backup';
+            exportBtn.innerHTML = '� Export Excel Backup';
             exportBtn.onclick = exportBackup;
             
             const importBtn = document.createElement('button');
             importBtn.className = 'btn btn-secondary';
-            importBtn.innerHTML = '📂 Import Backup';
+            importBtn.innerHTML = '📂 Import Excel Backup';
             importBtn.style.marginLeft = '10px';
             
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
-            fileInput.accept = '.json';
+            fileInput.accept = '.xlsx,.xls';
             fileInput.style.display = 'none';
             fileInput.onchange = importBackup;
             

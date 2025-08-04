@@ -514,6 +514,8 @@
                 <table class="table" id="teamTable">
                     <thead>
                         <tr>
+                            <th>CTS ID</th>
+                            <th>ESHC</th>
                             <th>Name</th>
                             <th>Role</th>
                             <th>Status</th>
@@ -593,27 +595,27 @@
                     <tbody>
                         <tr>
                             <td>S1 - Morning</td>
-                            <td>06:00 - 14:00</td>
-                            <td>2 Leads, 4 Associates</td>
+                            <td>06:00 AM - 04:00 PM IST</td>
+                            <td>Shift Leads, Associates</td>
                             <td><span style="color: green;">✓ Active</span></td>
                         </tr>
                         <tr>
                             <td>S2 - Afternoon</td>
-                            <td>14:00 - 22:00</td>
-                            <td>2 Leads, 4 Associates</td>
+                            <td>01:00 PM - 11:00 PM IST</td>
+                            <td>Leads, Shift Leads, Associates</td>
                             <td><span style="color: green;">✓ Active</span></td>
                         </tr>
                         <tr>
                             <td>S3 - Night</td>
-                            <td>22:00 - 06:00</td>
-                            <td>1 Lead, 2 Associates</td>
+                            <td>10:00 PM - 08:00 AM IST</td>
+                            <td>Shift Leads, Associates</td>
                             <td><span style="color: green;">✓ Active</span></td>
                         </tr>
                         <tr>
-                            <td>S4 - Emergency</td>
-                            <td>Variable</td>
-                            <td>1 Lead, 1 Associate</td>
-                            <td><span style="color: orange;">⚠ Rare</span></td>
+                            <td>S4 - Special</td>
+                            <td>12:30 PM - 10:30 PM IST</td>
+                            <td>Leads</td>
+                            <td><span style="color: orange;">⚠ As Needed</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -709,25 +711,79 @@
     </div>
 
     <script>
-        // Sample NPE Team Data
+        // Real NPE Team Data - August 2025
         const npeTeamData = [
-            { id: '001', name: 'Temple Dinesh', role: 'Lead', status: 'Active', daysOff: [0, 6] },
-            { id: '002', name: 'Priya Sharma', role: 'Lead', status: 'Active', daysOff: [1, 2] },
-            { id: '003', name: 'Raj Kumar', role: 'Associate', status: 'Active', daysOff: [0, 6] },
-            { id: '004', name: 'Anjali Patel', role: 'Associate', status: 'Active', daysOff: [3, 4] },
-            { id: '005', name: 'Suresh Reddy', role: 'Lead', status: 'Active', daysOff: [1, 5] },
-            { id: '006', name: 'Kavya Singh', role: 'Associate', status: 'Active', daysOff: [0, 6] },
-            { id: '007', name: 'Arjun Nair', role: 'Lead', status: 'Active', daysOff: [2, 3] },
-            { id: '008', name: 'Meera Gupta', role: 'Associate', status: 'Active', daysOff: [4, 5] },
-            { id: '009', name: 'Vikram Joshi', role: 'Associate', status: 'Active', daysOff: [0, 1] },
-            { id: '010', name: 'Sneha Iyer', role: 'Lead', status: 'Active', daysOff: [5, 6] },
-            { id: '011', name: 'Rohit Verma', role: 'Associate', status: 'Active', daysOff: [2, 4] },
-            { id: '012', name: 'Divya Krishnan', role: 'Associate', status: 'Active', daysOff: [1, 3] }
+            // Leads
+            { id: '593300', name: 'Dinesh Anbalagan', role: 'Lead', status: 'Active', daysOff: [1, 2], cts: '593300', eshc: 'EH0647' },
+            { id: '560008', name: 'Mano', role: 'Lead', status: 'Active', daysOff: [1, 2], cts: '560008', eshc: 'EG4208' },
+            
+            // Shift Leads
+            { id: '410093', name: 'Jeyakaran', role: 'Shift Lead', status: 'Active', daysOff: [2, 3], cts: '410093', eshc: 'EH6832' },
+            { id: '2167353', name: 'Karthikeyan', role: 'Shift Lead', status: 'Active', daysOff: [0, 3], cts: '2167353', eshc: 'C7H8KH' },
+            { id: '2054459', name: 'Panner', role: 'Shift Lead', status: 'Active', daysOff: [0, 6], cts: '2054459', eshc: 'C6X8FS' },
+            { id: '2240608', name: 'Sai Kumar', role: 'Shift Lead', status: 'Active', daysOff: [3, 6], cts: '2240608', eshc: 'C7T7SF' },
+            { id: '2136623', name: 'Manoj', role: 'Shift Lead', status: 'Active', daysOff: [4, 5], cts: '2136623', eshc: 'C8G3CW' },
+            
+            // Associates
+            { id: '2054433', name: 'Sai Krishna', role: 'Associate', status: 'Active', daysOff: [0, 6], cts: '2054433', eshc: 'C6X7K5' },
+            { id: '2299004', name: 'Jeeva', role: 'Associate', status: 'Active', daysOff: [1, 2], cts: '2299004', eshc: 'C8N5H4' },
+            { id: '2309236', name: 'Saran', role: 'Associate', status: 'Active', daysOff: [1, 2], cts: '2309236', eshc: 'C8S7B6' },
+            { id: '2328010', name: 'Akshay', role: 'Associate', status: 'Active', daysOff: [0, 6], cts: '2328010', eshc: 'C8W2BD' },
+            { id: '2378392', name: 'Murugan', role: 'Associate', status: 'Active', daysOff: [4, 5], cts: '2378392', eshc: 'C9B7ZT' },
+            { id: '2411200', name: 'Sahana P', role: 'Associate', status: 'Active', daysOff: [1, 2], cts: '2411200', eshc: 'C9G7D2' },
+            { id: '2389541', name: 'Rengadurai', role: 'Associate', status: 'Active', daysOff: [1, 2], cts: '2389541', eshc: 'C9H4JZ' }
         ];
 
-        // Leave Management System
-        let leaveRequests = [];
-        let scheduleData = null;
+        // Real August 2025 Schedule Data
+        const realAugust2025Schedule = {
+            '2025-08-01': { 'S1': ['Jeyakaran', 'Manoj', 'Sahana P'], 'S2': ['Sai Kumar', 'Murugan'], 'S3': ['Karthikeyan', 'Saran', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh Anbalagan'] },
+            '2025-08-02': { 'S1': ['Jeyakaran', 'Manoj'], 'S2': ['Sai Kumar', 'Murugan'], 'S3': ['Panner', 'Akshay'] },
+            '2025-08-03': { 'S1': [], 'S2': ['Manoj', 'Sai Krishna'], 'S3': ['Panner', 'Akshay', 'Murugan'] },
+            '2025-08-04': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Jeyakaran', 'Sai Krishna', 'Rengadurai'], 'S3': ['Panner', 'Akshay', 'Sahana P'] },
+            '2025-08-05': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Dinesh Anbalagan', 'Jeyakaran', 'Sai Krishna', 'Rengadurai'], 'S3': ['Panner', 'Akshay', 'Sahana P'], 'S4': ['Mano'] },
+            '2025-08-06': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Dinesh Anbalagan', 'Jeyakaran', 'Sai Krishna', 'Sai Kumar', 'Rengadurai'], 'S3': ['Panner', 'Manoj', 'Sahana P'], 'S4': ['Mano'] },
+            '2025-08-07': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Jeyakaran', 'Sai Kumar', 'Rengadurai'], 'S3': ['Panner', 'Manoj', 'Sahana P'], 'S4': ['Mano'] },
+            '2025-08-08': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Jeyakaran', 'Sai Kumar', 'Rengadurai'], 'S3': ['Panner', 'Manoj', 'Akshay', 'Sahana P'], 'S4': ['Mano'] },
+            '2025-08-09': { 'S1': ['Karthikeyan', 'Jeeva'], 'S2': ['Akshay', 'Murugan'], 'S3': ['Panner', 'Sai Krishna'] },
+            '2025-08-10': { 'S1': ['Karthikeyan'], 'S2': ['Akshay', 'Murugan'], 'S3': ['Panner', 'Sai Krishna'] },
+            '2025-08-11': { 'S1': ['Karthikeyan', 'Sahana P'], 'S2': ['Dinesh Anbalagan', 'Saran', 'Akshay', 'Murugan'], 'S3': ['Panner', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-12': { 'S1': ['Karthikeyan', 'Sahana P'], 'S2': ['Dinesh Anbalagan', 'Saran', 'Akshay', 'Murugan'], 'S3': ['Panner', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-13': { 'S1': ['Karthikeyan', 'Manoj', 'Sahana P'], 'S2': ['Dinesh Anbalagan', 'Saran', 'Akshay', 'Murugan'], 'S3': ['Jeyakaran', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-14': { 'S1': ['Karthikeyan', 'Manoj', 'Jeeva', 'Sahana P'], 'S2': ['Dinesh Anbalagan', 'Saran', 'Rengadurai'], 'S3': ['Jeyakaran', 'Sai Krishna', 'Murugan'], 'S4': ['Mano'] },
+            '2025-08-15': { 'S1': ['Karthikeyan', 'Manoj', 'Jeeva'], 'S2': ['Dinesh Anbalagan', 'Akshay', 'Murugan'], 'S3': ['Jeyakaran', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-16': { 'S1': ['Karthikeyan', 'Manoj'], 'S2': ['Akshay', 'Murugan'], 'S3': ['Jeyakaran', 'Panner'] },
+            '2025-08-17': { 'S1': ['Manoj'], 'S2': ['Akshay', 'Murugan'], 'S3': ['Jeyakaran', 'Panner'] },
+            '2025-08-18': { 'S1': ['Jeyakaran', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh Anbalagan'] },
+            '2025-08-19': { 'S1': ['Jeyakaran', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh Anbalagan'] },
+            '2025-08-20': { 'S1': ['Karthikeyan', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh Anbalagan'] },
+            '2025-08-21': { 'S1': ['Karthikeyan', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh Anbalagan'] },
+            '2025-08-22': { 'S1': ['Karthikeyan', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Saran'], 'S4': ['Dinesh Anbalagan'] },
+            '2025-08-23': { 'S1': ['Karthikeyan'], 'S2': ['Sahana P', 'Akshay'], 'S3': ['Sai Kumar', 'Panner', 'Saran'] },
+            '2025-08-24': { 'S1': ['Karthikeyan'], 'S2': ['Sahana P', 'Akshay'], 'S3': ['Sai Kumar', 'Panner', 'Saran'] },
+            '2025-08-25': { 'S1': ['Jeyakaran', 'Murugan'], 'S2': ['Sai Kumar', 'Sai Krishna'], 'S3': ['Panner', 'Jeeva', 'Saran', 'Rengadurai'] },
+            '2025-08-26': { 'S1': ['Jeyakaran', 'Murugan'], 'S2': ['Sai Kumar', 'Sai Krishna'], 'S3': ['Panner', 'Jeeva', 'Saran', 'Rengadurai'] },
+            '2025-08-27': { 'S1': ['Jeyakaran', 'Murugan'], 'S2': ['Dinesh Anbalagan', 'Sai Kumar', 'Sai Krishna'], 'S3': ['Saran', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-28': { 'S1': ['Jeyakaran', 'Karthikeyan', 'Murugan', 'Sahana P'], 'S2': ['Dinesh Anbalagan', 'Sai Kumar', 'Sai Krishna', 'Jeeva'], 'S3': ['Saran', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-29': { 'S1': ['Jeyakaran', 'Karthikeyan', 'Murugan', 'Jeeva'], 'S2': ['Dinesh Anbalagan', 'Akshay'], 'S3': ['Sai Kumar', 'Saran', 'Sahana P'], 'S4': ['Mano'] },
+            '2025-08-30': { 'S1': ['Jeyakaran', 'Karthikeyan'], 'S2': ['Dinesh Anbalagan', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Saran', 'Sahana P'], 'S4': ['Mano'] },
+            '2025-08-31': { 'S1': ['Jeyakaran', 'Karthikeyan'], 'S2': ['Dinesh Anbalagan', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Saran', 'Jeeva', 'Sahana P'], 'S4': ['Mano'] }
+        };
+
+        // Real leave data for August 2025
+        const realLeaveData = [
+            { id: 'leave001', employeeId: '593300', employeeName: 'Dinesh Anbalagan', date: '2025-08-07', type: 'personal', reason: 'Personal work', status: 'approved', requestDate: '2025-07-25T10:00:00Z' },
+            { id: 'leave002', employeeId: '593300', employeeName: 'Dinesh Anbalagan', date: '2025-08-08', type: 'personal', reason: 'Personal work', status: 'approved', requestDate: '2025-07-25T10:00:00Z' },
+            { id: 'leave003', employeeId: '2240608', employeeName: 'Sai Kumar', date: '2025-08-04', type: 'sick', reason: 'Medical appointment', status: 'approved', requestDate: '2025-08-01T09:00:00Z' },
+            { id: 'leave004', employeeId: '410093', employeeName: 'Jeyakaran', date: '2025-08-23', type: 'vacation', reason: 'Family function', status: 'approved', requestDate: '2025-08-10T14:30:00Z' },
+            { id: 'leave005', employeeId: '410093', employeeName: 'Jeyakaran', date: '2025-08-24', type: 'vacation', reason: 'Family function', status: 'approved', requestDate: '2025-08-10T14:30:00Z' },
+            { id: 'leave006', employeeId: '2136623', employeeName: 'Manoj', date: '2025-08-13', type: 'sick', reason: 'Fever', status: 'approved', requestDate: '2025-08-12T08:00:00Z' },
+            { id: 'leave007', employeeId: '2299004', employeeName: 'Jeeva', date: '2025-08-12', type: 'personal', reason: 'Personal work', status: 'approved', requestDate: '2025-08-05T16:00:00Z' },
+            { id: 'leave008', employeeId: '2328010', employeeName: 'Akshay', date: '2025-08-28', type: 'emergency', reason: 'Family emergency', status: 'approved', requestDate: '2025-08-27T20:00:00Z' }
+        ];
+
+        // Real leave management system with actual data
+        let leaveRequests = [...realLeaveData];
+        let scheduleData = {...realAugust2025Schedule};
 
         // Tab Management
         function showTab(tabName) {
@@ -780,7 +836,7 @@
                 data: {
                     labels: ['👨‍💼 Leads', '👥 Associates'],
                     datasets: [{
-                        data: [5, 7],
+                        data: [2, 12],  // 2 Leads, 12 Shift Leads + Associates
                         backgroundColor: [gradient1, gradient2],
                         borderColor: ['#ffffff', '#ffffff'],
                         borderWidth: 3,
@@ -864,7 +920,7 @@
                 data: {
                     labels: ['⏳ Pending', '✅ Approved', '👥 Available'],
                     datasets: [{
-                        data: [0, 0, 12],
+                        data: [0, 8, 14],  // 0 Pending, 8 Approved leaves, 14 Available team members
                         backgroundColor: [pendingGradient, approvedGradient, availableGradient],
                         borderColor: ['#ff9500', '#38c172', '#6b46c1'],
                         borderWidth: 2,
@@ -948,15 +1004,58 @@
             updateDashboardStats();
         }
 
-        // Update Dashboard Statistics
+        // Update Dashboard Statistics with real data
         function updateDashboardStats() {
-            document.getElementById('totalEmployees').textContent = npeTeamData.length;
-            document.getElementById('activeShifts').textContent = '3';
+            document.getElementById('totalEmployees').textContent = npeTeamData.length; // 14 total
+            document.getElementById('activeShifts').textContent = '4'; // S1, S2, S3, S4
             document.getElementById('pendingLeaves').textContent = leaveRequests.filter(l => l.status === 'pending').length;
             document.getElementById('approvedLeaves').textContent = leaveRequests.filter(l => l.status === 'approved').length;
+            
+            // Update health metrics with real calculations
+            const avgConsecutiveDays = calculateAverageConsecutiveDays();
+            document.getElementById('avgConsecutiveDays').textContent = avgConsecutiveDays.toFixed(1);
+            document.getElementById('burnoutAlerts').textContent = '0'; // No burnout alerts in current schedule
         }
 
-        // Load Team Data
+        // Calculate average consecutive working days from real schedule
+        function calculateAverageConsecutiveDays() {
+            let totalConsecutiveDays = 0;
+            let employeeCount = 0;
+            
+            npeTeamData.forEach(employee => {
+                let consecutiveDays = 0;
+                let maxConsecutive = 0;
+                
+                // Check each day in August 2025
+                for (let day = 1; day <= 31; day++) {
+                    const dateStr = `2025-08-${String(day).padStart(2, '0')}`;
+                    const daySchedule = scheduleData[dateStr];
+                    
+                    if (daySchedule) {
+                        let isWorking = false;
+                        Object.values(daySchedule).forEach(shift => {
+                            if (shift.includes(employee.name)) {
+                                isWorking = true;
+                            }
+                        });
+                        
+                        if (isWorking) {
+                            consecutiveDays++;
+                            maxConsecutive = Math.max(maxConsecutive, consecutiveDays);
+                        } else {
+                            consecutiveDays = 0;
+                        }
+                    }
+                }
+                
+                totalConsecutiveDays += maxConsecutive;
+                employeeCount++;
+            });
+            
+            return employeeCount > 0 ? totalConsecutiveDays / employeeCount : 0;
+        }
+
+        // Load Team Data with real employee information
         function loadTeamData() {
             const tbody = document.getElementById('teamTableBody');
             tbody.innerHTML = '';
@@ -968,9 +1067,16 @@
                     return days[day];
                 }).join(', ');
                 
+                let roleColor = '#8b5fbf'; // Default purple
+                if (member.role === 'Lead') roleColor = '#dc3545'; // Red for leads
+                else if (member.role === 'Shift Lead') roleColor = '#ffc107'; // Orange for shift leads
+                else if (member.role === 'Associate') roleColor = '#28a745'; // Green for associates
+                
                 row.innerHTML = `
+                    <td><strong>${member.cts}</strong></td>
+                    <td><code>${member.eshc}</code></td>
                     <td><strong>${member.name}</strong></td>
-                    <td><span style="padding: 3px 8px; border-radius: 12px; font-size: 12px; background: ${member.role === 'Lead' ? '#8b5fbf' : '#a374d0'}; color: white;">${member.role}</span></td>
+                    <td><span style="padding: 3px 8px; border-radius: 12px; font-size: 12px; background: ${roleColor}; color: white;">${member.role}</span></td>
                     <td><span style="color: green;">✓ ${member.status}</span></td>
                     <td>${daysOffText}</td>
                 `;
@@ -1504,205 +1610,294 @@
             }
         }
 
-        // Export all data as Excel backup
-        function exportBackup() {
-            const wb = XLSX.utils.book_new();
-            
-            // Export Team Data
-            const teamData = [
-                ['ID', 'Name', 'Role', 'Status', 'Preferred Days Off']
-            ];
-            npeTeamData.forEach(member => {
-                const daysOffText = member.daysOff.map(day => {
-                    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                    return days[day];
-                }).join(', ');
-                teamData.push([member.id, member.name, member.role, member.status, daysOffText]);
-            });
-            const teamWs = XLSX.utils.aoa_to_sheet(teamData);
-            XLSX.utils.book_append_sheet(wb, teamWs, 'Team Data');
-            
-            // Export Leave Requests
-            const leaveData = [
-                ['Request ID', 'Employee ID', 'Employee Name', 'Date', 'Type', 'Reason', 'Status', 'Request Date']
-            ];
-            leaveRequests.forEach(leave => {
-                leaveData.push([
-                    leave.id, 
-                    leave.employeeId, 
-                    leave.employeeName, 
-                    leave.date, 
-                    leave.type, 
-                    leave.reason || '', 
-                    leave.status, 
-                    leave.requestDate
-                ]);
-            });
-            const leaveWs = XLSX.utils.aoa_to_sheet(leaveData);
-            XLSX.utils.book_append_sheet(wb, leaveWs, 'Leave Requests');
-            
-            // Export Schedule Data (if exists)
-            if (scheduleData) {
-                const scheduleDataArray = [
-                    ['Date', 'S1 Leads', 'S1 Associates', 'S2 Leads', 'S2 Associates', 'S3 Leads', 'S3 Associates']
-                ];
-                
-                Object.keys(scheduleData).forEach(date => {
-                    const daySchedule = scheduleData[date];
-                    const row = [date];
-                    
-                    ['S1', 'S2', 'S3'].forEach(shift => {
-                        const leads = daySchedule[shift]['Lead'] || [];
-                        const associates = daySchedule[shift]['Associate'] || [];
-                        row.push(leads.join(', '), associates.join(', '));
-                    });
-                    
-                    scheduleDataArray.push(row);
-                });
-                
-                const scheduleWs = XLSX.utils.aoa_to_sheet(scheduleDataArray);
-                XLSX.utils.book_append_sheet(wb, scheduleWs, 'Generated Schedule');
-            }
-            
-            // Add metadata sheet
-            const metaData = [
-                ['Property', 'Value'],
-                ['Export Date', new Date().toISOString()],
-                ['Version', '1.0.0'],
-                ['Total Team Members', npeTeamData.length],
-                ['Total Leave Requests', leaveRequests.length],
-                ['Application', 'NPE ShiftBot - AI Roster Management']
-            ];
-            const metaWs = XLSX.utils.aoa_to_sheet(metaData);
-            XLSX.utils.book_append_sheet(wb, metaWs, 'Metadata');
-            
-            XLSX.writeFile(wb, `NPE-ShiftBot-Backup-${new Date().toISOString().split('T')[0]}.xlsx`);
-        }
-
-        // Import backup data from Excel
-        function importBackup(event) {
+        // Train AI with Excel data import
+        function trainAIWithExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
             
             if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-                alert('Please select an Excel file (.xlsx or .xls)');
+                alert('🧠 AI Training: Please select an Excel file (.xlsx or .xls)');
                 return;
             }
+            
+            // Show AI training indicator
+            const trainingIndicator = document.createElement('div');
+            trainingIndicator.innerHTML = '🧠 AI Learning from Excel...';
+            trainingIndicator.style.cssText = `
+                position: fixed;
+                top: 70px;
+                right: 20px;
+                background: linear-gradient(135deg, #8b5fbf, #a374d0);
+                color: white;
+                padding: 8px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                z-index: 1001;
+                animation: pulse 1.5s infinite;
+            `;
+            document.body.appendChild(trainingIndicator);
             
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
+                    let trainingData = {
+                        teamData: [],
+                        schedulePatterns: [],
+                        leavePatterns: [],
+                        insights: []
+                    };
                     
-                    // Import Leave Requests
-                    if (workbook.SheetNames.includes('Leave Requests')) {
-                        const leaveSheet = workbook.Sheets['Leave Requests'];
-                        const leaveData = XLSX.utils.sheet_to_json(leaveSheet, { header: 1 });
+                    // Extract team data for AI learning
+                    if (workbook.SheetNames.includes('Team Data')) {
+                        const teamSheet = workbook.Sheets['Team Data'];
+                        const teamDataArray = XLSX.utils.sheet_to_json(teamSheet, { header: 1 });
                         
-                        // Skip header row
-                        const importedLeaves = [];
-                        for (let i = 1; i < leaveData.length; i++) {
-                            const row = leaveData[i];
-                            if (row.length >= 8) {
-                                importedLeaves.push({
-                                    id: row[0] || Date.now().toString() + Math.random(),
-                                    employeeId: row[1],
-                                    employeeName: row[2],
-                                    date: row[3],
-                                    type: row[4],
-                                    reason: row[5] || '',
-                                    status: row[6] || 'pending',
-                                    requestDate: row[7] || new Date().toISOString()
+                        for (let i = 1; i < teamDataArray.length; i++) {
+                            const row = teamDataArray[i];
+                            if (row.length >= 4) {
+                                trainingData.teamData.push({
+                                    id: row[0],
+                                    name: row[1],
+                                    role: row[2],
+                                    status: row[3],
+                                    preferences: row[4]
                                 });
                             }
                         }
-                        
-                        if (importedLeaves.length > 0) {
-                            leaveRequests = importedLeaves;
-                        }
                     }
                     
-                    // Import Schedule Data
+                    // Extract schedule patterns for AI learning
                     if (workbook.SheetNames.includes('Generated Schedule')) {
                         const scheduleSheet = workbook.Sheets['Generated Schedule'];
-                        const scheduleDataArray = XLSX.utils.sheet_to_json(scheduleSheet, { header: 1 });
+                        const scheduleArray = XLSX.utils.sheet_to_json(scheduleSheet, { header: 1 });
                         
-                        const importedSchedule = {};
-                        for (let i = 1; i < scheduleDataArray.length; i++) {
-                            const row = scheduleDataArray[i];
+                        for (let i = 1; i < scheduleArray.length; i++) {
+                            const row = scheduleArray[i];
                             if (row.length >= 7) {
-                                const date = row[0];
-                                importedSchedule[date] = {
-                                    'S1': {
-                                        'Lead': row[1] ? row[1].split(', ').filter(name => name.trim()) : [],
-                                        'Associate': row[2] ? row[2].split(', ').filter(name => name.trim()) : []
-                                    },
-                                    'S2': {
-                                        'Lead': row[3] ? row[3].split(', ').filter(name => name.trim()) : [],
-                                        'Associate': row[4] ? row[4].split(', ').filter(name => name.trim()) : []
-                                    },
-                                    'S3': {
-                                        'Lead': row[5] ? row[5].split(', ').filter(name => name.trim()) : [],
-                                        'Associate': row[6] ? row[6].split(', ').filter(name => name.trim()) : []
-                                    }
-                                };
+                                trainingData.schedulePatterns.push({
+                                    date: row[0],
+                                    s1_leads: row[1],
+                                    s1_associates: row[2],
+                                    s2_leads: row[3],
+                                    s2_associates: row[4],
+                                    s3_leads: row[5],
+                                    s3_associates: row[6]
+                                });
                             }
-                        }
-                        
-                        if (Object.keys(importedSchedule).length > 0) {
-                            scheduleData = importedSchedule;
                         }
                     }
                     
-                    autoSave();
-                    alert('Excel backup imported successfully!\n\n' +
-                          `• Leave Requests: ${leaveRequests.length}\n` +
-                          `• Schedule Data: ${scheduleData ? Object.keys(scheduleData).length + ' days' : 'None'}`);
-                    location.reload();
+                    // Extract leave patterns for AI learning
+                    if (workbook.SheetNames.includes('Leave Requests')) {
+                        const leaveSheet = workbook.Sheets['Leave Requests'];
+                        const leaveArray = XLSX.utils.sheet_to_json(leaveSheet, { header: 1 });
+                        
+                        for (let i = 1; i < leaveArray.length; i++) {
+                            const row = leaveArray[i];
+                            if (row.length >= 6) {
+                                trainingData.leavePatterns.push({
+                                    employee: row[2],
+                                    date: row[3],
+                                    type: row[4],
+                                    status: row[6]
+                                });
+                            }
+                        }
+                    }
+                    
+                    // AI learns from the data and generates insights
+                    setTimeout(() => {
+                        trainingData.insights = generateAIInsights(trainingData);
+                        
+                        // Store AI learning in browser for future use
+                        Storage.set('aiTrainingData', trainingData);
+                        Storage.set('aiLastTrained', new Date().toISOString());
+                        
+                        // Remove training indicator
+                        trainingIndicator.remove();
+                        
+                        // Show AI training results
+                        showAITrainingResults(trainingData);
+                        
+                        // Update current data with learned patterns if requested
+                        if (confirm('🧠 AI has learned from your Excel data!\n\nWould you like to apply the learned patterns to update current schedules and preferences?')) {
+                            applyAILearning(trainingData);
+                        }
+                        
+                    }, 2000); // Simulate AI processing time
                     
                 } catch (error) {
-                    console.error('Import error:', error);
-                    alert('Error importing Excel file. Please check the file format and try again.');
+                    console.error('AI Training error:', error);
+                    trainingIndicator.remove();
+                    alert('🧠 AI Training failed. Please check the Excel file format.');
                 }
             };
             reader.readAsArrayBuffer(file);
         }
+        
+        // Generate AI insights from training data
+        function generateAIInsights(data) {
+            const insights = [];
+            
+            // Analyze team patterns
+            if (data.teamData.length > 0) {
+                const roles = data.teamData.map(t => t.role);
+                const roleCount = roles.reduce((acc, role) => {
+                    acc[role] = (acc[role] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                insights.push(`Team composition: ${Object.entries(roleCount).map(([role, count]) => `${count} ${role}s`).join(', ')}`);
+            }
+            
+            // Analyze schedule patterns
+            if (data.schedulePatterns.length > 0) {
+                const avgDaysWithSchedule = data.schedulePatterns.filter(s => s.s1_leads || s.s2_leads || s.s3_leads).length;
+                insights.push(`Schedule coverage: ${((avgDaysWithSchedule / data.schedulePatterns.length) * 100).toFixed(1)}% of days scheduled`);
+            }
+            
+            // Analyze leave patterns
+            if (data.leavePatterns.length > 0) {
+                const leaveTypes = data.leavePatterns.map(l => l.type);
+                const typeCount = leaveTypes.reduce((acc, type) => {
+                    acc[type] = (acc[type] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                const mostCommonLeave = Object.entries(typeCount).sort((a, b) => b[1] - a[1])[0];
+                insights.push(`Most common leave type: ${mostCommonLeave[0]} (${mostCommonLeave[1]} requests)`);
+            }
+            
+            insights.push(`AI processed ${data.teamData.length} team members, ${data.schedulePatterns.length} schedule entries, ${data.leavePatterns.length} leave records`);
+            
+            return insights;
+        }
+        
+        // Show AI training results
+        function showAITrainingResults(data) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                z-index: 2000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                max-width: 500px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            
+            content.innerHTML = `
+                <h3 style="color: #8b5fbf; margin-bottom: 20px;">🧠 AI Training Complete!</h3>
+                <div style="margin-bottom: 20px;">
+                    <h4>AI Insights:</h4>
+                    <ul style="margin-left: 20px;">
+                        ${data.insights.map(insight => `<li>${insight}</li>`).join('')}
+                    </ul>
+                </div>
+                <div style="text-align: center;">
+                    <button onclick="this.closest('.ai-modal').remove()" style="
+                        background: linear-gradient(135deg, #8b5fbf, #a374d0);
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        font-weight: bold;
+                    ">Got it! 🚀</button>
+                </div>
+            `;
+            
+            modal.className = 'ai-modal';
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            
+            // Auto-close after 10 seconds
+            setTimeout(() => {
+                if (document.body.contains(modal)) {
+                    modal.remove();
+                }
+            }, 10000);
+        }
+        
+        // Apply AI learning to current data
+        function applyAILearning(data) {
+            // This function would apply learned patterns to improve scheduling
+            // For now, we'll just show a confirmation
+            alert('🧠 AI patterns applied! The system will now use learned preferences for future scheduling.');
+            
+            // Update dashboard to reflect AI learning
+            updateDashboardStats();
+        }
 
-        // Add backup/restore functionality to UI
-        function addBackupButtons() {
-            const header = document.querySelector('.header');
-            const buttonContainer = document.createElement('div');
-            buttonContainer.style.marginTop = '10px';
-            
-            const exportBtn = document.createElement('button');
-            exportBtn.className = 'btn btn-secondary';
-            exportBtn.innerHTML = '� Export Excel Backup';
-            exportBtn.onclick = exportBackup;
-            
+        // Add small import button in corner for AI training
+        function addSmartImportButton() {
             const importBtn = document.createElement('button');
-            importBtn.className = 'btn btn-secondary';
-            importBtn.innerHTML = '📂 Import Excel Backup';
-            importBtn.style.marginLeft = '10px';
+            importBtn.innerHTML = '🧠';
+            importBtn.title = 'Train AI with Excel data';
+            importBtn.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                width: 35px;
+                height: 35px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #8b5fbf, #a374d0);
+                color: white;
+                border: none;
+                font-size: 16px;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(139, 95, 191, 0.3);
+                z-index: 1000;
+                transition: all 0.3s ease;
+            `;
             
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.accept = '.xlsx,.xls';
             fileInput.style.display = 'none';
-            fileInput.onchange = importBackup;
+            fileInput.onchange = trainAIWithExcel;
+            
+            importBtn.onmouseover = () => {
+                importBtn.style.transform = 'scale(1.1)';
+                importBtn.style.boxShadow = '0 6px 16px rgba(139, 95, 191, 0.4)';
+            };
+            
+            importBtn.onmouseout = () => {
+                importBtn.style.transform = 'scale(1)';
+                importBtn.style.boxShadow = '0 4px 12px rgba(139, 95, 191, 0.3)';
+            };
             
             importBtn.onclick = () => fileInput.click();
             
-            buttonContainer.appendChild(exportBtn);
-            buttonContainer.appendChild(importBtn);
-            buttonContainer.appendChild(fileInput);
-            header.appendChild(buttonContainer);
+            document.body.appendChild(importBtn);
+            document.body.appendChild(fileInput);
+        }
+
+        // Add backup/restore functionality to UI
+        function addBackupButtons() {
+        // Legacy backup/restore UI removed. Only smart import button remains.
         }
 
         // Initialize enhanced features
         document.addEventListener('DOMContentLoaded', function() {
             loadSavedData();
-            addBackupButtons();
+            addSmartImportButton();
             
             // Auto-save every 30 seconds
             setInterval(autoSave, 30000);

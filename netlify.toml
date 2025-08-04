@@ -1,6 +1,5 @@
 [build]
   publish = "."
-  command = "cp google-sites-version.html index.html"
 
 [[redirects]]
   from = "/*"

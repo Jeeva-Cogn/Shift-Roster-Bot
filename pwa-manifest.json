@@ -1,0 +1,154 @@
+# NPE ShiftBot - Alternative Deployment Options (No Restrictions)
+
+## 🚀 Free Hosting Platforms (No Restrictions)
+
+### 1. GitHub Pages (Recommended)
+**Best for:** Static sites, version control integration
+**Cost:** Free
+**Features:** Custom domains, HTTPS, unlimited bandwidth
+
+#### Setup Steps:
+1. Push your code to GitHub repository
+2. Go to Repository Settings → Pages
+3. Select source branch (main/master)
+4. Your site will be available at: `https://username.github.io/repository-name`
+
+#### Custom Domain Setup:
+```bash
+# Add CNAME file with your domain
+echo "your-domain.com" > CNAME
+git add CNAME
+git commit -m "Add custom domain"
+git push
+```
+
+### 2. Netlify
+**Best for:** Modern web apps, continuous deployment
+**Cost:** Free tier with 100GB bandwidth
+**Features:** Form handling, serverless functions, edge computing
+
+#### Deployment Methods:
+- **Git Integration:** Connect your GitHub repo for auto-deployment
+- **Drag & Drop:** Upload your HTML file directly
+- **CLI Deployment:**
+```bash
+npm install -g netlify-cli
+netlify deploy --prod --dir .
+```
+
+### 3. Vercel
+**Best for:** React, Next.js, but supports static HTML
+**Cost:** Free for personal projects
+**Features:** Global CDN, instant deployments, analytics
+
+#### Quick Deploy:
+```bash
+npm install -g vercel
+vercel --prod
+```
+
+### 4. Firebase Hosting
+**Best for:** Google ecosystem integration
+**Cost:** Free tier with 10GB storage
+**Features:** Global CDN, SSL certificates, custom domains
+
+#### Setup:
+```bash
+npm install -g firebase-tools
+firebase login
+firebase init hosting
+firebase deploy
+```
+
+### 5. Surge.sh
+**Best for:** Quick static deployments
+**Cost:** Free for custom domains
+**Features:** Simple CLI deployment, instant publishing
+
+#### Deploy:
+```bash
+npm install -g surge
+surge
+```
+
+## 🖥️ Self-Hosting Options
+
+### 1. DigitalOcean Droplets
+**Cost:** $5/month
+**Features:** Full server control, root access, scalable
+
+#### Quick Setup:
+```bash
+# Create Ubuntu droplet
+# Install Nginx
+sudo apt update
+sudo apt install nginx
+sudo systemctl start nginx
+
+# Upload your files
+scp -r * user@your-server-ip:/var/www/html/
+```
+
+### 2. AWS S3 + CloudFront
+**Cost:** Pay-as-you-go (very cheap for static sites)
+**Features:** Global CDN, 99.99% uptime, enterprise-grade
+
+#### Setup Script:
+```bash
+# Install AWS CLI
+pip install awscli
+aws configure
+
+# Create S3 bucket
+aws s3 mb s3://npe-shiftbot
+aws s3 sync . s3://npe-shiftbot --delete
+aws s3 website s3://npe-shiftbot --index-document index.html
+```
+
+### 3. Cloudflare Pages
+**Cost:** Free
+**Features:** Global CDN, unlimited bandwidth, analytics
+
+#### Deploy:
+1. Connect GitHub repository
+2. Set build command: `echo "Static site"`
+3. Set publish directory: `/`
+4. Deploy automatically
+
+## 📱 Progressive Web App (PWA) Version
+
+Let me create an enhanced PWA version with offline capabilities:
+
+<function_calls>
+<invoke name="create_file">
+<parameter name="content">{
+  "name": "NPE ShiftBot - AI Roster Management",
+  "short_name": "NPE ShiftBot",
+  "description": "AI-powered shift roster management with health-conscious scheduling",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#8b5fbf",
+  "theme_color": "#8b5fbf",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4YjVmYmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiLz48cGF0aCBkPSJNMTIgMVYzbTAgMTh2Mm0xMS0xMmgtMk01IDEySDNtMTAuNS02LjVMMTYgNE03LjUgMTcuNUw2IDE5bTAtMTNMNy41IDcuNW0xMSAxTDE3IDE3LjUiLz48L3N2Zz4=",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4YjVmYmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiLz48cGF0aCBkPSJNMTIgMVYzbTAgMTh2Mm0xMS0xMmgtMk01IDEySDNtMTAuNS02LjVMMTYgNE03LjUgMTcuNUw2IDE5bTAtMTNMNy41IDcuNW0xMSAxTDE3IDE3LjUiLz48L3N2Zz4=",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["productivity", "business", "utilities"],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4MCIgaGVpZ2h0PSI3MjAiIHZpZXdCb3g9IjAgMCAxMjgwIDcyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTI4MCIgaGVpZ2h0PSI3MjAiIGZpbGw9IiNmM2YwZjgiLz48dGV4dCB4PSI2NDAiIHk9IjM2MCIgZmlsbD0iIzhhNWZiZiIgZm9udC1zaXplPSI0OCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+TlBFIFNoaWZ0Qm90PC90ZXh0Pjx0ZXh0IHg9IjY0MCIgeT0iNDIwIiBmaWxsPSIjNjY2IiBmb250LXNpemU9IjI0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5BSSBSb3N0ZXIgTWFuYWdlbWVudDwvdGV4dD48L3N2Zz4=",
+      "sizes": "1280x720",
+      "type": "image/svg+xml",
+      "form_factor": "wide"
+    }
+  ]
+}

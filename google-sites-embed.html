@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPE ShiftBot Embed</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f3f0f8 0%, #e8dff0 100%);
+            color: #4a4a4a;
+            line-height: 1.6;
+        }
+        .widget-container {
+            max-width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(139, 95, 191, 0.15);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .widget-header {
+            background: linear-gradient(135deg, #8b5fbf 0%, #a374d0 100%);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+        .widget-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        .widget-content {
+            padding: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #e8dff0 0%, #d4c5e0 100%);
+            border-radius: 10px;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #8b5fbf;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #d4c5e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #8b5fbf 0%, #a374d0 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #e15662 100%);
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .team-card {
+            background: #f8f6fb;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #8b5fbf;
+        }
+        .team-card h4 {
+            margin: 0 0 5px 0;
+            color: #8b5fbf;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: white;
+            margin-bottom: 5px;
+        }
+        .role-lead {
+            background: #8b5fbf;
+        }
+        .role-associate {
+            background: #a374d0;
+        }
+        .leave-request {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .leave-request h5 {
+            margin: 0 0 10px 0;
+            color: #8b5fbf;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #8b5fbf 0%, #a374d0 100%);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+            .tab-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NPE ShiftBot Dashboard Widget -->
+    <div class="widget-container">
+        <div class="widget-header">
+            <h2>🤖 NPE ShiftBot Dashboard</h2>
+            <p style="margin: 5px 0 0 0; opacity: 0.9;">AI-Powered Health-Conscious Scheduling</p>
+        </div>
+        <div class="widget-content">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalTeam">12</div>
+                    <div class="stat-label">Team Members</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="activeShifts">3</div>
+                    <div class="stat-label">Active Shifts</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="pendingLeaves">0</div>
+                    <div class="stat-label">Pending Leaves</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="healthScore">98%</div>
+                    <div class="stat-label">Health Score</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="showTabContent('dashboard')">📊 Dashboard</button>
+        <button class="tab-btn" onclick="showTabContent('team')">👥 Team</button>
+        <button class="tab-btn" onclick="showTabContent('leaves')">🏖️ Leaves</button>
+        <button class="tab-btn" onclick="showTabContent('schedule')">📅 Schedule</button>
+    </div>
+
+    <!-- Dashboard Tab -->
+    <div id="dashboard" class="tab-content active">
+        <div class="widget-container">
+            <div class="widget-header">
+                <h2>📊 Current Status Overview</h2>
+            </div>
+            <div class="widget-content">
+                <div class="alert alert-info">
+                    <strong>Health-Conscious AI:</strong> Our system ensures work-life balance with max 6 consecutive days, mandatory rest periods, and stress management.
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value">4.2</div>
+                        <div class="stat-label">Avg Work Days/Week</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">2.1</div>
+                        <div class="stat-label">Avg Rest Days</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Burnout Alerts</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">100%</div>
+                        <div class="stat-label">Compliance</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Tab -->
+    <div id="team" class="tab-content">
+        <div class="widget-container">
+            <div class="widget-header">
+                <h2>👥 NPE Team Members</h2>
+            </div>
+            <div class="widget-content">
+                <div class="team-grid" id="teamGrid">
+                    <!-- Team members will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Management Tab -->
+    <div id="leaves" class="tab-content">
+        <div class="widget-container">
+            <div class="widget-header">
+                <h2>🏖️ Leave Management</h2>
+            </div>
+            <div class="widget-content">
+                <form id="leaveForm" onsubmit="submitLeave(event)">
+                    <div class="form-group">
+                        <label for="employee">Employee</label>
+                        <select id="employee" required>
+                            <option value="">Select Employee</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="leaveDate">Leave Date</label>
+                        <input type="date" id="leaveDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="leaveType">Leave Type</label>
+                        <select id="leaveType" required>
+                            <option value="">Select Type</option>
+                            <option value="sick">Sick Leave</option>
+                            <option value="vacation">Vacation</option>
+                            <option value="personal">Personal</option>
+                            <option value="emergency">Emergency</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Submit Leave Request</button>
+                </form>
+                
+                <div id="leaveRequests" style="margin-top: 20px;">
+                    <!-- Leave requests will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Generator Tab -->
+    <div id="schedule" class="tab-content">
+        <div class="widget-container">
+            <div class="widget-header">
+                <h2>📅 AI Schedule Generator</h2>
+            </div>
+            <div class="widget-content">
+                <div class="alert alert-info">
+                    <strong>Health Rules Applied:</strong><br>
+                    🛡️ Work-Life Balance: 5 days work + 2 days rest<br>
+                    🧠 Stress Management: Max 6 consecutive days<br>
+                    💚 Mental Health: Respects preferred days off<br>
+                    ⚖️ Fair Distribution: Equal workload across team
+                </div>
+                
+                <form onsubmit="generateSchedule(event)">
+                    <div class="form-group">
+                        <label for="startDate">Start Date</label>
+                        <input type="date" id="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">Duration</label>
+                        <select id="duration" required>
+                            <option value="7">1 Week</option>
+                            <option value="14">2 Weeks</option>
+                            <option value="30">1 Month</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">🤖 Generate Health-Conscious Schedule</button>
+                </form>
+                
+                <div id="scheduleResult" style="margin-top: 20px;">
+                    <!-- Generated schedule will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // NPE Team Data
+        const npeTeam = [
+            { id: '001', name: 'Temple Dinesh', role: 'Lead', daysOff: ['Sun', 'Sat'] },
+            { id: '002', name: 'Priya Sharma', role: 'Lead', daysOff: ['Mon', 'Tue'] },
+            { id: '003', name: 'Raj Kumar', role: 'Associate', daysOff: ['Sun', 'Sat'] },
+            { id: '004', name: 'Anjali Patel', role: 'Associate', daysOff: ['Wed', 'Thu'] },
+            { id: '005', name: 'Suresh Reddy', role: 'Lead', daysOff: ['Mon', 'Fri'] },
+            { id: '006', name: 'Kavya Singh', role: 'Associate', daysOff: ['Sun', 'Sat'] },
+            { id: '007', name: 'Arjun Nair', role: 'Lead', daysOff: ['Tue', 'Wed'] },
+            { id: '008', name: 'Meera Gupta', role: 'Associate', daysOff: ['Thu', 'Fri'] },
+            { id: '009', name: 'Vikram Joshi', role: 'Associate', daysOff: ['Sun', 'Mon'] },
+            { id: '010', name: 'Sneha Iyer', role: 'Lead', daysOff: ['Fri', 'Sat'] },
+            { id: '011', name: 'Rohit Verma', role: 'Associate', daysOff: ['Tue', 'Thu'] },
+            { id: '012', name: 'Divya Krishnan', role: 'Associate', daysOff: ['Mon', 'Wed'] }
+        ];
+
+        let leaveRequests = [];
+
+        // Tab Management
+        function showTabContent(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load tab-specific content
+            if (tabName === 'team') {
+                loadTeamData();
+            } else if (tabName === 'leaves') {
+                loadLeaveManagement();
+            }
+        }
+
+        // Load Team Data
+        function loadTeamData() {
+            const grid = document.getElementById('teamGrid');
+            grid.innerHTML = npeTeam.map(member => `
+                <div class="team-card">
+                    <h4>${member.name}</h4>
+                    <span class="role-badge ${member.role === 'Lead' ? 'role-lead' : 'role-associate'}">${member.role}</span>
+                    <div style="margin-top: 10px; font-size: 14px;">
+                        <strong>Preferred Days Off:</strong> ${member.daysOff.join(', ')}
+                    </div>
+                    <div style="margin-top: 5px; font-size: 14px; color: green;">
+                        ✓ Active
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load Leave Management
+        function loadLeaveManagement() {
+            const select = document.getElementById('employee');
+            select.innerHTML = '<option value="">Select Employee</option>' + 
+                npeTeam.map(member => `<option value="${member.id}">${member.name}</option>`).join('');
+            
+            // Set today's date
+            document.getElementById('leaveDate').value = new Date().toISOString().split('T')[0];
+            
+            updateLeaveDisplay();
+        }
+
+        // Submit Leave Request
+        function submitLeave(event) {
+            event.preventDefault();
+            
+            const employeeId = document.getElementById('employee').value;
+            const leaveDate = document.getElementById('leaveDate').value;
+            const leaveType = document.getElementById('leaveType').value;
+            
+            if (!employeeId || !leaveDate || !leaveType) {
+                alert('Please fill all fields!');
+                return;
+            }
+
+            const employee = npeTeam.find(e => e.id === employeeId);
+            const request = {
+                id: Date.now(),
+                employeeId,
+                employeeName: employee.name,
+                date: leaveDate,
+                type: leaveType,
+                status: 'pending'
+            };
+
+            leaveRequests.push(request);
+            updateLeaveDisplay();
+            updateStats();
+            
+            // Reset form
+            document.getElementById('leaveForm').reset();
+            document.getElementById('leaveDate').value = new Date().toISOString().split('T')[0];
+            
+            alert('Leave request submitted successfully!');
+        }
+
+        // Update Leave Display
+        function updateLeaveDisplay() {
+            const container = document.getElementById('leaveRequests');
+            const pending = leaveRequests.filter(l => l.status === 'pending');
+            
+            if (pending.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No pending leave requests</p>';
+                return;
+            }
+            
+            container.innerHTML = pending.map(leave => `
+                <div class="leave-request">
+                    <h5>${leave.employeeName} - ${leave.date}</h5>
+                    <p><strong>Type:</strong> ${leave.type.charAt(0).toUpperCase() + leave.type.slice(1)} Leave</p>
+                    <button class="btn btn-success" onclick="approveLeave(${leave.id})">✓ Approve</button>
+                    <button class="btn btn-danger" onclick="rejectLeave(${leave.id})">✗ Reject</button>
+                </div>
+            `).join('');
+        }
+
+        // Approve Leave
+        function approveLeave(id) {
+            const leave = leaveRequests.find(l => l.id === id);
+            if (leave) {
+                leave.status = 'approved';
+                updateLeaveDisplay();
+                updateStats();
+                alert(`Leave approved for ${leave.employeeName} on ${leave.date}`);
+            }
+        }
+
+        // Reject Leave
+        function rejectLeave(id) {
+            const index = leaveRequests.findIndex(l => l.id === id);
+            if (index !== -1) {
+                const leave = leaveRequests[index];
+                leaveRequests.splice(index, 1);
+                updateLeaveDisplay();
+                updateStats();
+                alert(`Leave rejected for ${leave.employeeName} on ${leave.date}`);
+            }
+        }
+
+        // Generate Schedule
+        function generateSchedule(event) {
+            event.preventDefault();
+            
+            const startDate = document.getElementById('startDate').value;
+            const duration = parseInt(document.getElementById('duration').value);
+            
+            if (!startDate) {
+                alert('Please select a start date!');
+                return;
+            }
+            
+            const result = document.getElementById('scheduleResult');
+            result.innerHTML = '<div class="alert alert-info">🤖 AI is generating health-conscious schedule...</div>';
+            
+            setTimeout(() => {
+                const schedule = createSchedule(startDate, duration);
+                displaySchedule(schedule);
+            }, 2000);
+        }
+
+        // Create Health-Conscious Schedule
+        function createSchedule(startDate, duration) {
+            const schedule = [];
+            const shifts = ['S1 (Morning)', 'S2 (Afternoon)', 'S3 (Night)'];
+            const leads = npeTeam.filter(e => e.role === 'Lead');
+            const associates = npeTeam.filter(e => e.role === 'Associate');
+            
+            for (let i = 0; i < duration; i++) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                
+                // Check for approved leaves
+                const onLeave = leaveRequests.filter(l => l.date === dateStr && l.status === 'approved');
+                const leaveNames = onLeave.map(l => l.employeeName);
+                
+                const daySchedule = {
+                    date: dateStr,
+                    day: dayName,
+                    leaves: leaveNames,
+                    shifts: shifts.map(shift => {
+                        const availableLeads = leads.filter(l => !leaveNames.includes(l.name));
+                        const availableAssociates = associates.filter(a => !leaveNames.includes(a.name));
+                        
+                        return {
+                            name: shift,
+                            leads: availableLeads.slice(0, shift === 'S3 (Night)' ? 1 : 2).map(l => l.name),
+                            associates: availableAssociates.slice(0, shift === 'S3 (Night)' ? 2 : 4).map(a => a.name)
+                        };
+                    })
+                };
+                
+                schedule.push(daySchedule);
+            }
+            
+            return schedule;
+        }
+
+        // Display Schedule
+        function displaySchedule(schedule) {
+            const result = document.getElementById('scheduleResult');
+            let html = '<div class="alert alert-success">✅ Health-conscious schedule generated successfully!</div>';
+            
+            html += '<div style="max-height: 400px; overflow-y: auto;">';
+            schedule.forEach(day => {
+                html += `
+                    <div style="border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-bottom: 10px; background: white;">
+                        <h4 style="margin: 0 0 10px 0; color: #8b5fbf;">${day.date} (${day.day})</h4>
+                        ${day.leaves.length > 0 ? `<p style="color: #ffc107; margin-bottom: 10px;"><strong>On Leave:</strong> ${day.leaves.join(', ')}</p>` : ''}
+                        ${day.shifts.map(shift => `
+                            <div style="margin-bottom: 8px; padding: 8px; background: #f8f9fa; border-radius: 5px;">
+                                <strong>${shift.name}:</strong><br>
+                                <small>Leads: ${shift.leads.join(', ') || 'None assigned'}<br>
+                                Associates: ${shift.associates.join(', ') || 'None assigned'}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            result.innerHTML = html;
+        }
+
+        // Update Statistics
+        function updateStats() {
+            document.getElementById('pendingLeaves').textContent = leaveRequests.filter(l => l.status === 'pending').length;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date to today
+            document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>

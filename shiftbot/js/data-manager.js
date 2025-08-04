@@ -169,10 +169,13 @@ const defaultData = {
     ],
     rules: [
         { id: generateId(), type: 'MIN_REST_HOURS', value: 10, description: 'Minimum 10 hours rest between shifts' },
-        { id: generateId(), type: 'MAX_CONSECUTIVE_DAYS', value: 5, description: 'Maximum 5 consecutive work days' },
+        { id: generateId(), type: 'MAX_CONSECUTIVE_DAYS', value: 5, description: 'Maximum 5 consecutive work days for health' },
         { id: generateId(), type: 'REQUIRED_SKILL', value: 1, description: 'Employee must have required skills for shift' },
-        { id: generateId(), type: 'DAY_OFF', value: 1, description: 'Respect employee preferred days off' }
+        { id: generateId(), type: 'DAY_OFF', value: 1, description: 'Respect employee preferred days off' },
+        { id: generateId(), type: 'WORK_LIFE_BALANCE', value: 2, description: 'Ensure 2 days off after 5-6 work days for mental health' },
+        { id: generateId(), type: 'STRESS_MANAGEMENT', value: 1, description: 'Consider stress levels and prevent burnout' }
     ],
+    leaveRequests: [],
     schedule: null,
 };
 
@@ -271,4 +274,59 @@ export const schedule = {
         appData.schedule = newSchedule;
         saveData();
     },
+    clear: () => {
+        appData.schedule = null;
+        saveData();
+    }
+};
+
+export const leaveRequests = {
+    getAll: () => appData.leaveRequests || [],
+    getById: (id) => (appData.leaveRequests || []).find(lr => lr.id === id),
+    getByEmployee: (employeeId) => (appData.leaveRequests || []).filter(lr => lr.employeeId === employeeId),
+    getPending: () => (appData.leaveRequests || []).filter(lr => lr.status === 'pending'),
+    getApproved: () => (appData.leaveRequests || []).filter(lr => lr.status === 'approved'),
+    getForDate: (date) => (appData.leaveRequests || []).filter(lr => lr.date === date && lr.status === 'approved'),
+    create: (data) => {
+        if (!appData.leaveRequests) appData.leaveRequests = [];
+        const newLeaveRequest = {
+            id: generateId(),
+            employeeId: data.employeeId,
+            date: data.date,
+            type: data.type || 'personal',
+            reason: data.reason || '',
+            status: 'pending',
+            requestedAt: new Date().toISOString(),
+            ...data
+        };
+        appData.leaveRequests.push(newLeaveRequest);
+        saveData();
+        return newLeaveRequest;
+    },
+    update: (id, data) => {
+        if (!appData.leaveRequests) appData.leaveRequests = [];
+        const index = appData.leaveRequests.findIndex(lr => lr.id === id);
+        if (index !== -1) {
+            appData.leaveRequests[index] = { ...appData.leaveRequests[index], ...data };
+            saveData();
+            return appData.leaveRequests[index];
+        }
+        return null;
+    },
+    delete: (id) => {
+        if (!appData.leaveRequests) return false;
+        const index = appData.leaveRequests.findIndex(lr => lr.id === id);
+        if (index !== -1) {
+            appData.leaveRequests.splice(index, 1);
+            saveData();
+            return true;
+        }
+        return false;
+    },
+    approve: (id) => {
+        return leaveRequests.update(id, { status: 'approved', approvedAt: new Date().toISOString() });
+    },
+    reject: (id) => {
+        return leaveRequests.update(id, { status: 'rejected', rejectedAt: new Date().toISOString() });
+    }
 };

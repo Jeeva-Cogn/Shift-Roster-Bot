@@ -1,4 +1,4 @@
-import { employees, shifts, rules, schedule, getData } from './data-manager.js';
+import { employees, shifts, rules, schedule, leaveRequests, getData } from './data-manager.js';
 import { generateSchedule } from './schedule-generator.js';
 import { generateComplianceReport, generateEmployeeHoursReport } from './reports.js';
 import { exportToExcel, importFromExcel, initializeExcelSupport, downloadTemplate } from './excel-manager.js';
@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initNav();
     initDashboard();
     initEmployees();
+    initLeaves();
     initShifts();
     initRules();
     initGenerator();
@@ -46,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById(sectionId).classList.add('active');
 
             if (sectionId === 'dashboard') updateDashboard();
+            if (sectionId === 'leaves') renderLeaves();
             if (sectionId === 'reports') renderReports();
         });
     });
@@ -56,6 +58,7 @@ function renderAll() {
     renderEmployeeList();
     renderShiftList();
     renderRuleList();
+    renderLeaves();
     updateDashboard();
     renderSchedule();
     renderReports();
@@ -65,6 +68,10 @@ function updateDashboard() {
     document.getElementById('total-employees-stat').textContent = employees.getAll().length;
     document.getElementById('total-shifts-stat').textContent = shifts.getAll().length;
     document.getElementById('total-rules-stat').textContent = rules.getAll().length;
+    
+    // Update leave status instead of schedule status
+    const pendingLeaves = leaveRequests.getPending().length;
+    document.getElementById('leave-status-stat').textContent = `${pendingLeaves} Pending`;
 
     const currentSchedule = schedule.get();
     if(currentSchedule) {
@@ -478,6 +485,164 @@ function showEmployeeForm(emp = null) {
         }
         closeModal();
         renderAll();
+    });
+}
+
+// --- Leave Management ---
+function initLeaves() {
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('leave-date-input').min = today;
+    
+    // Initialize employee select
+    updateEmployeeSelect();
+    
+    // Add event listeners
+    document.getElementById('request-leave-btn').addEventListener('click', handleLeaveRequest);
+}
+
+function updateEmployeeSelect() {
+    const select = document.getElementById('employee-select');
+    const allEmployees = employees.getAll();
+    
+    select.innerHTML = '<option value="">Select Team Member</option>';
+    allEmployees.forEach(emp => {
+        const option = document.createElement('option');
+        option.value = emp.id;
+        option.textContent = `${emp.name} (${emp.role})`;
+        select.appendChild(option);
+    });
+}
+
+function handleLeaveRequest() {
+    const employeeId = document.getElementById('employee-select').value;
+    const date = document.getElementById('leave-date-input').value;
+    const type = document.getElementById('leave-type-select').value;
+    
+    if (!employeeId || !date) {
+        showToast('Please select an employee and date', 'error');
+        return;
+    }
+    
+    // Check for duplicate requests
+    const existing = leaveRequests.getAll().find(lr => 
+        lr.employeeId === employeeId && lr.date === date && lr.status !== 'rejected'
+    );
+    
+    if (existing) {
+        showToast('Leave request already exists for this date', 'error');
+        return;
+    }
+    
+    // Create leave request
+    const employee = employees.getById(employeeId);
+    leaveRequests.create({
+        employeeId,
+        date,
+        type,
+        reason: `${type.charAt(0).toUpperCase() + type.slice(1)} leave requested for health and work-life balance`
+    });
+    
+    showToast(`Leave request submitted for ${employee.name}`, 'success');
+    
+    // Clear form
+    document.getElementById('employee-select').value = '';
+    document.getElementById('leave-date-input').value = '';
+    document.getElementById('leave-type-select').value = 'sick';
+    
+    renderLeaves();
+    updateDashboard();
+}
+
+function renderLeaves() {
+    updateLeaveStats();
+    renderLeaveList();
+}
+
+function updateLeaveStats() {
+    const pending = leaveRequests.getPending().length;
+    const approved = leaveRequests.getApproved().length;
+    const total = leaveRequests.getAll().length;
+    
+    document.getElementById('total-pending-leaves').textContent = pending;
+    document.getElementById('total-approved-leaves').textContent = approved;
+    document.getElementById('total-team-leaves').textContent = total;
+}
+
+function renderLeaveList() {
+    const container = document.getElementById('team-leave-list');
+    const allLeaves = leaveRequests.getAll().sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
+    
+    container.innerHTML = '';
+    
+    if (allLeaves.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #888;">No leave requests yet</p>';
+        return;
+    }
+    
+    allLeaves.forEach(leave => {
+        const employee = employees.getById(leave.employeeId);
+        if (!employee) return;
+        
+        const leaveItem = document.createElement('div');
+        leaveItem.className = `leave-item status-${leave.status}`;
+        
+        const typeIcons = {
+            sick: '🤒',
+            personal: '👤',
+            vacation: '🏖️',
+            emergency: '🚨',
+            'mental-health': '🧠'
+        };
+        
+        const formatDate = (dateStr) => {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        };
+        
+        leaveItem.innerHTML = `
+            <div class="leave-item-header">
+                <div class="leave-employee-name">${employee.name}</div>
+                <div class="leave-date">${formatDate(leave.date)}</div>
+            </div>
+            <div class="leave-type">${typeIcons[leave.type]} ${leave.type.replace('-', ' ').toUpperCase()}</div>
+            <div class="leave-actions">
+                ${leave.status === 'pending' ? `
+                    <button class="leave-btn approve-btn" data-id="${leave.id}">✅ Approve</button>
+                    <button class="leave-btn reject-btn" data-id="${leave.id}">❌ Reject</button>
+                ` : `<span style="font-weight: bold; color: ${leave.status === 'approved' ? '#27ae60' : '#e74c3c'};">
+                    ${leave.status.toUpperCase()}
+                </span>`}
+            </div>
+        `;
+        
+        container.appendChild(leaveItem);
+    });
+    
+    // Add event listeners for approve/reject buttons
+    container.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const leaveId = e.target.dataset.id;
+            leaveRequests.approve(leaveId);
+            showToast('Leave request approved', 'success');
+            renderLeaves();
+            updateDashboard();
+        });
+    });
+    
+    container.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const leaveId = e.target.dataset.id;
+            leaveRequests.reject(leaveId);
+            showToast('Leave request rejected', 'error');
+            renderLeaves();
+            updateDashboard();
+        });
     });
 }
 

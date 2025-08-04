@@ -1,4 +1,4 @@
-import { employees, shifts, rules } from './data-manager.js';
+import { employees, shifts, rules, leaveRequests } from './data-manager.js';
 import { checkAllRules } from './rule-engine.js';
 import { deepClone } from './utils.js';
 
@@ -50,6 +50,9 @@ export function generateSchedule(startDateStr, numDays) {
         log.push(`
 --- Processing ${currentDateStr} (${dayName}) ---`);
 
+        // Apply health protection rules to ensure work-life balance
+        applyHealthProtectionRules(currentDateStr, schedule, allEmployees, log);
+
         // Process shifts in priority order (S1, S2, S3, then S4 if needed)
         const sortedShifts = allShifts.sort((a, b) => {
             if (a.isRare) return 1; // S4 goes last
@@ -74,23 +77,47 @@ export function generateSchedule(startDateStr, numDays) {
                 log.push(`  Looking for ${requiredCount} ${requiredRole}(s)...`);
                 
                 // Find eligible candidates for this role
-                const candidates = allEmployees.filter(emp => 
-                    emp.role === requiredRole &&
-                    !schedule.assignments[emp.id][currentDateStr] // Not already assigned today
-                );
+                const candidates = allEmployees.filter(emp => {
+                    // Basic availability check
+                    if (emp.role !== requiredRole || schedule.assignments[emp.id][currentDateStr]) {
+                        return false;
+                    }
+                    
+                    // Check if employee has approved leave for this date
+                    const approvedLeaves = leaveRequests.getForDate(currentDateStr);
+                    const hasLeave = approvedLeaves.some(leave => leave.employeeId === emp.id);
+                    if (hasLeave) {
+                        log.push(`  ${emp.name} has approved leave on ${currentDateStr}`);
+                        return false;
+                    }
+                    
+                    // Health check: prevent overwork (max 6 consecutive days)
+                    const consecutiveDays = getConsecutiveDays(emp.id, currentDate, schedule);
+                    if (consecutiveDays >= 6) {
+                        log.push(`  ${emp.name} needs rest after ${consecutiveDays} consecutive days (health protection)`);
+                        return false;
+                    }
+                    
+                    return true;
+                });
                 
                 if (candidates.length === 0) {
                     log.push(`  WARNING: No available ${requiredRole}s found for ${shift.name}.`);
                     continue;
                 }
 
-                // Sort candidates by suitability
+                // Sort candidates by suitability (health and work-life balance focused)
                 candidates.sort((a, b) => {
-                    // Prefer employees with fewer consecutive days worked
+                    // Priority 1: Work-life balance - fewer consecutive days worked
                     const aConsecutive = getConsecutiveDays(a.id, currentDate, schedule);
                     const bConsecutive = getConsecutiveDays(b.id, currentDate, schedule);
                     
-                    // Check if it's their preferred day off
+                    // Priority 2: Stress management - avoid overworking
+                    if (aConsecutive !== bConsecutive) {
+                        return aConsecutive - bConsecutive; // Prefer fewer consecutive days
+                    }
+                    
+                    // Priority 3: Respect preferred days off for mental health
                     const dayOfWeek = currentDate.weekday % 7; // Convert to 0-6 format
                     const aPreferredOff = a.daysOff.includes(dayOfWeek);
                     const bPreferredOff = b.daysOff.includes(dayOfWeek);
@@ -99,7 +126,12 @@ export function generateSchedule(startDateStr, numDays) {
                         return aPreferredOff ? 1 : -1; // Prefer those not on preferred day off
                     }
                     
-                    return aConsecutive - bConsecutive;
+                    // Priority 4: Fair distribution - check total hours worked
+                    // (This ensures everyone gets fair workload distribution)
+                    const aTotalDays = Object.values(schedule.assignments[a.id]).filter(s => s && s !== 'OFF').length;
+                    const bTotalDays = Object.values(schedule.assignments[b.id]).filter(s => s && s !== 'OFF').length;
+                    
+                    return aTotalDays - bTotalDays;
                 });
 
                 // Assign the required number of this role
@@ -175,4 +207,51 @@ function generateScheduleStats(schedule, allEmployees) {
     });
     
     return { totalAssignments, totalViolations, leadsAssigned, associatesAssigned };
+}
+
+/**
+ * Apply health protection rules to ensure work-life balance
+ */
+function applyHealthProtectionRules(currentDateStr, schedule, allEmployees, log) {
+    allEmployees.forEach(employee => {
+        const consecutiveDays = getConsecutiveDaysWorked(employee.id, currentDateStr, schedule);
+        
+        // HEALTH RULE: Mandatory rest after 5-6 consecutive work days
+        if (consecutiveDays >= 5) {
+            // Force rest day for this employee
+            schedule.assignments[employee.id][currentDateStr] = 'OFF';
+            log.push(`  Health Protection: ${employee.name} forced OFF (${consecutiveDays} consecutive days)`);
+            
+            // Also force rest for the next day if they've worked 6+ consecutive days
+            if (consecutiveDays >= 6) {
+                const nextDate = DateTime.fromISO(currentDateStr).plus({ days: 1 });
+                const nextDateStr = nextDate.toISODate();
+                schedule.assignments[employee.id][nextDateStr] = 'OFF';
+                log.push(`  Health Protection: ${employee.name} also OFF tomorrow (burnout prevention)`);
+            }
+        }
+    });
+}
+
+/**
+ * Count consecutive days worked leading up to a specific date
+ */
+function getConsecutiveDaysWorked(employeeId, currentDateStr, schedule) {
+    let consecutiveDays = 0;
+    const currentDate = DateTime.fromISO(currentDateStr);
+    
+    // Look backwards from current date
+    for (let i = 1; i <= 10; i++) { // Check up to 10 days back
+        const checkDate = currentDate.minus({ days: i });
+        const checkDateStr = checkDate.toISODate();
+        const assignment = schedule.assignments[employeeId][checkDateStr];
+        
+        if (assignment && assignment !== 'OFF') {
+            consecutiveDays++;
+        } else {
+            break; // Hit a day off, stop counting
+        }
+    }
+    
+    return consecutiveDays;
 }

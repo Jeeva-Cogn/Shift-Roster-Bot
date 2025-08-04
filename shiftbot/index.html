@@ -43,6 +43,7 @@
             <nav class="sidebar-nav">
                 <a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a>
                 <a href="#employees" class="nav-link" data-section="employees">NPE Team</a>
+                <a href="#leaves" class="nav-link" data-section="leaves">Leave Management</a>
                 <a href="#shifts" class="nav-link" data-section="shifts">Shifts</a>
                 <a href="#rules" class="nav-link" data-section="rules">AI Rules</a>
                 <a href="#generator" class="nav-link" data-section="generator">Schedule Generator</a>
@@ -64,7 +65,7 @@
                     <div class="stat-card"><h3>NPE Team Members</h3><p id="total-employees-stat">0</p></div>
                     <div class="stat-card"><h3>Shift Types</h3><p id="total-shifts-stat">0</p></div>
                     <div class="stat-card"><h3>Active Rules</h3><p id="total-rules-stat">0</p></div>
-                    <div class="stat-card"><h3>Schedule Status</h3><p id="schedule-status-stat">No Schedule</p></div>
+                    <div class="stat-card"><h3>Leave Status</h3><p id="leave-status-stat">0 Pending</p></div>
                 </div>
                 
                 <!-- Schedule Analytics Section -->
@@ -106,6 +107,51 @@
                 </p>
                 <button id="add-employee-btn">Add New Team Member</button>
                 <div id="employee-list" class="card-grid"></div>
+            </section>
+
+            <!-- Leave Management Section -->
+            <section id="leaves" class="content-section">
+                <h2>🍃 Leave Management System</h2>
+                <p style="color: #666; margin-bottom: 20px;">
+                    🏥 <strong>Health-Focused Leave Management:</strong> Request leaves for team members to maintain work-life balance and stress management. 
+                    The AI will automatically consider these leaves during schedule generation to ensure proper rest cycles.
+                </p>
+                
+                <div class="leave-summary-cards">
+                    <div class="leave-summary-card">
+                        <h3>📊 Leave Overview</h3>
+                        <div class="leave-stats">
+                            <span class="leave-stat"><strong id="total-pending-leaves">0</strong> Pending Requests</span>
+                            <span class="leave-stat"><strong id="total-approved-leaves">0</strong> Approved This Month</span>
+                            <span class="leave-stat"><strong id="total-team-leaves">0</strong> Total Applied</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="leave-management-grid">
+                    <div class="leave-calendar-section">
+                        <h3>📅 Request Leave</h3>
+                        <div class="leave-request-form">
+                            <select id="employee-select" class="form-control">
+                                <option value="">Select Team Member</option>
+                            </select>
+                            <input type="date" id="leave-date-input" class="form-control" min="">
+                            <select id="leave-type-select" class="form-control">
+                                <option value="sick">🤒 Sick Leave</option>
+                                <option value="personal">👤 Personal Leave</option>
+                                <option value="vacation">🏖️ Vacation</option>
+                                <option value="emergency">🚨 Emergency</option>
+                                <option value="mental-health">🧠 Mental Health Day</option>
+                            </select>
+                            <button id="request-leave-btn" class="primary-btn">Request Leave</button>
+                        </div>
+                    </div>
+
+                    <div class="team-leave-list">
+                        <h3>👥 Team Leave Requests</h3>
+                        <div id="team-leave-list" class="leave-list-container"></div>
+                    </div>
+                </div>
             </section>
 
             <!-- Shifts Section -->

@@ -1,0 +1,23 @@
+{
+  "name": "NPE ShiftBot - AI Roster Management",
+  "short_name": "NPE ShiftBot",
+  "description": "AI-powered shift roster management with health-conscious scheduling",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#8b5fbf",
+  "theme_color": "#8b5fbf",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4YjVmYmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiLz48cGF0aCBkPSJNMTIgMVYzbTAgMTh2Mm0xMS0xMmgtMk01IDEySDNtMTAuNS02LjVMMTYgNE03LjUgMTcuNUw2IDE5bTAtMTNMNy41IDcuNW0xMSAxTDE3IDE3LjUiLz48L3N2Zz4=",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4YjVmYmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiLz48cGF0aCBkPSJNMTIgMVYzbTAgMTh2Mm0xMS0xMmgtMk01IDEySDNtMTAuNS02LjVMMTYgNE03LjUgMTcuNUw2IDE5bTAtMTNMNy41IDcuNW0xMSAxTDE3IDE3LjUiLz48L3N2Zz4=",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["productivity", "business", "utilities"]
+}

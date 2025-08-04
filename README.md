@@ -1,20 +1,22 @@
-# ShiftBot Web Application
+# NPE ShiftBot - Public Domain
 
-🚀 **Live Demo**: [Access ShiftBot Web App](#deployment) *(Ready for deployment)*
+🚀 **Live Demo**: [Access NPE ShiftBot Web App](#deployment) *(Ready for deployment)*
 
 ## 🌟 Overview
 
-ShiftBot is a powerful AI-powered shift roster management web application designed specifically for QA&DOD UAT teams. Built with modern web technologies, it provides intelligent shift scheduling, comprehensive reporting, and real-time roster management.
+NPE ShiftBot is a powerful AI-powered shift roster management web application designed specifically for NPE teams. Built with modern web technologies, it provides intelligent shift scheduling, comprehensive Excel-based reporting, and real-time roster management. **This software is released into the public domain - free to use, modify, and distribute.**
 
 ## ✨ Features
 
-- **🤖 AI-Powered Scheduling**: Intelligent shift assignment based on team skills and availability
-- **📊 Real-time Analytics**: Comprehensive reports and visualizations
-- **👥 Team Management**: Manage 14+ team members with role-based assignments
+- **🤖 AI-Powered Scheduling**: Intelligent shift assignment based on roles and availability
+- **📊 Real-time Analytics**: Comprehensive reports and visualizations with Chart.js
+- **👥 NPE Team Management**: Manage 12 NPE team members (3 Leads + 9 Associates)
+- **📋 Excel Integration**: Complete Excel import/export functionality (no more JSON)
 - **🕐 Multi-Shift Support**: Handle S1-S4 shifts, General, Production, and HIH schedules
 - **🌍 Timezone Aware**: IST (Indian Standard Time) support
-- **📱 Responsive Design**: Works seamlessly on desktop and mobile devices
-- **💾 Data Persistence**: Local storage with export/import capabilities
+- **📱 Mobile Responsive**: Works seamlessly on desktop and mobile devices with purple theme
+- **💾 Data Persistence**: Local storage with Excel export/import capabilities
+- **🎨 Purple Theme**: Beautiful light purple theme throughout the application
 
 ## 🏗️ Architecture
 
@@ -23,16 +25,17 @@ Shift-Roster-Bot/
 ├── server.js              # Express.js web server
 ├── package.json           # Root dependencies
 ├── shiftbot/              # Client-side application
-│   ├── index.html         # Main application entry
-│   ├── css/style.css      # Responsive styling
+│   ├── index.html         # Main application entry (NPE-themed)
+│   ├── css/style.css      # Purple responsive styling
 │   ├── js/                # JavaScript modules
 │   │   ├── app.js         # Main application controller
-│   │   ├── data-manager.js # Core data management
+│   │   ├── data-manager.js # NPE team data management
+│   │   ├── excel-manager.js # Excel import/export functionality
 │   │   ├── schedule-generator.js # AI scheduling engine
 │   │   ├── reports.js     # Analytics and reporting
 │   │   ├── rule-engine.js # Business logic rules
 │   │   └── utils.js       # Utility functions
-│   └── *.json            # Sample and actual roster data
+│   └── *.json            # NPE roster data files
 └── deployment/           # Deployment configurations
 ```
 
@@ -1584,30 +1587,43 @@ Thumbs.db
 ### **`LICENSE`**
 
 ```
-MIT License
+This is free and unencumbered software released into the public domain.
 
-Copyright (c) 2025 Your Name
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+For more information, please refer to <https://unlicense.org>
 ```
 
-You now have all the files and content needed for your **ShiftBot** project. Just create the files and folders as instructed, copy and paste the code, and open `index.html` in your web browser. The application will be fully functional.
+## 🌍 Public Domain
+
+**NPE ShiftBot is released into the public domain.** This means:
+
+- ✅ **Free to use** for any purpose (commercial or non-commercial)
+- ✅ **Free to modify** and customize for your needs  
+- ✅ **Free to distribute** and share with others
+- ✅ **No attribution required** (though appreciated)
+- ✅ **No licensing restrictions** or obligations
+
+You can fork, clone, modify, and deploy this application anywhere without any restrictions. Use it as the foundation for your own roster management systems!
 
 
 

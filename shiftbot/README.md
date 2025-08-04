@@ -1,20 +1,18 @@
-# ShiftBot - AI Roster Management
+# NPE ShiftBot - AI Roster Management (Public Domain)
 
-ShiftBot is a powerful, client-side web application for intelligently managing employee shift rosters. It features a customizable AI rule engine to automate scheduling while respecting complex constraints like labor laws, operational needs, and employee preferences.
+NPE ShiftBot is a powerful, client-side web application for intelligently managing NPE team shift rosters. It features Excel integration, analytics dashboard, and a customizable AI rule engine to automate scheduling while respecting complex constraints like labor laws, operational needs, and employee preferences.
 
 ## Features
 
-- **Interactive Dashboard**: Real-time overview of key metrics like employee count, shift definitions, and schedule compliance scores.
-- **Employee Management**: Create and manage detailed employee profiles, including skills, availability, and work constraints.
-- **Shift Configuration**: Define various shift types (e.g., morning, evening, night) with specific times and skill requirements.
-- **AI Rule Engine**: Train the bot with custom rules such as:
-  - Minimum rest hours between shifts.
-  - Maximum consecutive working days.
-  - Required skills for specific shifts.
-  - Employee day-off preferences.
-- **Automated Schedule Generator**: A heuristic-based algorithm generates optimized rosters based on your defined rules, minimizing violations.
-- **Detailed Reports**: Analyze workload distribution, scheduled hours per employee, and view a full compliance report identifying any rule violations in the generated schedule.
-- **Data Management**: Easily import and export all your application data (employees, shifts, rules) in JSON format.
+- **Interactive Dashboard**: Real-time overview of key metrics with beautiful purple theme and analytics charts.
+- **NPE Team Management**: Manage 12 NPE team members (3 Leads + 9 Associates) with role-based assignments.
+- **Excel Integration**: Complete Excel import/export functionality (no more JSON files).
+- **Analytics Dashboard**: Interactive charts showing team statistics, workload distribution, and member analysis.
+- **Shift Configuration**: Define various shift types (S1-S4, General, Production, HIH) with specific times and requirements.
+- **AI Rule Engine**: Smart scheduling based on roles and availability without complex skills management.
+- **Mobile Responsive**: Works perfectly on all devices with purple theme and touch-friendly controls.
+- **PWA Support**: Can be installed as a native app on mobile devices.
+- **Data Management**: Excel-based import/export with local storage persistence.
 
 ## Getting Started
 
@@ -22,29 +20,34 @@ This is a pure client-side application. No server or build process is needed.
 
 1. **Clone the repository or download the files:**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/shiftbot.git
-   cd shiftbot
+   git clone https://github.com/Jeeva-Cogn/Shift-Roster-Bot.git
+   cd Shift-Roster-Bot/shiftbot
    ```
 
 2. **Open index.html in your browser:**
    Simply double-click the `index.html` file or open it from your browser's "File -> Open" menu.
 
-That's it! The application is ready to use.
+That's it! The NPE ShiftBot is ready to use with all Excel functionality and analytics.
 
 ## How It Works
 
-- **Front-End**: The entire application is built with HTML, CSS, and modern JavaScript (ES6 Modules).
-- **Data Storage**: All data is stored locally in your browser's localStorage. This means your data persists between sessions on the same computer and browser.
-- **Scheduling "AI"**: The core logic in `schedule-generator.js` uses a constraint-based heuristic algorithm. It iterates through each shift that needs to be filled and assigns the "best" available employee by scoring them against the defined rules in `rule-engine.js`. This provides intelligent, automated scheduling without requiring a complex backend.
-- **Dependencies**: Uses Chart.js for charts and Luxon for robust date/time handling, both loaded via CDN.
+- **Front-End**: Built with HTML, CSS, and modern JavaScript with beautiful purple theme.
+- **Data Storage**: All data stored locally in browser's localStorage with Excel export capability.
+- **Excel Integration**: Uses XLSX library for complete Excel file handling.
+- **Analytics**: Chart.js for interactive charts and data visualization.
+- **Scheduling "AI"**: Smart role-based assignment algorithm optimized for NPE team structure.
+- **Dependencies**: Chart.js, Luxon, and XLSX library loaded via CDN.
 
 ## Customization
 
-All the code is provided and commented. You can easily customize it:
+All code is provided and commented. You can easily customize it:
 
-- **UI**: Modify `css/style.css` to change the look and feel.
-- **Logic**: Extend the functionality by editing the JavaScript files in the `js/` directory. For example, you could add new rule types to `js/rule-engine.js`.
+- **UI**: Modify `css/style.css` to change colors or layout (currently beautiful purple theme).
+- **Logic**: Extend functionality by editing JavaScript files in the `js/` directory.
+- **Team Structure**: Easily modify NPE team members in `js/data-manager.js`.
 
-## License
+## Public Domain
 
-MIT License - see LICENSE file for details.
+**This software is released into the public domain.** You are free to use, modify, distribute, and sell this software without any restrictions or attribution requirements. See the UNLICENSE file for details.
+
+For more information about public domain software, visit: https://unlicense.org

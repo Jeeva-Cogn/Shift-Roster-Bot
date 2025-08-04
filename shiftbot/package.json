@@ -1,12 +1,12 @@
 {
-  "name": "shiftbot-webapp",
-  "version": "1.0.0",
-  "description": "AI-powered shift roster management web application",
+  "name": "npe-shiftbot-webapp",
+  "version": "2.0.0",
+  "description": "NPE ShiftBot - AI-powered shift roster management web application (Public Domain)",
   "main": "server.js",
   "scripts": {
     "start": "node ../server.js",
     "dev": "nodemon ../server.js",
-    "build": "echo \"Static files ready for deployment\"",
+    "build": "echo \"NPE ShiftBot static files ready for deployment\"",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [
@@ -16,10 +16,14 @@
     "ai",
     "javascript",
     "webapp",
-    "express"
+    "express",
+    "npe",
+    "excel",
+    "public-domain",
+    "unlicense"
   ],
   "author": "Jeeva-Cogn",
-  "license": "MIT",
+  "license": "Unlicense",
   "repository": {
     "type": "git",
     "url": "https://github.com/Jeeva-Cogn/Shift-Roster-Bot.git"

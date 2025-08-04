@@ -1,6 +1,6 @@
 # NPE ShiftBot - Public Domain
 
-🚀 **Live Demo**: [Access NPE ShiftBot Web App](#deployment) *(Ready for deployment)*
+🚀 **Live Demo**: https://shiftbot.netlify.app/ *(Ready for deployment)*
 
 ## 🌟 Overview
 

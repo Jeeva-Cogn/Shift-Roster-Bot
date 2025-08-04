@@ -152,17 +152,100 @@
             padding: 20px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(139, 95, 191, 0.25);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #e8dff0 0%, #d4c5e0 100%);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            animation: fadeInScale 0.8s ease-out;
+        }
+
+        .stat-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(139, 95, 191, 0.3);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-color);
+            animation: countUp 1.5s ease-out;
+        }
+
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .card h3 {
             color: var(--primary-color);
             margin-bottom: 15px;
             font-size: 1.3em;
+            animation: fadeInLeft 0.8s ease-out;
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .compact-chart {
             height: 200px !important;
             margin: 10px 0;
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         .stats-grid {
@@ -171,27 +254,22 @@
             gap: 15px;
         }
 
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background: linear-gradient(135deg, #e8dff0 0%, #d4c5e0 100%);
-            border-radius: 10px;
-        }
-
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
         .stat-label {
             font-size: 0.9em;
             color: var(--text-light);
             margin-top: 5px;
+            animation: fadeInUp 1s ease-out;
         }
 
-        .form-group {
-            margin-bottom: 15px;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .form-group label {
@@ -683,61 +761,186 @@
 
         // Initialize Dashboard
         function initDashboard() {
-            // Workload Distribution Chart
+            // Workload Distribution Chart with Enhanced Animations
             const ctx1 = document.getElementById('workloadChart').getContext('2d');
+            
+            // Create gradient backgrounds
+            const gradient1 = ctx1.createLinearGradient(0, 0, 0, 200);
+            gradient1.addColorStop(0, '#8b5fbf');
+            gradient1.addColorStop(0.5, '#a374d0');
+            gradient1.addColorStop(1, '#b794d1');
+            
+            const gradient2 = ctx1.createLinearGradient(0, 0, 0, 200);
+            gradient2.addColorStop(0, '#4facfe');
+            gradient2.addColorStop(0.5, '#00f2fe');
+            gradient2.addColorStop(1, '#43e97b');
+            
             new Chart(ctx1, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Leads', 'Associates'],
+                    labels: ['👨‍💼 Leads', '👥 Associates'],
                     datasets: [{
                         data: [5, 7],
-                        backgroundColor: [
-                            'linear-gradient(135deg, #8b5fbf 0%, #a374d0 100%)',
-                            'linear-gradient(135deg, #a374d0 0%, #b794d1 100%)'
-                        ],
-                        borderWidth: 0
+                        backgroundColor: [gradient1, gradient2],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 3,
+                        hoverBorderWidth: 5,
+                        hoverBorderColor: ['#ffd700', '#ffd700'],
+                        hoverBackgroundColor: [
+                            '#9d73d4', // Lighter purple for leads
+                            '#5bc0de'  // Lighter blue for associates
+                        ]
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '60%',
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 2000,
+                        easing: 'easeInOutBounce'
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 20,
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                },
+                                color: '#4a4a4a'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#333',
+                            bodyColor: '#666',
+                            borderColor: '#8b5fbf',
+                            borderWidth: 2,
+                            cornerRadius: 10,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.parsed} members (${percentage}%)`;
+                                }
+                            }
                         }
+                    },
+                    onHover: (event, activeElements) => {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
                     }
                 }
             });
 
-            // Leave Status Chart
+            // Leave Status Chart with Enhanced Animations
             const ctx2 = document.getElementById('leaveStatusChart').getContext('2d');
+            
+            // Create gradients for bar chart
+            const pendingGradient = ctx2.createLinearGradient(0, 0, 0, 200);
+            pendingGradient.addColorStop(0, '#ffd93d');
+            pendingGradient.addColorStop(1, '#ff9500');
+            
+            const approvedGradient = ctx2.createLinearGradient(0, 0, 0, 200);
+            approvedGradient.addColorStop(0, '#43e97b');
+            approvedGradient.addColorStop(1, '#38c172');
+            
+            const availableGradient = ctx2.createLinearGradient(0, 0, 0, 200);
+            availableGradient.addColorStop(0, '#8b5fbf');
+            availableGradient.addColorStop(1, '#6b46c1');
+            
             new Chart(ctx2, {
                 type: 'bar',
                 data: {
-                    labels: ['Pending', 'Approved', 'Available'],
+                    labels: ['⏳ Pending', '✅ Approved', '👥 Available'],
                     datasets: [{
                         data: [0, 0, 12],
-                        backgroundColor: [
-                            '#ffc107',
-                            '#28a745', 
-                            '#8b5fbf'
-                        ],
-                        borderWidth: 0,
-                        borderRadius: 5
+                        backgroundColor: [pendingGradient, approvedGradient, availableGradient],
+                        borderColor: ['#ff9500', '#38c172', '#6b46c1'],
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        hoverBackgroundColor: ['#ffb84d', '#4ade80', '#8b5fbf'],
+                        hoverBorderWidth: 3
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart',
+                        delay: (context) => {
+                            return context.dataIndex * 300; // Stagger animation
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#333',
+                            bodyColor: '#666',
+                            borderColor: '#8b5fbf',
+                            borderWidth: 2,
+                            cornerRadius: 10,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label.replace(/[⏳✅👥]/g, '').trim();
+                                },
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    const suffix = context.label.includes('Available') ? ' team members' : ' requests';
+                                    return `${value}${suffix}`;
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(139, 95, 191, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: 11,
+                                    weight: 'bold'
+                                }
+                            }
                         }
+                    },
+                    onHover: (event, activeElements) => {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
                     }
                 }
             });
@@ -1090,15 +1293,31 @@
         // Initialize Reports
         function initReports() {
             const ctx = document.getElementById('reportChart').getContext('2d');
+            
+            // Create gradient for line chart
+            const lineGradient = ctx.createLinearGradient(0, 0, 0, 200);
+            lineGradient.addColorStop(0, 'rgba(139, 95, 191, 0.8)');
+            lineGradient.addColorStop(0.5, 'rgba(139, 95, 191, 0.4)');
+            lineGradient.addColorStop(1, 'rgba(139, 95, 191, 0.1)');
+            
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    labels: ['📅 Week 1', '📅 Week 2', '📅 Week 3', '📅 Week 4'],
                     datasets: [{
                         label: 'Average Working Days',
                         data: [4.2, 4.1, 4.3, 4.0],
                         borderColor: '#8b5fbf',
-                        backgroundColor: 'rgba(139, 95, 191, 0.1)',
+                        backgroundColor: lineGradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#8b5fbf',
+                        pointBorderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#ffd700',
+                        pointHoverBorderColor: '#8b5fbf',
+                        pointHoverBorderWidth: 4,
                         tension: 0.4,
                         fill: true
                     }]
@@ -1106,16 +1325,72 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 2500,
+                        easing: 'easeInOutCubic',
+                        delay: (context) => {
+                            return context.dataIndex * 200;
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#333',
+                            bodyColor: '#666',
+                            borderColor: '#8b5fbf',
+                            borderWidth: 2,
+                            cornerRadius: 10,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label.replace('📅 ', '');
+                                },
+                                label: function(context) {
+                                    return `Average: ${context.parsed.y} days per week`;
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 7
+                            max: 7,
+                            grid: {
+                                color: 'rgba(139, 95, 191, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: 11
+                                },
+                                callback: function(value) {
+                                    return value + ' days';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: 11,
+                                    weight: 'bold'
+                                }
+                            }
                         }
+                    },
+                    onHover: (event, activeElements) => {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
                     }
                 }
             });

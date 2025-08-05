@@ -76,7 +76,7 @@ npx http-server .
 ## 📊 Real NPE Data (August 2025)
 
 ### Team Structure
-- **2 Leads**: Dinesh Anbalagan, Mano
+- **2 Leads**: Dinesh, Mano
 - **5 Shift Leads**: Jeyakaran, Karthikeyan, Panner, Sai Kumar, Manoj
 - **7 Associates**: Sai Krishna, Jeeva, Saran, Akshay, Murugan, Sahana P, Rengadurai
 

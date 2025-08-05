@@ -442,9 +442,59 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🤖 NPE ShiftBot</h1>
-            <p>AI-Powered Roster Management with Health-Conscious Scheduling</p>
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>🤖 NPE ShiftBot</h1>
+                    <p>AI-Powered Roster Management with Health-Conscious Scheduling</p>
+                </div>
+                <div class="header-actions">
+                    <button onclick="handleImportRoster()" class="import-btn">
+                        <span class="icon">📥</span>
+                        Import Roster
+                    </button>
+                </div>
+            </div>
         </div>
+
+        <style>
+            .header-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                padding: 0 20px;
+            }
+            .header-title {
+                flex: 1;
+            }
+            .header-actions {
+                display: flex;
+                gap: 10px;
+            }
+            .import-btn {
+                background: linear-gradient(135deg, #8b5fbf 0%, #6b46c1 100%);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 14px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .import-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+                background: linear-gradient(135deg, #9d73d4 0%, #7c54d3 100%);
+            }
+            .import-btn .icon {
+                font-size: 18px;
+            }
+        </style>
 
         <!-- Navigation Tabs -->
         <div class="tabs">
@@ -714,7 +764,7 @@
         // Real NPE Team Data - August 2025
         const npeTeamData = [
             // Leads
-            { id: '593300', name: 'Dinesh Anbalagan', role: 'Lead', status: 'Active', daysOff: [1, 2], cts: '593300', eshc: 'EH0647' },
+            { id: '593300', name: 'Dinesh', role: 'Lead', status: 'Active', daysOff: [1, 2], cts: '593300', eshc: 'EH0647' },
             { id: '560008', name: 'Mano', role: 'Lead', status: 'Active', daysOff: [1, 2], cts: '560008', eshc: 'EG4208' },
             
             // Shift Leads
@@ -736,43 +786,43 @@
 
         // Real August 2025 Schedule Data
         const realAugust2025Schedule = {
-            '2025-08-01': { 'S1': ['Jeyakaran', 'Manoj', 'Sahana P'], 'S2': ['Sai Kumar', 'Murugan'], 'S3': ['Karthikeyan', 'Saran', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh Anbalagan'] },
+            '2025-08-01': { 'S1': ['Jeyakaran', 'Manoj', 'Sahana P'], 'S2': ['Sai Kumar', 'Murugan'], 'S3': ['Karthikeyan', 'Saran', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh'] },
             '2025-08-02': { 'S1': ['Jeyakaran', 'Manoj'], 'S2': ['Sai Kumar', 'Murugan'], 'S3': ['Panner', 'Akshay'] },
             '2025-08-03': { 'S1': [], 'S2': ['Manoj', 'Sai Krishna'], 'S3': ['Panner', 'Akshay', 'Murugan'] },
             '2025-08-04': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Jeyakaran', 'Sai Krishna', 'Rengadurai'], 'S3': ['Panner', 'Akshay', 'Sahana P'] },
-            '2025-08-05': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Dinesh Anbalagan', 'Jeyakaran', 'Sai Krishna', 'Rengadurai'], 'S3': ['Panner', 'Akshay', 'Sahana P'], 'S4': ['Mano'] },
-            '2025-08-06': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Dinesh Anbalagan', 'Jeyakaran', 'Sai Krishna', 'Sai Kumar', 'Rengadurai'], 'S3': ['Panner', 'Manoj', 'Sahana P'], 'S4': ['Mano'] },
+            '2025-08-05': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Dinesh', 'Jeyakaran', 'Sai Krishna', 'Rengadurai'], 'S3': ['Panner', 'Akshay', 'Sahana P'], 'S4': ['Mano'] },
+            '2025-08-06': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Dinesh', 'Jeyakaran', 'Sai Krishna', 'Sai Kumar', 'Rengadurai'], 'S3': ['Panner', 'Manoj', 'Sahana P'], 'S4': ['Mano'] },
             '2025-08-07': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Jeyakaran', 'Sai Kumar', 'Rengadurai'], 'S3': ['Panner', 'Manoj', 'Sahana P'], 'S4': ['Mano'] },
             '2025-08-08': { 'S1': ['Karthikeyan', 'Jeeva', 'Saran'], 'S2': ['Jeyakaran', 'Sai Kumar', 'Rengadurai'], 'S3': ['Panner', 'Manoj', 'Akshay', 'Sahana P'], 'S4': ['Mano'] },
             '2025-08-09': { 'S1': ['Karthikeyan', 'Jeeva'], 'S2': ['Akshay', 'Murugan'], 'S3': ['Panner', 'Sai Krishna'] },
             '2025-08-10': { 'S1': ['Karthikeyan'], 'S2': ['Akshay', 'Murugan'], 'S3': ['Panner', 'Sai Krishna'] },
-            '2025-08-11': { 'S1': ['Karthikeyan', 'Sahana P'], 'S2': ['Dinesh Anbalagan', 'Saran', 'Akshay', 'Murugan'], 'S3': ['Panner', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
-            '2025-08-12': { 'S1': ['Karthikeyan', 'Sahana P'], 'S2': ['Dinesh Anbalagan', 'Saran', 'Akshay', 'Murugan'], 'S3': ['Panner', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
-            '2025-08-13': { 'S1': ['Karthikeyan', 'Manoj', 'Sahana P'], 'S2': ['Dinesh Anbalagan', 'Saran', 'Akshay', 'Murugan'], 'S3': ['Jeyakaran', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
-            '2025-08-14': { 'S1': ['Karthikeyan', 'Manoj', 'Jeeva', 'Sahana P'], 'S2': ['Dinesh Anbalagan', 'Saran', 'Rengadurai'], 'S3': ['Jeyakaran', 'Sai Krishna', 'Murugan'], 'S4': ['Mano'] },
-            '2025-08-15': { 'S1': ['Karthikeyan', 'Manoj', 'Jeeva'], 'S2': ['Dinesh Anbalagan', 'Akshay', 'Murugan'], 'S3': ['Jeyakaran', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-11': { 'S1': ['Karthikeyan', 'Sahana P'], 'S2': ['Dinesh', 'Saran', 'Akshay', 'Murugan'], 'S3': ['Panner', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-12': { 'S1': ['Karthikeyan', 'Sahana P'], 'S2': ['Dinesh', 'Saran', 'Akshay', 'Murugan'], 'S3': ['Panner', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-13': { 'S1': ['Karthikeyan', 'Manoj', 'Sahana P'], 'S2': ['Dinesh', 'Saran', 'Akshay', 'Murugan'], 'S3': ['Jeyakaran', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-14': { 'S1': ['Karthikeyan', 'Manoj', 'Jeeva', 'Sahana P'], 'S2': ['Dinesh', 'Saran', 'Rengadurai'], 'S3': ['Jeyakaran', 'Sai Krishna', 'Murugan'], 'S4': ['Mano'] },
+            '2025-08-15': { 'S1': ['Karthikeyan', 'Manoj', 'Jeeva'], 'S2': ['Dinesh', 'Akshay', 'Murugan'], 'S3': ['Jeyakaran', 'Sai Krishna', 'Rengadurai'], 'S4': ['Mano'] },
             '2025-08-16': { 'S1': ['Karthikeyan', 'Manoj'], 'S2': ['Akshay', 'Murugan'], 'S3': ['Jeyakaran', 'Panner'] },
             '2025-08-17': { 'S1': ['Manoj'], 'S2': ['Akshay', 'Murugan'], 'S3': ['Jeyakaran', 'Panner'] },
-            '2025-08-18': { 'S1': ['Jeyakaran', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh Anbalagan'] },
-            '2025-08-19': { 'S1': ['Jeyakaran', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh Anbalagan'] },
-            '2025-08-20': { 'S1': ['Karthikeyan', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh Anbalagan'] },
-            '2025-08-21': { 'S1': ['Karthikeyan', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh Anbalagan'] },
-            '2025-08-22': { 'S1': ['Karthikeyan', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Saran'], 'S4': ['Dinesh Anbalagan'] },
+            '2025-08-18': { 'S1': ['Jeyakaran', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh'] },
+            '2025-08-19': { 'S1': ['Jeyakaran', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh'] },
+            '2025-08-20': { 'S1': ['Karthikeyan', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh'] },
+            '2025-08-21': { 'S1': ['Karthikeyan', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Rengadurai'], 'S4': ['Dinesh'] },
+            '2025-08-22': { 'S1': ['Karthikeyan', 'Sai Krishna'], 'S2': ['Sahana P', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Panner', 'Jeeva', 'Saran'], 'S4': ['Dinesh'] },
             '2025-08-23': { 'S1': ['Karthikeyan'], 'S2': ['Sahana P', 'Akshay'], 'S3': ['Sai Kumar', 'Panner', 'Saran'] },
             '2025-08-24': { 'S1': ['Karthikeyan'], 'S2': ['Sahana P', 'Akshay'], 'S3': ['Sai Kumar', 'Panner', 'Saran'] },
             '2025-08-25': { 'S1': ['Jeyakaran', 'Murugan'], 'S2': ['Sai Kumar', 'Sai Krishna'], 'S3': ['Panner', 'Jeeva', 'Saran', 'Rengadurai'] },
             '2025-08-26': { 'S1': ['Jeyakaran', 'Murugan'], 'S2': ['Sai Kumar', 'Sai Krishna'], 'S3': ['Panner', 'Jeeva', 'Saran', 'Rengadurai'] },
-            '2025-08-27': { 'S1': ['Jeyakaran', 'Murugan'], 'S2': ['Dinesh Anbalagan', 'Sai Kumar', 'Sai Krishna'], 'S3': ['Saran', 'Rengadurai'], 'S4': ['Mano'] },
-            '2025-08-28': { 'S1': ['Jeyakaran', 'Karthikeyan', 'Murugan', 'Sahana P'], 'S2': ['Dinesh Anbalagan', 'Sai Kumar', 'Sai Krishna', 'Jeeva'], 'S3': ['Saran', 'Rengadurai'], 'S4': ['Mano'] },
-            '2025-08-29': { 'S1': ['Jeyakaran', 'Karthikeyan', 'Murugan', 'Jeeva'], 'S2': ['Dinesh Anbalagan', 'Akshay'], 'S3': ['Sai Kumar', 'Saran', 'Sahana P'], 'S4': ['Mano'] },
-            '2025-08-30': { 'S1': ['Jeyakaran', 'Karthikeyan'], 'S2': ['Dinesh Anbalagan', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Saran', 'Sahana P'], 'S4': ['Mano'] },
-            '2025-08-31': { 'S1': ['Jeyakaran', 'Karthikeyan'], 'S2': ['Dinesh Anbalagan', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Saran', 'Jeeva', 'Sahana P'], 'S4': ['Mano'] }
+            '2025-08-27': { 'S1': ['Jeyakaran', 'Murugan'], 'S2': ['Dinesh', 'Sai Kumar', 'Sai Krishna'], 'S3': ['Saran', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-28': { 'S1': ['Jeyakaran', 'Karthikeyan', 'Murugan', 'Sahana P'], 'S2': ['Dinesh', 'Sai Kumar', 'Sai Krishna', 'Jeeva'], 'S3': ['Saran', 'Rengadurai'], 'S4': ['Mano'] },
+            '2025-08-29': { 'S1': ['Jeyakaran', 'Karthikeyan', 'Murugan', 'Jeeva'], 'S2': ['Dinesh', 'Akshay'], 'S3': ['Sai Kumar', 'Saran', 'Sahana P'], 'S4': ['Mano'] },
+            '2025-08-30': { 'S1': ['Jeyakaran', 'Karthikeyan'], 'S2': ['Dinesh', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Saran', 'Sahana P'], 'S4': ['Mano'] },
+            '2025-08-31': { 'S1': ['Jeyakaran', 'Karthikeyan'], 'S2': ['Dinesh', 'Akshay', 'Murugan'], 'S3': ['Sai Kumar', 'Saran', 'Jeeva', 'Sahana P'], 'S4': ['Mano'] }
         };
 
         // Real leave data for August 2025
         const realLeaveData = [
-            { id: 'leave001', employeeId: '593300', employeeName: 'Dinesh Anbalagan', date: '2025-08-07', type: 'personal', reason: 'Personal work', status: 'approved', requestDate: '2025-07-25T10:00:00Z' },
-            { id: 'leave002', employeeId: '593300', employeeName: 'Dinesh Anbalagan', date: '2025-08-08', type: 'personal', reason: 'Personal work', status: 'approved', requestDate: '2025-07-25T10:00:00Z' },
+            { id: 'leave001', employeeId: '593300', employeeName: 'Dinesh', date: '2025-08-07', type: 'personal', reason: 'Personal work', status: 'approved', requestDate: '2025-07-25T10:00:00Z' },
+            { id: 'leave002', employeeId: '593300', employeeName: 'Dinesh', date: '2025-08-08', type: 'personal', reason: 'Personal work', status: 'approved', requestDate: '2025-07-25T10:00:00Z' },
             { id: 'leave003', employeeId: '2240608', employeeName: 'Sai Kumar', date: '2025-08-04', type: 'sick', reason: 'Medical appointment', status: 'approved', requestDate: '2025-08-01T09:00:00Z' },
             { id: 'leave004', employeeId: '410093', employeeName: 'Jeyakaran', date: '2025-08-23', type: 'vacation', reason: 'Family function', status: 'approved', requestDate: '2025-08-10T14:30:00Z' },
             { id: 'leave005', employeeId: '410093', employeeName: 'Jeyakaran', date: '2025-08-24', type: 'vacation', reason: 'Family function', status: 'approved', requestDate: '2025-08-10T14:30:00Z' },
@@ -781,9 +831,221 @@
             { id: 'leave008', employeeId: '2328010', employeeName: 'Akshay', date: '2025-08-28', type: 'emergency', reason: 'Family emergency', status: 'approved', requestDate: '2025-08-27T20:00:00Z' }
         ];
 
-        // Real leave management system with actual data
+        // Dynamic data storage
         let leaveRequests = [...realLeaveData];
         let scheduleData = {...realAugust2025Schedule};
+
+        // Handle roster import
+        function handleImportRoster() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xlsx,.xls';
+            
+            input.onchange = async function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                try {
+                    const data = await file.arrayBuffer();
+                    const workbook = XLSX.read(data);
+                    
+                    // Process the Excel file
+                    processImportedRoster(workbook);
+                    
+                } catch (error) {
+                    alert('Error processing the file. Please ensure it\'s a valid Excel roster file.');
+                    console.error('Import error:', error);
+                }
+            };
+
+            input.click();
+        }
+
+        // Excel Template Structure Definition
+        const EXCEL_TEMPLATE = {
+            SHEETS: {
+                EMPLOYEES: {
+                    name: 'Employees',
+                    columns: [
+                        { header: 'Name *', key: 'name', width: 20, required: true },
+                        { header: 'Role *', key: 'role', width: 15, required: true },
+                        { header: 'Employee ID', key: 'employeeId', width: 15 },
+                        { header: 'ESHC', key: 'eshc', width: 15 },
+                        { header: 'Preferred Days Off', key: 'daysOff', width: 20 },
+                        { header: 'Skills', key: 'skills', width: 25 }
+                    ]
+                },
+                SHIFTS: {
+                    name: 'Shifts',
+                    columns: [
+                        { header: 'Shift Code *', key: 'code', width: 12, required: true },
+                        { header: 'Start Time', key: 'startTime', width: 15 },
+                        { header: 'End Time', key: 'endTime', width: 15 },
+                        { header: 'Min Staff Required *', key: 'minStaff', width: 18, required: true },
+                        { header: 'Required Leads', key: 'requiredLeads', width: 15 },
+                        { header: 'Required Associates', key: 'requiredAssociates', width: 15 },
+                        { header: 'Mandatory Members', key: 'mandatoryMembers', width: 30 },
+                        { header: 'Preferred Shift Lead', key: 'preferredLead', width: 20 }
+                    ]
+                },
+                ROSTER: {
+                    name: 'Roster',
+                    columns: [
+                        { header: 'Date', key: 'date', width: 15 },
+                        { header: 'S1 (06:00-14:00)', key: 'S1', width: 25 },
+                        { header: 'S2 (13:00-21:00)', key: 'S2', width: 25 },
+                        { header: 'S3 (20:00-04:00)', key: 'S3', width: 25 },
+                        { header: 'S4 (12:30-20:30)', key: 'S4', width: 25 }
+                    ]
+                },
+                LEAVES: {
+                    name: 'Leaves',
+                    columns: [
+                        { header: 'Employee ID', key: 'employeeId', width: 15 },
+                        { header: 'Employee Name', key: 'employeeName', width: 20 },
+                        { header: 'Date', key: 'date', width: 15 },
+                        { header: 'Leave Type', key: 'type', width: 15 },
+                        { header: 'Status', key: 'status', width: 15 },
+                        { header: 'Reason', key: 'reason', width: 30 }
+                    ]
+                }
+            }
+        };
+
+        function processImportedRoster(workbook) {
+            // Show loading state
+            document.body.style.cursor = 'wait';
+            const loadingAlert = document.createElement('div');
+            loadingAlert.className = 'alert alert-info';
+            loadingAlert.style.position = 'fixed';
+            loadingAlert.style.top = '20px';
+            loadingAlert.style.right = '20px';
+            loadingAlert.style.zIndex = '1000';
+            loadingAlert.innerHTML = '🔄 Analyzing roster data...';
+            document.body.appendChild(loadingAlert);
+
+            try {
+                const sheetProcessors = {
+                    [EXCEL_TEMPLATE.SHEETS.EMPLOYEES.name]: (sheet) => {
+                        const employeeData = XLSX.utils.sheet_to_json(sheet);
+                        npeTeamData.length = 0;
+                        
+                        employeeData.forEach(emp => {
+                            // Check for required fields
+                            if (!emp['Name'] || !emp['Role']) {
+                                console.warn('Skipping employee record: Name and Role are required fields');
+                                return;
+                            }
+                            
+                            // Generate ID if not provided
+                            const id = emp['Employee ID'] || Date.now().toString();
+                            
+                            npeTeamData.push({
+                                id: id,
+                                name: emp['Name'],
+                                role: emp['Role'],
+                                status: 'Active',
+                                // All other fields are optional with defaults
+                                daysOff: emp['Preferred Days Off'] ? 
+                                    emp['Preferred Days Off'].split(',').map(d => parseInt(d.trim())) : 
+                                    [0, 6], // Default weekend off
+                                cts: emp['Employee ID'] || id, // Use ID as CTS if not provided
+                                eshc: emp['ESHC'] || 'N/A',   // ESHC is optional
+                                maxConsecutiveDays: 6,        // Default values for health rules
+                                minRestHours: 12,
+                                skills: emp['Skills'] ? emp['Skills'].split(',').map(s => s.trim()) : []
+                            });
+                        });
+                    },
+
+                    [EXCEL_TEMPLATE.SHEETS.SHIFTS.name]: (sheet) => {
+                        const shiftData = XLSX.utils.sheet_to_json(sheet);
+                        window.shiftConfig = {};
+                        
+                        shiftData.forEach(shift => {
+                            window.shiftConfig[shift['Shift Code']] = {
+                                startTime: shift['Start Time'],
+                                endTime: shift['End Time'],
+                                minStaff: shift['Min Staff Required'],
+                                requiredLeads: shift['Required Leads'] || 0,
+                                requiredAssociates: shift['Required Associates'] || 0,
+                                preferredLead: shift['Preferred Shift Lead'] || '',
+                                mandatoryMembers: shift['Mandatory Members'] ? 
+                                    shift['Mandatory Members'].split(',').map(s => s.trim()) : 
+                                    [],
+                                breakDuration: shift['Break Duration (mins)'] || 30
+                            };
+                        });
+                    },
+
+                    [EXCEL_TEMPLATE.SHEETS.ROSTER.name]: (sheet) => {
+                        const rosterData = XLSX.utils.sheet_to_json(sheet);
+                        scheduleData = {};
+                        
+                        rosterData.forEach(row => {
+                            if (row['Date']) {
+                                scheduleData[row['Date']] = {
+                                    'S1': row['S1 (06:00-14:00)'] ? 
+                                        row['S1 (06:00-14:00)'].split(',').map(s => s.trim()) : [],
+                                    'S2': row['S2 (13:00-21:00)'] ? 
+                                        row['S2 (13:00-21:00)'].split(',').map(s => s.trim()) : [],
+                                    'S3': row['S3 (20:00-04:00)'] ? 
+                                        row['S3 (20:00-04:00)'].split(',').map(s => s.trim()) : [],
+                                    'S4': row['S4 (12:30-20:30)'] ? 
+                                        row['S4 (12:30-20:30)'].split(',').map(s => s.trim()) : []
+                                };
+                            }
+                        });
+                    },
+
+                    [EXCEL_TEMPLATE.SHEETS.LEAVES.name]: (sheet) => {
+                        const leaveData = XLSX.utils.sheet_to_json(sheet);
+                        leaveRequests.length = 0;
+                        
+                        leaveData.forEach(leave => {
+                            leaveRequests.push({
+                                id: Date.now().toString(),
+                                employeeId: leave['Employee ID'],
+                                employeeName: leave['Employee Name'],
+                                date: leave['Date'],
+                                type: leave['Leave Type'] || 'personal',
+                                reason: leave['Reason'] || '',
+                                status: leave['Status'] || 'approved',
+                                requestDate: new Date().toISOString()
+                            });
+                        });
+                    }
+                };
+
+                // Process each sheet if it exists
+                Object.values(EXCEL_TEMPLATE.SHEETS).forEach(sheetConfig => {
+                    if (workbook.SheetNames.includes(sheetConfig.name)) {
+                        const sheet = workbook.Sheets[sheetConfig.name];
+                        sheetProcessors[sheetConfig.name](sheet);
+                    }
+                });
+
+                // Refresh all views
+                initDashboard();
+                loadTeamData();
+                updateLeaveRequests();
+                generateLeaveCalendar();
+
+                // Show success message
+                loadingAlert.className = 'alert alert-success';
+                loadingAlert.innerHTML = '✅ Roster data imported successfully!';
+                setTimeout(() => loadingAlert.remove(), 3000);
+
+            } catch (error) {
+                console.error('Processing error:', error);
+                loadingAlert.className = 'alert alert-danger';
+                loadingAlert.innerHTML = '❌ Error processing roster data. Please check the file format.';
+                setTimeout(() => loadingAlert.remove(), 5000);
+            }
+
+            // Reset cursor
+            document.body.style.cursor = 'default';
+        }
 
         // Tab Management
         function showTab(tabName) {
@@ -812,6 +1074,125 @@
                 initLeaveManagement();
             } else if (tabName === 'reports') {
                 initReports();
+            } else if (tabName === 'shiftConfig') {
+                initShiftConfiguration();
+            }
+        }
+
+        // Initialize Shift Configuration
+        function initShiftConfiguration() {
+            // Populate shift leads dropdown
+            const preferredLeadSelect = document.getElementById('preferredLead');
+            const mandatoryMembersSelect = document.getElementById('mandatoryMembers');
+            
+            preferredLeadSelect.innerHTML = '<option value="">Select Shift Lead</option>';
+            mandatoryMembersSelect.innerHTML = '';
+            
+            // Add shift leads to preferred lead dropdown
+            npeTeamData.filter(member => member.role === 'Shift Lead').forEach(lead => {
+                const option = document.createElement('option');
+                option.value = lead.name;
+                option.textContent = lead.name;
+                preferredLeadSelect.appendChild(option);
+            });
+            
+            // Add all team members to mandatory members multiselect
+            npeTeamData.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.name;
+                option.textContent = `${member.name} (${member.role})`;
+                mandatoryMembersSelect.appendChild(option);
+            });
+            
+            // Load existing shift configurations
+            updateShiftConfigList();
+        }
+
+        // Handle Shift Configuration Form
+        document.getElementById('shiftConfigForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const shiftCode = document.getElementById('shiftCode').value;
+            const startTime = document.getElementById('shiftStart').value;
+            const endTime = document.getElementById('shiftEnd').value;
+            const minStaff = parseInt(document.getElementById('minStaff').value);
+            const requiredLeads = parseInt(document.getElementById('requiredLeads').value);
+            const requiredAssociates = parseInt(document.getElementById('requiredAssociates').value);
+            const preferredLead = document.getElementById('preferredLead').value;
+            
+            // Get selected mandatory members
+            const mandatorySelect = document.getElementById('mandatoryMembers');
+            const mandatoryMembers = Array.from(mandatorySelect.selectedOptions).map(opt => opt.value);
+            
+            // Update shift configuration
+            window.shiftConfig[shiftCode] = {
+                startTime,
+                endTime,
+                minStaff,
+                requiredLeads,
+                requiredAssociates,
+                preferredLead,
+                mandatoryMembers,
+                breakDuration: 30 // Default break duration
+            };
+            
+            updateShiftConfigList();
+            this.reset();
+            alert('Shift configuration saved successfully!');
+        });
+
+        // Update Shift Configuration List
+        function updateShiftConfigList() {
+            const container = document.getElementById('shiftConfigList');
+            container.innerHTML = '';
+            
+            Object.entries(window.shiftConfig).forEach(([code, config]) => {
+                const card = document.createElement('div');
+                card.className = 'shift-config-card';
+                
+                card.innerHTML = `
+                    <h4>${code}</h4>
+                    <div class="details">
+                        <p><strong>Time:</strong> ${config.startTime || 'Not set'} - ${config.endTime || 'Not set'}</p>
+                        <p><strong>Staff Requirements:</strong> Min ${config.minStaff} (${config.requiredLeads} Leads, ${config.requiredAssociates} Associates)</p>
+                        <p><strong>Preferred Lead:</strong> ${config.preferredLead || 'None'}</p>
+                        <p><strong>Mandatory Members:</strong> ${config.mandatoryMembers.join(', ') || 'None'}</p>
+                    </div>
+                    <div class="actions">
+                        <button onclick="editShiftConfig('${code}')" class="btn-secondary">Edit</button>
+                        <button onclick="deleteShiftConfig('${code}')" class="btn-danger">Delete</button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Edit Shift Configuration
+        function editShiftConfig(code) {
+            const config = window.shiftConfig[code];
+            if (!config) return;
+            
+            document.getElementById('shiftCode').value = code;
+            document.getElementById('shiftStart').value = config.startTime || '';
+            document.getElementById('shiftEnd').value = config.endTime || '';
+            document.getElementById('minStaff').value = config.minStaff || '';
+            document.getElementById('requiredLeads').value = config.requiredLeads || 0;
+            document.getElementById('requiredAssociates').value = config.requiredAssociates || 0;
+            document.getElementById('preferredLead').value = config.preferredLead || '';
+            
+            // Set mandatory members
+            const mandatorySelect = document.getElementById('mandatoryMembers');
+            Array.from(mandatorySelect.options).forEach(opt => {
+                opt.selected = config.mandatoryMembers.includes(opt.value);
+            });
+        }
+
+        // Delete Shift Configuration
+        function deleteShiftConfig(code) {
+            if (confirm(`Are you sure you want to delete shift ${code}?`)) {
+                delete window.shiftConfig[code];
+                updateShiftConfigList();
             }
         }
 
@@ -822,41 +1203,48 @@
             
             // Create gradient backgrounds
             const gradient1 = ctx1.createLinearGradient(0, 0, 0, 200);
-            gradient1.addColorStop(0, '#8b5fbf');
-            gradient1.addColorStop(0.5, '#a374d0');
-            gradient1.addColorStop(1, '#b794d1');
+            gradient1.addColorStop(0, 'rgba(139, 95, 191, 0.9)');
+            gradient1.addColorStop(0.5, 'rgba(163, 116, 208, 0.9)');
+            gradient1.addColorStop(1, 'rgba(183, 148, 209, 0.9)');
             
             const gradient2 = ctx1.createLinearGradient(0, 0, 0, 200);
-            gradient2.addColorStop(0, '#4facfe');
-            gradient2.addColorStop(0.5, '#00f2fe');
-            gradient2.addColorStop(1, '#43e97b');
+            gradient2.addColorStop(0, 'rgba(79, 172, 254, 0.9)');
+            gradient2.addColorStop(0.5, 'rgba(0, 242, 254, 0.9)');
+            gradient2.addColorStop(1, 'rgba(67, 233, 123, 0.9)');
             
             new Chart(ctx1, {
                 type: 'doughnut',
                 data: {
-                    labels: ['👨‍💼 Leads', '👥 Associates'],
+                    labels: ['👨‍💼 Team Leads', '👥 Team Members'],
                     datasets: [{
                         data: [2, 12],  // 2 Leads, 12 Shift Leads + Associates
                         backgroundColor: [gradient1, gradient2],
-                        borderColor: ['#ffffff', '#ffffff'],
-                        borderWidth: 3,
-                        hoverBorderWidth: 5,
-                        hoverBorderColor: ['#ffd700', '#ffd700'],
+                        borderColor: ['rgba(255, 255, 255, 0.8)', 'rgba(255, 255, 255, 0.8)'],
+                        borderWidth: 4,
+                        hoverBorderWidth: 6,
+                        hoverBorderColor: ['rgba(255, 215, 0, 0.8)', 'rgba(255, 215, 0, 0.8)'],
                         hoverBackgroundColor: [
-                            '#9d73d4', // Lighter purple for leads
-                            '#5bc0de'  // Lighter blue for associates
-                        ]
+                            'rgba(157, 115, 212, 0.9)', // Lighter purple for leads with transparency
+                            'rgba(91, 192, 222, 0.9)'   // Lighter blue for associates with transparency
+                        ],
+                        borderRadius: 20,
+                        spacing: 10,
+                        offset: 10
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '60%',
+                    cutout: '75%',
+                    layout: {
+                        padding: 20
+                    },
                     animation: {
                         animateRotate: true,
                         animateScale: true,
-                        duration: 2000,
-                        easing: 'easeInOutBounce'
+                        duration: 2500,
+                        easing: 'easeOutCubic',
+                        delay: (context) => context.dataIndex * 300
                     },
                     interaction: {
                         intersect: false,
@@ -867,28 +1255,60 @@
                             position: 'bottom',
                             labels: {
                                 usePointStyle: true,
-                                pointStyle: 'circle',
-                                padding: 20,
+                                pointStyle: 'rectRounded',
+                                padding: 25,
                                 font: {
-                                    size: 12,
-                                    weight: 'bold'
+                                    family: "'Segoe UI', system-ui, sans-serif",
+                                    size: 14,
+                                    weight: 600,
+                                    lineHeight: 1.5
                                 },
-                                color: '#4a4a4a'
+                                color: '#2d3748',
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    return data.labels.map((label, i) => ({
+                                        text: label,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        strokeStyle: data.datasets[0].borderColor[i],
+                                        lineWidth: 2,
+                                        hidden: false,
+                                        index: i
+                                    }));
+                                }
                             }
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                            titleColor: '#333',
-                            bodyColor: '#666',
-                            borderColor: '#8b5fbf',
+                            enabled: true,
+                            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                            titleColor: '#1a202c',
+                            titleFont: {
+                                family: "'Segoe UI', system-ui, sans-serif",
+                                size: 16,
+                                weight: 600
+                            },
+                            bodyColor: '#4a5568',
+                            bodyFont: {
+                                family: "'Segoe UI', system-ui, sans-serif",
+                                size: 14
+                            },
+                            bodySpacing: 8,
+                            padding: 16,
+                            borderColor: 'rgba(139, 95, 191, 0.5)',
                             borderWidth: 2,
-                            cornerRadius: 10,
+                            cornerRadius: 12,
                             displayColors: true,
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            boxPadding: 4,
+                            usePointStyle: true,
                             callbacks: {
+                                title: function(tooltipItems) {
+                                    return 'Team Distribution';
+                                },
                                 label: function(context) {
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                    return `${context.label}: ${context.parsed} members (${percentage}%)`;
+                                    return ` ${context.label}: ${context.parsed} members (${percentage}%)`;
                                 }
                             }
                         }
@@ -904,40 +1324,61 @@
             
             // Create gradients for bar chart
             const pendingGradient = ctx2.createLinearGradient(0, 0, 0, 200);
-            pendingGradient.addColorStop(0, '#ffd93d');
-            pendingGradient.addColorStop(1, '#ff9500');
+            pendingGradient.addColorStop(0, 'rgba(255, 217, 61, 0.85)');
+            pendingGradient.addColorStop(0.5, 'rgba(255, 182, 25, 0.85)');
+            pendingGradient.addColorStop(1, 'rgba(255, 149, 0, 0.85)');
             
             const approvedGradient = ctx2.createLinearGradient(0, 0, 0, 200);
-            approvedGradient.addColorStop(0, '#43e97b');
-            approvedGradient.addColorStop(1, '#38c172');
+            approvedGradient.addColorStop(0, 'rgba(67, 233, 123, 0.85)');
+            approvedGradient.addColorStop(0.5, 'rgba(56, 208, 110, 0.85)');
+            approvedGradient.addColorStop(1, 'rgba(56, 193, 114, 0.85)');
             
             const availableGradient = ctx2.createLinearGradient(0, 0, 0, 200);
-            availableGradient.addColorStop(0, '#8b5fbf');
-            availableGradient.addColorStop(1, '#6b46c1');
+            availableGradient.addColorStop(0, 'rgba(139, 95, 191, 0.85)');
+            availableGradient.addColorStop(0.5, 'rgba(118, 81, 163, 0.85)');
+            availableGradient.addColorStop(1, 'rgba(107, 70, 193, 0.85)');
             
             new Chart(ctx2, {
                 type: 'bar',
                 data: {
-                    labels: ['⏳ Pending', '✅ Approved', '👥 Available'],
+                    labels: ['⏳ Pending Requests', '✅ Approved Leaves', '👥 Team Available'],
                     datasets: [{
                         data: [0, 8, 14],  // 0 Pending, 8 Approved leaves, 14 Available team members
                         backgroundColor: [pendingGradient, approvedGradient, availableGradient],
-                        borderColor: ['#ff9500', '#38c172', '#6b46c1'],
+                        borderColor: ['rgba(255, 149, 0, 0.8)', 'rgba(56, 193, 114, 0.8)', 'rgba(107, 70, 193, 0.8)'],
                         borderWidth: 2,
-                        borderRadius: 8,
+                        borderRadius: 12,
                         borderSkipped: false,
-                        hoverBackgroundColor: ['#ffb84d', '#4ade80', '#8b5fbf'],
-                        hoverBorderWidth: 3
+                        hoverBackgroundColor: ['rgba(255, 184, 77, 0.9)', 'rgba(74, 222, 128, 0.9)', 'rgba(139, 95, 191, 0.9)'],
+                        hoverBorderWidth: 3,
+                        maxBarThickness: 50,
+                        minBarLength: 10
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 20,
+                            right: 25,
+                            bottom: 20,
+                            left: 25
+                        }
+                    },
                     animation: {
-                        duration: 2000,
-                        easing: 'easeInOutQuart',
+                        duration: 2500,
+                        easing: 'easeOutQuart',
                         delay: (context) => {
-                            return context.dataIndex * 300; // Stagger animation
+                            return context.dataIndex * 350; // Stagger animation
+                        },
+                        animations: {
+                            y: {
+                                from: 500
+                            },
+                            opacity: {
+                                from: 0
+                            }
                         }
                     },
                     interaction: {

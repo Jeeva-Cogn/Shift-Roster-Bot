@@ -425,13 +425,17 @@
         .calendar-day {
             aspect-ratio: 1;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             border: 1px solid var(--border-color);
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 12px;
+            padding: 3px;
+            position: relative;
+            min-height: 60px;
         }
 
         .calendar-day:hover {
@@ -446,6 +450,71 @@
         .calendar-day.has-leave {
             background: linear-gradient(135deg, #ffc107 0%, #ffcd39 100%);
             color: white;
+        }
+
+        .calendar-day-number {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .leave-employees {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            width: 100%;
+            max-height: 45px;
+            overflow-y: auto;
+            font-size: 9px;
+        }
+
+        .leave-employee-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            padding: 1px 3px;
+            margin: 1px 0;
+        }
+
+        .leave-employee-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 8px;
+        }
+
+        .cancel-leave-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            width: 12px;
+            height: 12px;
+            font-size: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 2px;
+            flex-shrink: 0;
+        }
+
+        .cancel-leave-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         .alert {
@@ -668,34 +737,6 @@
             font-size: 0.75rem;
             font-weight: 500;
         }
-
-        /* Workload Heatmap */
-        .workload-heatmap {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.5rem;
-            padding: 1rem 0;
-        }
-
-        .heatmap-day {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: white;
-            transition: transform 0.2s ease;
-        }
-
-        .heatmap-day:hover {
-            transform: scale(1.1);
-        }
-
-        .heatmap-low { background: #d1fae5; color: #065f46; }
-        .heatmap-medium { background: #fbbf24; color: #92400e; }
-        .heatmap-high { background: #ef4444; color: white; }
 
         /* Circular Progress Charts */
         .health-metrics {
@@ -986,19 +1027,6 @@
 
             <!-- Modern Analytics Grid -->
             <div class="analytics-grid">
-                <!-- Team Workload Heatmap -->
-                <div class="analytics-card wide">
-                    <div class="card-header">
-                        <h3>Team Workload Distribution</h3>
-                        <div class="card-actions">
-                            <button class="btn-secondary">View Details</button>
-                        </div>
-                    </div>
-                    <div class="workload-heatmap" id="workloadHeatmap">
-                        <!-- Dynamic workload visualization will be inserted here -->
-                    </div>
-                </div>
-
                 <!-- Schedule Efficiency Metrics -->
                 <div class="analytics-card">
                     <div class="card-header">
@@ -2024,7 +2052,6 @@
         // Initialize Modern Analytics Dashboard
         function updateModernDashboard() {
             updateKPICards();
-            updateWorkloadHeatmap();
             updateHealthMetrics();
             updateAIInsights();
             updateActivityFeed();
@@ -2047,30 +2074,6 @@
             // AI Predictions
             const aiEl = document.querySelector('.kpi-card.info .kpi-value');
             if (aiEl) aiEl.textContent = '8';
-        }
-
-        // Update Workload Heatmap
-        function updateWorkloadHeatmap() {
-            const heatmapContainer = document.querySelector('.workload-heatmap');
-            if (!heatmapContainer) return;
-
-            heatmapContainer.innerHTML = '';
-            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            
-            days.forEach((day, index) => {
-                const dayElement = document.createElement('div');
-                dayElement.className = 'heatmap-day';
-                dayElement.textContent = day;
-                
-                // Simulate workload intensity based on day
-                if (index < 5) { // Weekdays
-                    dayElement.classList.add(index % 2 === 0 ? 'heatmap-high' : 'heatmap-medium');
-                } else { // Weekends
-                    dayElement.classList.add('heatmap-low');
-                }
-                
-                heatmapContainer.appendChild(dayElement);
-            });
         }
 
         // Update Health Metrics with circular progress
@@ -2387,19 +2390,110 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
-                dayElement.textContent = day;
+                
+                // Add day number
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'calendar-day-number';
+                dayNumber.textContent = day;
+                dayElement.appendChild(dayNumber);
                 
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const hasLeave = leaveRequests.some(l => l.date === dateStr && l.status === 'approved');
+                const leavesForDay = leaveRequests.filter(l => l.date === dateStr && l.status === 'approved');
                 
-                if (hasLeave) {
+                if (leavesForDay.length > 0) {
                     dayElement.classList.add('has-leave');
-                    const leavesForDay = leaveRequests.filter(l => l.date === dateStr && l.status === 'approved');
-                    dayElement.title = `Leaves: ${leavesForDay.map(l => l.employeeName).join(', ')}`;
+                    
+                    // Create employees container
+                    const employeesContainer = document.createElement('div');
+                    employeesContainer.className = 'leave-employees';
+                    
+                    leavesForDay.forEach(leave => {
+                        const employeeItem = document.createElement('div');
+                        employeeItem.className = 'leave-employee-item';
+                        
+                        const employeeName = document.createElement('span');
+                        employeeName.className = 'leave-employee-name';
+                        employeeName.textContent = leave.employeeName;
+                        employeeItem.appendChild(employeeName);
+                        
+                        const cancelBtn = document.createElement('button');
+                        cancelBtn.className = 'cancel-leave-btn';
+                        cancelBtn.innerHTML = '×';
+                        cancelBtn.title = `Cancel leave for ${leave.employeeName}`;
+                        cancelBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            cancelLeave(leave.employeeName, dateStr);
+                        };
+                        employeeItem.appendChild(cancelBtn);
+                        
+                        employeesContainer.appendChild(employeeItem);
+                    });
+                    
+                    dayElement.appendChild(employeesContainer);
                 }
                 
                 container.appendChild(dayElement);
             }
+        }
+
+        // Function to cancel leave
+        function cancelLeave(employeeName, dateStr) {
+            const confirmation = confirm(`Cancel leave for ${employeeName} on ${dateStr}?`);
+            if (confirmation) {
+                // Remove the leave from the array
+                const leaveIndex = leaveRequests.findIndex(l => 
+                    l.employeeName === employeeName && 
+                    l.date === dateStr && 
+                    l.status === 'approved'
+                );
+                
+                if (leaveIndex !== -1) {
+                    leaveRequests.splice(leaveIndex, 1);
+                    
+                    // Update the leave calendar
+                    generateLeaveCalendar();
+                    
+                    // Update the leave requests display
+                    updateLeaveRequests();
+                    
+                    // Show success message
+                    showNotification(`Leave cancelled for ${employeeName} on ${dateStr}`, 'success');
+                }
+            }
+        }
+
+        // Function to show notifications
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                font-weight: bold;
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            switch(type) {
+                case 'success':
+                    notification.style.background = '#28a745';
+                    break;
+                case 'error':
+                    notification.style.background = '#dc3545';
+                    break;
+                default:
+                    notification.style.background = '#17a2b8';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
 
         // Schedule Generation

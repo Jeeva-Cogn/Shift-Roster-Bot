@@ -10,6 +10,7 @@
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#8b5fbf">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="NPE ShiftBot">
@@ -1109,15 +1110,17 @@
             updateShiftConfigList();
         }
 
-        // Handle Shift Configuration Form
-        document.getElementById('shiftConfigForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const shiftCode = document.getElementById('shiftCode').value;
-            const startTime = document.getElementById('shiftStart').value;
-            const endTime = document.getElementById('shiftEnd').value;
-            const minStaff = parseInt(document.getElementById('minStaff').value);
-            const requiredLeads = parseInt(document.getElementById('requiredLeads').value);
+        // Handle Shift Configuration Form (if it exists)
+        const shiftConfigForm = document.getElementById('shiftConfigForm');
+        if (shiftConfigForm) {
+            shiftConfigForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const shiftCode = document.getElementById('shiftCode').value;
+                const startTime = document.getElementById('shiftStart').value;
+                const endTime = document.getElementById('shiftEnd').value;
+                const minStaff = parseInt(document.getElementById('minStaff').value);
+                const requiredLeads = parseInt(document.getElementById('requiredLeads').value);
             const requiredAssociates = parseInt(document.getElementById('requiredAssociates').value);
             const preferredLead = document.getElementById('preferredLead').value;
             
@@ -1141,6 +1144,7 @@
             this.reset();
             alert('Shift configuration saved successfully!');
         });
+        }
 
         // Update Shift Configuration List
         function updateShiftConfigList() {
@@ -1546,14 +1550,16 @@
             generateLeaveCalendar();
         }
 
-        // Handle Leave Request Form
-        document.getElementById('leaveRequestForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const employeeId = document.getElementById('employeeSelect').value;
-            const leaveDate = document.getElementById('leaveDate').value;
-            const leaveType = document.getElementById('leaveType').value;
-            const leaveReason = document.getElementById('leaveReason').value;
+        // Handle Leave Request Form (if it exists)
+        const leaveRequestForm = document.getElementById('leaveRequestForm');
+        if (leaveRequestForm) {
+            leaveRequestForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const employeeId = document.getElementById('employeeSelect').value;
+                const leaveDate = document.getElementById('leaveDate').value;
+                const leaveType = document.getElementById('leaveType').value;
+                const leaveReason = document.getElementById('leaveReason').value;
             
             if (!employeeId || !leaveDate || !leaveType) {
                 alert('Please fill all required fields!');
@@ -1582,6 +1588,7 @@
             
             alert('Leave request submitted successfully!');
         });
+        }
 
         // Update Leave Requests Display
         function updateLeaveRequests() {
@@ -1946,17 +1953,25 @@
 
         // Initialize app on load
         document.addEventListener('DOMContentLoaded', function() {
-            initDashboard();
-            
-            // Set default start date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDate').value = today;
-            
-            // Register Service Worker for PWA functionality
-            registerServiceWorker();
+            try {
+                initDashboard();
+                
+                // Set default start date to today
+                const startDateElement = document.getElementById('startDate');
+                if (startDateElement) {
+                    const today = new Date().toISOString().split('T')[0];
+                    startDateElement.value = today;
+                }
+                
+                // Register Service Worker for PWA functionality
+                registerServiceWorker();
             
             // Add install app prompt
             setupInstallPrompt();
+            } catch (error) {
+                console.error('Error during app initialization:', error);
+                // Continue with basic functionality even if some features fail
+            }
         });
 
         // PWA Service Worker Registration

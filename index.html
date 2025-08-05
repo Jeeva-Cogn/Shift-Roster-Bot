@@ -1815,47 +1815,52 @@
 
         // Tab Management
         function showTab(tabName) {
-            // Stop activity feed when leaving dashboard
-            if (tabName !== 'dashboard') {
-                stopActivityFeed();
-            }
-            
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Show selected tab content
-            document.getElementById(tabName).classList.add('active');
-            
-            // Add active class to clicked tab
-            event.target.classList.add('active');
-            
-            // Initialize tab-specific content
-            if (tabName === 'dashboard') {
-                initDashboard();
-                addRealActivity('📊 Viewed dashboard', 'Analytics and activity overview');
-            } else if (tabName === 'team') {
-                loadTeamData();
-                addRealActivity('👥 Viewed team', 'Team member management');
-            } else if (tabName === 'leaves') {
-                initLeaveManagement();
-                addRealActivity('🏖️ Viewed leaves', 'Leave management and calendar');
-            } else if (tabName === 'generator') {
-                initializeExtraOffManagement();
-                addRealActivity('🤖 Opened generator', 'Schedule generation and extra offs');
-            } else if (tabName === 'reports') {
-                initReports();
-                addRealActivity('📈 Viewed reports', 'Performance analytics and insights');
-            } else if (tabName === 'shiftConfig') {
-                initShiftConfiguration();
-                addRealActivity('⚙️ Opened config', 'Shift configuration settings');
-            }
+    // Stop activity feed when leaving dashboard
+    if (tabName !== 'dashboard') {
+        stopActivityFeed();
+    }
+
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    // Show selected tab content
+    document.getElementById(tabName).classList.add('active');
+
+    // Add active class to the correct tab
+    // Find the tab button that matches tabName and activate it
+    document.querySelectorAll('.tab').forEach(tab => {
+        if (tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(`showTab('${tabName}')`)) {
+            tab.classList.add('active');
+        }
+    });
+
+    // Initialize tab-specific content
+    if (tabName === 'dashboard') {
+        initDashboard();
+        addRealActivity('📊 Viewed dashboard', 'Analytics and activity overview');
+    } else if (tabName === 'team') {
+        loadTeamData();
+        addRealActivity('👥 Viewed team', 'Team member management');
+    } else if (tabName === 'leaves') {
+        initLeaveManagement();
+        addRealActivity('🏖️ Viewed leaves', 'Leave management and calendar');
+    } else if (tabName === 'generator') {
+        // Removed Extra Off Management logic
+        addRealActivity('🤖 Opened generator', 'Schedule generation');
+    } else if (tabName === 'reports') {
+        initReports();
+        addRealActivity('📈 Viewed reports', 'Performance analytics and insights');
+    } else if (tabName === 'shiftConfig') {
+        initShiftConfiguration();
+        addRealActivity('⚙️ Opened config', 'Shift configuration settings');
+    }
         }
 
         // Real Activity Tracking System

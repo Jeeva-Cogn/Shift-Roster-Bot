@@ -45,6 +45,64 @@
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
+    <script>
+        // Chennai timezone utilities - Ultimate rule awareness
+        function getChennaiTime() {
+            return new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+        }
+        
+        function getChennaiDate() {
+            const chennaiTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+            return new Date(chennaiTime);
+        }
+        
+        function isWeekendInChennai(date) {
+            const chennaiDate = new Date(date.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
+            const dayOfWeek = chennaiDate.getDay();
+            return dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+        }
+        
+        function countWeekendsInRange(startDate, endDate) {
+            let count = 0;
+            const current = new Date(startDate);
+            while (current <= endDate) {
+                if (isWeekendInChennai(current)) {
+                    count++;
+                }
+                current.setDate(current.getDate() + 1);
+            }
+            return count;
+        }
+        
+        // Ultimate rule: Count of Sat & Sun = Count of each employee OFF
+        function validateEmployeeSchedule(employeeName, schedule, startDate, endDate) {
+            const weekendCount = countWeekendsInRange(startDate, endDate);
+            let offCount = 0;
+            
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                const daySchedule = schedule[dateStr] || {};
+                
+                // Check if employee is OFF this day
+                let isWorking = false;
+                Object.keys(daySchedule).forEach(shift => {
+                    if (daySchedule[shift] && daySchedule[shift].includes(employeeName)) {
+                        isWorking = true;
+                    }
+                });
+                
+                if (!isWorking) offCount++;
+            }
+            
+            return {
+                weekendCount,
+                offCount,
+                isValid: weekendCount === offCount,
+                employeeName
+            };
+        }
+    </script>
+    
     <style>
         /* Google Sites Compatible CSS */
         :root {
@@ -2578,26 +2636,26 @@
                         cell.alignment = { horizontal: 'center', vertical: 'middle' };
                         cell.font = { bold: assignment !== 'OFF', size: 10 };
                         
-                        // Color coding based on assignment and WFO policy
+                        // Color coding based on assignment and WFO policy using Chennai timezone
                         if (assignment === 'Leave') {
-                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCC' } }; // Light red
-                            cell.font = { ...cell.font, color: { argb: 'FFCC0000' } };
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } }; // Bright red
+                            cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
                         } else if (assignment === 'OFF') {
-                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } }; // Light gray
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF808080' } }; // Gray
+                            cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
                         } else {
-                            // Check if it's weekend (Saturday = 6, Sunday = 0)
+                            // Check if it's weekend using Chennai timezone
                             const currentDate = new Date(2025, 7, day);
-                            const dayOfWeek = currentDate.getDay();
-                            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+                            const isWeekend = isWeekendInChennai(currentDate);
                             
                             if (isWeekend) {
-                                // Weekend work = WFH (Blue highlighting)
-                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFADD8E6' } }; // Light blue
-                                cell.font = { ...cell.font, color: { argb: 'FF000080' } }; // Dark blue text
+                                // Weekend work = WFH (Strong Blue highlighting)
+                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0066CC' } }; // Strong blue
+                                cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
                             } else {
-                                // Weekday work = WFO (Green highlighting) - max 3 days per week
-                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF90EE90' } }; // Light green
-                                cell.font = { ...cell.font, color: { argb: 'FF006400' } }; // Dark green text
+                                // Weekday work = WFO (Strong Green highlighting)
+                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00AA00' } }; // Strong green
+                                cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
                             }
                         }
                         
@@ -2840,27 +2898,27 @@
                         cell.alignment = { horizontal: 'center', vertical: 'middle' };
                         cell.font = { bold: assignment !== 'OFF', size: 10 };
                         
-                        // Color coding based on assignment and WFO policy
+                        // Color coding based on assignment and WFO policy using Chennai timezone
                         if (assignment === 'Leave') {
-                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCC' } }; // Light red
-                            cell.font = { ...cell.font, color: { argb: 'FFCC0000' } };
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } }; // Bright red
+                            cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
                         } else if (assignment === 'OFF') {
-                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } }; // Light gray
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF808080' } }; // Gray
+                            cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
                         } else {
-                            // Check if it's weekend (Saturday = 6, Sunday = 0)
+                            // Check if it's weekend using Chennai timezone
                             const currentDate = new Date(start);
                             currentDate.setDate(start.getDate() + i);
-                            const dayOfWeek = currentDate.getDay();
-                            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+                            const isWeekend = isWeekendInChennai(currentDate);
                             
                             if (isWeekend) {
-                                // Weekend work = WFH (Blue highlighting)
-                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFADD8E6' } }; // Light blue
-                                cell.font = { ...cell.font, color: { argb: 'FF000080' } }; // Dark blue text
+                                // Weekend work = WFH (Strong Blue highlighting)
+                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0066CC' } }; // Strong blue
+                                cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
                             } else {
-                                // Weekday work = WFO (Green highlighting) - max 3 days per week
-                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF90EE90' } }; // Light green
-                                cell.font = { ...cell.font, color: { argb: 'FF006400' } }; // Dark green text
+                                // Weekday work = WFO (Strong Green highlighting)
+                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00AA00' } }; // Strong green
+                                cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
                             }
                         }
                         
@@ -3389,8 +3447,24 @@
                 throw new Error('OpenAI API key is required');
             }
 
+            const chennaiTime = getChennaiTime();
+            const chennaiDate = getChennaiDate();
+            const weekendCount = countWeekendsInRange(new Date(startDate), new Date(endDate));
+
             const customRulesText = `
 STRICT CUSTOM RULES - FOLLOW THESE EXACTLY:
+
+ULTIMATE RULE (MOST IMPORTANT):
+- Count of Saturday & Sunday = Count of each employee OFF days
+- Weekend count in this period: ${weekendCount} days
+- Each employee must have exactly ${weekendCount} OFF days
+
+CHENNAI TIMEZONE AWARENESS:
+- Current Chennai time: ${chennaiTime}
+- All calculations must respect Asia/Kolkata timezone
+- Saturday/Sunday work = WFH ONLY (Blue highlighting in Excel)
+- Weekday work = WFO ONLY (Green highlighting in Excel)
+- Maximum 3 WFO days per employee per week
 
 SHIFT RULES:
 ${userCustomRules.shiftRules.map(rule => `- ${rule}`).join('\n')}
@@ -3421,11 +3495,16 @@ SCHEDULE PERIOD: ${startDate} to ${endDate}
 ${customRulesText}
 
 IMPORTANT INSTRUCTIONS:
-1. Follow ONLY the custom rules provided above
-2. Do not apply any standard workforce management patterns
-3. Strictly adhere to the user's specific requirements
-4. Generate a detailed roster that meets all stated rules
-5. If rules conflict, prioritize in the order: Restrictions > Timing > Team > Shift > Priority
+1. ULTIMATE RULE: Each employee must have exactly ${weekendCount} OFF days (matching weekend count)
+2. Chennai timezone awareness: Use Asia/Kolkata for all date calculations
+3. Follow ONLY the custom rules provided above
+4. Saturday/Sunday assignments = WFH, Weekday assignments = WFO
+5. Maximum 3 WFO days per employee per week
+6. Do not apply any standard workforce management patterns
+7. Strictly adhere to the user's specific requirements
+8. Generate a detailed roster that meets all stated rules
+9. If rules conflict, prioritize: ULTIMATE RULE > Restrictions > Timing > Team > Shift > Priority
+10. Validate that weekend count equals OFF count for each employee
 
 Generate a complete shift roster in JSON format:
 {
@@ -3437,7 +3516,10 @@ Generate a complete shift roster in JSON format:
   }
 }
 
-Also provide an explanation of how each rule was applied.`;
+Also provide:
+1. Explanation of how each rule was applied
+2. Validation that ULTIMATE RULE is satisfied for each employee
+3. WFO/WFH breakdown for each employee`;
 
             try {
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -3451,7 +3533,11 @@ Also provide an explanation of how each rule was applied.`;
                         messages: [
                             {
                                 role: 'system',
-                                content: 'You are a precise shift roster generator that STRICTLY follows user-defined rules. You never deviate from the provided rules and always explain your decisions.'
+                                content: `You are a precise shift roster generator with Chennai timezone awareness that STRICTLY follows user-defined rules. Current Chennai time: ${chennaiTime}. 
+
+ULTIMATE RULE: Count of Saturday & Sunday = Count of each employee OFF days.
+
+You never deviate from the provided rules, always respect Asia/Kolkata timezone, ensure weekend count equals OFF count for each employee, and always explain your decisions with validation.`
                             },
                             {
                                 role: 'user',
@@ -3507,7 +3593,12 @@ Also provide an explanation of how each rule was applied.`;
                 throw new Error('OpenAI API key is required');
             }
 
-            const prompt = `Analyze this Excel shift roster data and extract patterns, rules, and optimization opportunities:
+            const chennaiTime = getChennaiTime();
+            const chennaiDate = getChennaiDate();
+            
+            const prompt = `Analyze this Excel shift roster data with Chennai timezone awareness (Current Chennai time: ${chennaiTime}):
+
+ULTIMATE RULE: Count of Saturday & Sunday = Count of each employee OFF days (Weekend count must equal OFF count for each employee)
 
 Excel Data Summary:
 - Team Members: ${excelData.teamData?.length || 0}
@@ -3518,14 +3609,22 @@ Sample Team Data: ${JSON.stringify(excelData.teamData?.slice(0, 3) || [])}
 Sample Schedule: ${JSON.stringify(excelData.schedulePatterns?.slice(0, 3) || [])}
 Sample Leave: ${JSON.stringify(excelData.leavePatterns?.slice(0, 3) || [])}
 
-Please analyze and provide:
-1. Work patterns (shift preferences, rotation cycles)
-2. Health & wellbeing rules (consecutive days, rest periods)
-3. Fairness criteria (workload distribution, preference accommodation)
-4. Optimization suggestions for better work-life balance
-5. Specific rules extracted from the data
+CRITICAL RULES TO FOLLOW:
+1. Chennai timezone awareness - All dates/times must respect Asia/Kolkata timezone
+2. ULTIMATE RULE: Weekend count (Sat + Sun) = OFF count for each employee
+3. Maximum 3 WFO (Work From Office) days per week per employee
+4. Saturday and Sunday work = WFH (Work From Home) ONLY
+5. Weekday work = WFO (Work From Office) with green highlighting in Excel
+6. Weekend work = WFH with blue highlighting in Excel
 
-Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules, optimizations, extractedRules`;
+Please analyze and provide:
+1. Work patterns (shift preferences, rotation cycles) with Chennai timezone consideration
+2. Health & wellbeing rules (consecutive days, rest periods)
+3. Fairness criteria (workload distribution, weekend OFF enforcement)
+4. Optimization suggestions respecting ULTIMATE RULE
+5. Specific rules extracted from the data with weekend/weekday distinction
+
+Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules, optimizations, extractedRules, weekendRules, ultimateRuleCompliance`;
 
             try {
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -3539,7 +3638,17 @@ Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules
                         messages: [
                             {
                                 role: 'system',
-                                content: 'You are an AI specialist in workforce management and shift scheduling. Analyze data to extract patterns and rules that promote work-life balance and operational efficiency.'
+                                content: `You are an AI specialist in workforce management and shift scheduling with Chennai timezone awareness. Current Chennai time: ${chennaiTime}. 
+
+ULTIMATE RULE: Count of Saturday & Sunday = Count of each employee OFF days.
+
+CRITICAL CONSTRAINTS:
+- Always consider Asia/Kolkata timezone for all date/time calculations
+- Maximum 3 WFO days per employee per week
+- Saturday/Sunday work = WFH ONLY
+- Weekday work = WFO
+- Weekend count must equal OFF count for each employee
+- Analyze data to extract patterns that promote work-life balance and operational efficiency while strictly following the ULTIMATE RULE.`
                             },
                             {
                                 role: 'user',

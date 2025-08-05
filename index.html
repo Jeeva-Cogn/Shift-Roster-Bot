@@ -42,7 +42,8 @@
     <!-- External Dependencies with integrity checks -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
     <style>
         /* Google Sites Compatible CSS */
@@ -2464,158 +2465,262 @@
             output.innerHTML = html;
         }
 
-        // Download Schedule as Excel in SharePoint Format
-        function downloadSchedule() {
-            // Create Excel workbook with SharePoint format
-            const wb = XLSX.utils.book_new();
-            
-            // Create the roster data in exact SharePoint format
-            const rosterData = [];
-            
-            // Row 1: Header with QA&DOD, UAT sections
-            const row1 = ['', '', '', '', '', '', '', 'QA&DOD', 'UAT'];
-            for (let i = 9; i < 35; i++) row1.push(''); // Fill remaining columns
-            rosterData.push(row1);
-            
-            // Row 2: Empty row
-            rosterData.push(new Array(35).fill(''));
-            
-            // Row 3: Date headers
-            const dateRow = ['', '', '', 'Date/Month/Year', '', ''];
-            for (let day = 1; day <= 31; day++) {
-                const formattedDate = String(day).padStart(2, '0') + '-Aug-25';
-                dateRow.push(formattedDate);
-            }
-            rosterData.push(dateRow);
-            
-            // Row 4: Day names and column headers
-            const dayRow = ['', '', '', 'CTS', 'ESHC', 'Name'];
-            for (let day = 1; day <= 31; day++) {
-                const date = new Date(2025, 7, day); // August 2025
-                const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-                dayRow.push(dayName);
-            }
-            rosterData.push(dayRow);
-            
-            // Employee rows with actual roster data
-            npeTeamData.forEach(employee => {
-                const empRow = ['', '', '', employee.cts, employee.eshc, employee.name];
-                
-                for (let day = 1; day <= 31; day++) {
-                    const dateStr = `2025-08-${String(day).padStart(2, '0')}`;
-                    const daySchedule = realAugust2025Schedule[dateStr] || {};
-                    
-                    let assignment = 'OFF';
-                    
-                    // Check which shift the employee is assigned to
-                    Object.keys(daySchedule).forEach(shift => {
-                        if (daySchedule[shift] && daySchedule[shift].includes(employee.name)) {
-                            assignment = shift;
-                        }
-                    });
-                    
-                    // Check for leaves
-                    const leave = realLeaveData.find(l => 
-                        l.employeeName === employee.name && 
-                        l.date === dateStr && 
-                        l.status === 'approved'
-                    );
-                    
-                    if (leave) {
-                        assignment = 'Leave';
-                    }
-                    
-                    empRow.push(assignment);
-                }
-                rosterData.push(empRow);
-            });
-            
-            // Add summary rows for shift counts
-            const s1CountRow = ['', '', '', '', '', 'S1'];
-            const s2CountRow = ['', '', '', '', '', 'S2'];
-            const s3CountRow = ['', '', '', '', '', 'S3'];
-            
-            for (let day = 1; day <= 31; day++) {
-                const dateStr = `2025-08-${String(day).padStart(2, '0')}`;
-                const daySchedule = realAugust2025Schedule[dateStr] || {};
-                
-                const s1Count = (daySchedule.S1 || []).length;
-                const s2Count = (daySchedule.S2 || []).length;
-                const s3Count = (daySchedule.S3 || []).length;
-                
-                s1CountRow.push(s1Count);
-                s2CountRow.push(s2Count);
-                s3CountRow.push(s3Count);
-            }
-            
-            rosterData.push(s1CountRow);
-            rosterData.push(s2CountRow);
-            rosterData.push(s3CountRow);
-            
-            // Add empty rows
-            rosterData.push(new Array(35).fill(''));
-            rosterData.push(new Array(35).fill(''));
-            
-            // Add shift timing legend
-            rosterData.push(['', 'S1', '06:00 AM TO 04:00 PM IST']);
-            rosterData.push(['', 'S2', '01:00 PM TO 11:00 PM IST']);
-            rosterData.push(['', 'S3', '10:00 PM TO 08:00 AM IST']);
-            rosterData.push(['', 'S4', '12:30 PM TO 10:30 PM IST']);
-            rosterData.push(['', 'G', '09:00 AM TO 07:00 PM IST']);
-            rosterData.push(['', 'P', '06:30 PM TO 04:30 AM IST']);
-            rosterData.push(['', 'HIH', '11:30 AM TO 08:30 PM IST']);
-            
-            // Add empty row
-            rosterData.push(new Array(35).fill(''));
-            
-            // Add team structure
-            rosterData.push(['LeadS']);
-            rosterData.push(['593300', 'EH0647', 'Dinesh Anbalagan']);
-            rosterData.push(['560008', 'EG4208', 'Mano']);
-            rosterData.push(['Shift Leads']);
-            rosterData.push(['410093', 'EH6832', 'Jeyakaran']);
-            rosterData.push(['2167353', 'C7H8KH', 'Karthikeyan']);
-            rosterData.push(['2054459', 'C6X8FS', 'Panner']);
-            rosterData.push(['2240608', 'C7T7SF', 'Sai Kumar']);
-            rosterData.push(['2136623', 'C8G3CW', 'Manoj']);
-            
-            // Create worksheet
-            const ws = XLSX.utils.aoa_to_sheet(rosterData);
-            
-            // Set column widths for better formatting
-            ws['!cols'] = [
-                { width: 8 }, { width: 8 }, { width: 8 }, { width: 10 }, 
-                { width: 8 }, { width: 15 }, // CTS, ESHC, Name columns
-                ...new Array(31).fill({ width: 7 }) // Date columns
-            ];
-            
-            // Add the worksheet to workbook
-            XLSX.utils.book_append_sheet(wb, ws, 'Shift Roster - Format');
-            
-            // Export the file with SharePoint compatible naming
-            const fileName = `Shift_Roster_Format_August_2025.xlsx`;
-            XLSX.writeFile(wb, fileName);
-            
-            // Show success message
-            alert(`✅ Excel exported successfully!\n\nFile: ${fileName}\n\nFormat: SharePoint Compatible\n📊 Includes: All shifts, leaves, daily counts, and team structure\n🎨 Ready for WFO highlighting in Excel`);
-        }
-
-        // Export AI-generated roster to SharePoint Excel format
-        function exportGeneratedRosterToSharePoint(startDate, endDate) {
+        // Download Schedule as Excel in SharePoint Format with FULL FORMATTING
+        async function downloadSchedule() {
             try {
-                // Create Excel workbook with SharePoint format for AI-generated roster
-                const wb = XLSX.utils.book_new();
+                // Create new workbook with ExcelJS (supports formatting!)
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('Shift Roster - Format');
                 
-                // Create the roster data in exact SharePoint format
-                const rosterData = [];
+                // Set up basic worksheet properties
+                worksheet.properties.defaultRowHeight = 20;
                 
                 // Row 1: Header with QA&DOD, UAT sections
-                const row1 = ['', '', '', '', '', '', '', 'QA&DOD', 'UAT'];
-                for (let i = 9; i < 35; i++) row1.push(''); // Fill remaining columns
-                rosterData.push(row1);
+                const row1 = worksheet.getRow(1);
+                row1.getCell(8).value = 'QA&DOD';
+                row1.getCell(9).value = 'UAT';
                 
-                // Row 2: Empty row
-                rosterData.push(new Array(35).fill(''));
+                // Style the header row
+                row1.getCell(8).font = { bold: true, color: { argb: 'FF000000' } };
+                row1.getCell(8).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFCCCCCC' } };
+                row1.getCell(9).font = { bold: true, color: { argb: 'FF000000' } };
+                row1.getCell(9).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFCCCCCC' } };
+                
+                // Row 3: Date headers
+                const row3 = worksheet.getRow(3);
+                row3.getCell(4).value = 'Date/Month/Year';
+                row3.getCell(4).font = { bold: true };
+                
+                for (let day = 1; day <= 31; day++) {
+                    const formattedDate = String(day).padStart(2, '0') + '-Aug-25';
+                    const cell = row3.getCell(5 + day);
+                    cell.value = formattedDate;
+                    cell.font = { bold: true, size: 10 };
+                    cell.alignment = { horizontal: 'center' };
+                }
+                
+                // Row 4: Column headers and day names
+                const row4 = worksheet.getRow(4);
+                row4.getCell(4).value = 'CTS';
+                row4.getCell(5).value = 'ESHC';
+                row4.getCell(6).value = 'Name';
+                
+                // Style column headers
+                [4, 5, 6].forEach(col => {
+                    const cell = row4.getCell(col);
+                    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    cell.border = {
+                        top: { style: 'thin' }, bottom: { style: 'thin' },
+                        left: { style: 'thin' }, right: { style: 'thin' }
+                    };
+                });
+                
+                for (let day = 1; day <= 31; day++) {
+                    const date = new Date(2025, 7, day);
+                    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+                    const cell = row4.getCell(6 + day);
+                    cell.value = dayName;
+                    cell.font = { bold: true, size: 9 };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
+                }
+                
+                // Employee rows with formatting
+                let currentRow = 5;
+                npeTeamData.forEach((employee, empIndex) => {
+                    const row = worksheet.getRow(currentRow);
+                    
+                    // Employee info columns
+                    row.getCell(4).value = employee.cts;
+                    row.getCell(5).value = employee.eshc;
+                    row.getCell(6).value = employee.name;
+                    
+                    // Style employee info
+                    [4, 5, 6].forEach(col => {
+                        const cell = row.getCell(col);
+                        cell.font = { bold: col === 6 }; // Bold name only
+                        cell.alignment = { horizontal: col === 6 ? 'left' : 'center', vertical: 'middle' };
+                        cell.border = {
+                            top: { style: 'thin' }, bottom: { style: 'thin' },
+                            left: { style: 'thin' }, right: { style: 'thin' }
+                        };
+                    });
+                    
+                    // Daily assignments with color coding
+                    for (let day = 1; day <= 31; day++) {
+                        const dateStr = `2025-08-${String(day).padStart(2, '0')}`;
+                        const daySchedule = realAugust2025Schedule[dateStr] || {};
+                        
+                        let assignment = 'OFF';
+                        
+                        // Check which shift the employee is assigned to
+                        Object.keys(daySchedule).forEach(shift => {
+                            if (daySchedule[shift] && daySchedule[shift].includes(employee.name)) {
+                                assignment = shift;
+                            }
+                        });
+                        
+                        // Check for leaves
+                        const leave = realLeaveData.find(l => 
+                            l.employeeName === employee.name && 
+                            l.date === dateStr && 
+                            l.status === 'approved'
+                        );
+                        
+                        if (leave) {
+                            assignment = 'Leave';
+                        }
+                        
+                        const cell = row.getCell(6 + day);
+                        cell.value = assignment;
+                        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        cell.font = { bold: assignment !== 'OFF', size: 10 };
+                        
+                        // Color coding based on assignment
+                        if (assignment === 'Leave') {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCC' } }; // Light red
+                            cell.font = { ...cell.font, color: { argb: 'FFCC0000' } };
+                        } else if (assignment === 'OFF') {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } }; // Light gray
+                        } else {
+                            // WFO highlighting - GREEN for work assignments!
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF90EE90' } }; // Light green
+                            cell.font = { ...cell.font, color: { argb: 'FF006400' } }; // Dark green text
+                        }
+                        
+                        cell.border = {
+                            top: { style: 'thin' }, bottom: { style: 'thin' },
+                            left: { style: 'thin' }, right: { style: 'thin' }
+                        };
+                    }
+                    
+                    currentRow++;
+                });
+                
+                // Add summary rows for shift counts
+                currentRow += 1; // Add space
+                
+                ['S1', 'S2', 'S3'].forEach(shiftType => {
+                    const row = worksheet.getRow(currentRow);
+                    row.getCell(6).value = shiftType;
+                    row.getCell(6).font = { bold: true };
+                    row.getCell(6).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEB9C' } };
+                    
+                    for (let day = 1; day <= 31; day++) {
+                        const dateStr = `2025-08-${String(day).padStart(2, '0')}`;
+                        const daySchedule = realAugust2025Schedule[dateStr] || {};
+                        const count = (daySchedule[shiftType] || []).length;
+                        
+                        const cell = row.getCell(6 + day);
+                        cell.value = count;
+                        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        cell.font = { bold: true };
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEB9C' } };
+                        cell.border = {
+                            top: { style: 'thin' }, bottom: { style: 'thin' },
+                            left: { style: 'thin' }, right: { style: 'thin' }
+                        };
+                    }
+                    currentRow++;
+                });
+                
+                // Add shift timing legend
+                currentRow += 2;
+                const legendData = [
+                    ['S1', '06:00 AM TO 04:00 PM IST'],
+                    ['S2', '01:00 PM TO 11:00 PM IST'],
+                    ['S3', '10:00 PM TO 08:00 AM IST'],
+                    ['S4', '12:30 PM TO 10:30 PM IST'],
+                    ['G', '09:00 AM TO 07:00 PM IST'],
+                    ['P', '06:30 PM TO 04:30 AM IST'],
+                    ['HIH', '11:30 AM TO 08:30 PM IST']
+                ];
+                
+                legendData.forEach(([shift, time]) => {
+                    const row = worksheet.getRow(currentRow);
+                    row.getCell(2).value = shift;
+                    row.getCell(3).value = time;
+                    
+                    row.getCell(2).font = { bold: true };
+                    row.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9EAD3' } };
+                    currentRow++;
+                });
+                
+                // Add team structure
+                currentRow += 2;
+                const teamData = [
+                    ['LeadS'],
+                    ['593300', 'EH0647', 'Dinesh Anbalagan'],
+                    ['560008', 'EG4208', 'Mano'],
+                    ['Shift Leads'],
+                    ['410093', 'EH6832', 'Jeyakaran'],
+                    ['2167353', 'C7H8KH', 'Karthikeyan'],
+                    ['2054459', 'C6X8FS', 'Panner'],
+                    ['2240608', 'C7T7SF', 'Sai Kumar'],
+                    ['2136623', 'C8G3CW', 'Manoj']
+                ];
+                
+                teamData.forEach(rowData => {
+                    const row = worksheet.getRow(currentRow);
+                    rowData.forEach((value, colIndex) => {
+                        const cell = row.getCell(colIndex + 1);
+                        cell.value = value;
+                        if (rowData.length === 1) { // Headers
+                            cell.font = { bold: true };
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFCCCCCC' } };
+                        }
+                    });
+                    currentRow++;
+                });
+                
+                // Set column widths
+                worksheet.getColumn(4).width = 10; // CTS
+                worksheet.getColumn(5).width = 8;  // ESHC
+                worksheet.getColumn(6).width = 15; // Name
+                for (let i = 7; i <= 37; i++) {
+                    worksheet.getColumn(i).width = 7; // Date columns
+                }
+                
+                // Generate and download the file
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                });
+                
+                const fileName = `Shift_Roster_Format_August_2025_WITH_COLORS.xlsx`;
+                saveAs(blob, fileName);
+                
+                // Show success message
+                alert(`🎨 Excel exported with FULL FORMATTING!\n\nFile: ${fileName}\n\n✅ Features:\n🟢 GREEN highlighting for WFO assignments\n� RED highlighting for leaves\n⚪ GRAY for OFF days\n📊 Professional borders and fonts\n� Ready for SharePoint!`);
+                
+            } catch (error) {
+                console.error('Excel export error:', error);
+                alert(`❌ Export failed: ${error.message}`);
+            }
+        }
+
+        // Export AI-generated roster to SharePoint Excel format with FULL FORMATTING
+        async function exportGeneratedRosterToSharePoint(startDate, endDate) {
+            try {
+                // Create new workbook with ExcelJS (supports full formatting!)
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('AI Generated Roster');
+                
+                // Set up basic worksheet properties
+                worksheet.properties.defaultRowHeight = 20;
+                
+                // Row 1: Header with QA&DOD, UAT sections
+                const row1 = worksheet.getRow(1);
+                row1.getCell(8).value = 'QA&DOD';
+                row1.getCell(9).value = 'UAT';
+                
+                // Style the header row
+                row1.getCell(8).font = { bold: true, color: { argb: 'FF000000' } };
+                row1.getCell(8).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFCCCCCC' } };
+                row1.getCell(9).font = { bold: true, color: { argb: 'FF000000' } };
+                row1.getCell(9).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFCCCCCC' } };
                 
                 // Calculate date range for export
                 const start = new Date(startDate);
@@ -2623,41 +2728,78 @@
                 const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
                 
                 // Row 3: Date headers
-                const dateRow = ['', '', '', 'Date/Month/Year', '', ''];
+                const row3 = worksheet.getRow(3);
+                row3.getCell(4).value = 'Date/Month/Year';
+                row3.getCell(4).font = { bold: true };
+                
                 for (let i = 0; i < totalDays && i < 31; i++) {
                     const currentDate = new Date(start);
                     currentDate.setDate(start.getDate() + i);
                     const day = currentDate.getDate();
                     const formattedDate = String(day).padStart(2, '0') + '-Aug-25';
-                    dateRow.push(formattedDate);
+                    const cell = row3.getCell(7 + i);
+                    cell.value = formattedDate;
+                    cell.font = { bold: true, size: 10 };
+                    cell.alignment = { horizontal: 'center' };
                 }
-                // Fill remaining columns if less than 31 days
-                while (dateRow.length < 35) dateRow.push('');
-                rosterData.push(dateRow);
                 
-                // Row 4: Day names and column headers
-                const dayRow = ['', '', '', 'CTS', 'ESHC', 'Name'];
+                // Row 4: Column headers and day names
+                const row4 = worksheet.getRow(4);
+                row4.getCell(4).value = 'CTS';
+                row4.getCell(5).value = 'ESHC';
+                row4.getCell(6).value = 'Name';
+                
+                // Style column headers
+                [4, 5, 6].forEach(col => {
+                    const cell = row4.getCell(col);
+                    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    cell.border = {
+                        top: { style: 'thin' }, bottom: { style: 'thin' },
+                        left: { style: 'thin' }, right: { style: 'thin' }
+                    };
+                });
+                
                 for (let i = 0; i < totalDays && i < 31; i++) {
                     const currentDate = new Date(start);
                     currentDate.setDate(start.getDate() + i);
                     const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
-                    dayRow.push(dayName);
+                    const cell = row4.getCell(7 + i);
+                    cell.value = dayName;
+                    cell.font = { bold: true, size: 9 };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
                 }
-                // Fill remaining columns
-                while (dayRow.length < 35) dayRow.push('');
-                rosterData.push(dayRow);
                 
-                // Employee rows with AI-generated roster data
-                npeTeamData.forEach(employee => {
-                    const empRow = ['', '', '', employee.cts, employee.eshc, employee.name];
+                // Employee rows with AI-generated data and formatting
+                let currentRow = 5;
+                npeTeamData.forEach((employee, empIndex) => {
+                    const row = worksheet.getRow(currentRow);
                     
+                    // Employee info columns
+                    row.getCell(4).value = employee.cts;
+                    row.getCell(5).value = employee.eshc;
+                    row.getCell(6).value = employee.name;
+                    
+                    // Style employee info
+                    [4, 5, 6].forEach(col => {
+                        const cell = row.getCell(col);
+                        cell.font = { bold: col === 6 }; // Bold name only
+                        cell.alignment = { horizontal: col === 6 ? 'left' : 'center', vertical: 'middle' };
+                        cell.border = {
+                            top: { style: 'thin' }, bottom: { style: 'thin' },
+                            left: { style: 'thin' }, right: { style: 'thin' }
+                        };
+                    });
+                    
+                    // Daily assignments with color coding
                     for (let i = 0; i < totalDays && i < 31; i++) {
                         const currentDate = new Date(start);
                         currentDate.setDate(start.getDate() + i);
                         const dateStr = currentDate.toISOString().split('T')[0];
                         
-                        // Get assignment from the latest generated schedule
-                        // This will use the AI-generated data if available, otherwise fall back to real data
+                        // Get assignment from AI-generated schedule or fall back to real data
                         const daySchedule = lastGeneratedSchedule && lastGeneratedSchedule[dateStr] 
                             ? lastGeneratedSchedule[dateStr] 
                             : realAugust2025Schedule[dateStr] || {};
@@ -2682,92 +2824,133 @@
                             assignment = 'Leave';
                         }
                         
-                        empRow.push(assignment);
+                        const cell = row.getCell(7 + i);
+                        cell.value = assignment;
+                        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        cell.font = { bold: assignment !== 'OFF', size: 10 };
+                        
+                        // Color coding based on assignment
+                        if (assignment === 'Leave') {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCC' } }; // Light red
+                            cell.font = { ...cell.font, color: { argb: 'FFCC0000' } };
+                        } else if (assignment === 'OFF') {
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } }; // Light gray
+                        } else {
+                            // WFO highlighting - GREEN for work assignments!
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF90EE90' } }; // Light green
+                            cell.font = { ...cell.font, color: { argb: 'FF006400' } }; // Dark green text
+                        }
+                        
+                        cell.border = {
+                            top: { style: 'thin' }, bottom: { style: 'thin' },
+                            left: { style: 'thin' }, right: { style: 'thin' }
+                        };
                     }
                     
-                    // Fill remaining columns
-                    while (empRow.length < 35) empRow.push('OFF');
-                    rosterData.push(empRow);
+                    currentRow++;
                 });
                 
                 // Add summary rows for shift counts
-                const s1CountRow = ['', '', '', '', '', 'S1'];
-                const s2CountRow = ['', '', '', '', '', 'S2'];
-                const s3CountRow = ['', '', '', '', '', 'S3'];
+                currentRow += 1; // Add space
                 
-                for (let i = 0; i < totalDays && i < 31; i++) {
-                    const currentDate = new Date(start);
-                    currentDate.setDate(start.getDate() + i);
-                    const dateStr = currentDate.toISOString().split('T')[0];
+                ['S1', 'S2', 'S3'].forEach(shiftType => {
+                    const row = worksheet.getRow(currentRow);
+                    row.getCell(6).value = shiftType;
+                    row.getCell(6).font = { bold: true };
+                    row.getCell(6).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEB9C' } };
                     
-                    const daySchedule = lastGeneratedSchedule && lastGeneratedSchedule[dateStr] 
-                        ? lastGeneratedSchedule[dateStr] 
-                        : realAugust2025Schedule[dateStr] || {};
-                    
-                    const s1Count = (daySchedule.S1 || []).length;
-                    const s2Count = (daySchedule.S2 || []).length;
-                    const s3Count = (daySchedule.S3 || []).length;
-                    
-                    s1CountRow.push(s1Count);
-                    s2CountRow.push(s2Count);
-                    s3CountRow.push(s3Count);
-                }
-                
-                // Fill remaining columns
-                while (s1CountRow.length < 35) s1CountRow.push(0);
-                while (s2CountRow.length < 35) s2CountRow.push(0);
-                while (s3CountRow.length < 35) s3CountRow.push(0);
-                
-                rosterData.push(s1CountRow);
-                rosterData.push(s2CountRow);
-                rosterData.push(s3CountRow);
-                
-                // Add empty rows
-                rosterData.push(new Array(35).fill(''));
-                rosterData.push(new Array(35).fill(''));
+                    for (let i = 0; i < totalDays && i < 31; i++) {
+                        const currentDate = new Date(start);
+                        currentDate.setDate(start.getDate() + i);
+                        const dateStr = currentDate.toISOString().split('T')[0];
+                        
+                        const daySchedule = lastGeneratedSchedule && lastGeneratedSchedule[dateStr] 
+                            ? lastGeneratedSchedule[dateStr] 
+                            : realAugust2025Schedule[dateStr] || {};
+                        
+                        const count = (daySchedule[shiftType] || []).length;
+                        
+                        const cell = row.getCell(7 + i);
+                        cell.value = count;
+                        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                        cell.font = { bold: true };
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEB9C' } };
+                        cell.border = {
+                            top: { style: 'thin' }, bottom: { style: 'thin' },
+                            left: { style: 'thin' }, right: { style: 'thin' }
+                        };
+                    }
+                    currentRow++;
+                });
                 
                 // Add shift timing legend
-                rosterData.push(['', 'S1', '06:00 AM TO 04:00 PM IST']);
-                rosterData.push(['', 'S2', '01:00 PM TO 11:00 PM IST']);
-                rosterData.push(['', 'S3', '10:00 PM TO 08:00 AM IST']);
-                rosterData.push(['', 'S4', '12:30 PM TO 10:30 PM IST']);
-                rosterData.push(['', 'G', '09:00 AM TO 07:00 PM IST']);
-                rosterData.push(['', 'P', '06:30 PM TO 04:30 AM IST']);
-                rosterData.push(['', 'HIH', '11:30 AM TO 08:30 PM IST']);
-                
-                // Add empty row
-                rosterData.push(new Array(35).fill(''));
-                
-                // Add team structure
-                rosterData.push(['LeadS']);
-                rosterData.push(['593300', 'EH0647', 'Dinesh Anbalagan']);
-                rosterData.push(['560008', 'EG4208', 'Mano']);
-                rosterData.push(['Shift Leads']);
-                rosterData.push(['410093', 'EH6832', 'Jeyakaran']);
-                rosterData.push(['2167353', 'C7H8KH', 'Karthikeyan']);
-                rosterData.push(['2054459', 'C6X8FS', 'Panner']);
-                rosterData.push(['2240608', 'C7T7SF', 'Sai Kumar']);
-                rosterData.push(['2136623', 'C8G3CW', 'Manoj']);
-                
-                // Create worksheet
-                const ws = XLSX.utils.aoa_to_sheet(rosterData);
-                
-                // Set column widths for better formatting
-                ws['!cols'] = [
-                    { width: 8 }, { width: 8 }, { width: 8 }, { width: 10 }, 
-                    { width: 8 }, { width: 15 }, // CTS, ESHC, Name columns
-                    ...new Array(31).fill({ width: 7 }) // Date columns
+                currentRow += 2;
+                const legendData = [
+                    ['S1', '06:00 AM TO 04:00 PM IST'],
+                    ['S2', '01:00 PM TO 11:00 PM IST'],
+                    ['S3', '10:00 PM TO 08:00 AM IST'],
+                    ['S4', '12:30 PM TO 10:30 PM IST'],
+                    ['G', '09:00 AM TO 07:00 PM IST'],
+                    ['P', '06:30 PM TO 04:30 AM IST'],
+                    ['HIH', '11:30 AM TO 08:30 PM IST']
                 ];
                 
-                // Add the worksheet to workbook
-                XLSX.utils.book_append_sheet(wb, ws, 'AI Generated Roster');
+                legendData.forEach(([shift, time]) => {
+                    const row = worksheet.getRow(currentRow);
+                    row.getCell(2).value = shift;
+                    row.getCell(3).value = time;
+                    
+                    row.getCell(2).font = { bold: true };
+                    row.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9EAD3' } };
+                    currentRow++;
+                });
                 
-                // Export the file with AI-generated naming
-                const fileName = `AI_Generated_Roster_${startDate}_to_${endDate}.xlsx`;
-                XLSX.writeFile(wb, fileName);
+                // Add team structure
+                currentRow += 2;
+                const teamData = [
+                    ['LeadS'],
+                    ['593300', 'EH0647', 'Dinesh Anbalagan'],
+                    ['560008', 'EG4208', 'Mano'],
+                    ['Shift Leads'],
+                    ['410093', 'EH6832', 'Jeyakaran'],
+                    ['2167353', 'C7H8KH', 'Karthikeyan'],
+                    ['2054459', 'C6X8FS', 'Panner'],
+                    ['2240608', 'C7T7SF', 'Sai Kumar'],
+                    ['2136623', 'C8G3CW', 'Manoj']
+                ];
+                
+                teamData.forEach(rowData => {
+                    const row = worksheet.getRow(currentRow);
+                    rowData.forEach((value, colIndex) => {
+                        const cell = row.getCell(colIndex + 1);
+                        cell.value = value;
+                        if (rowData.length === 1) { // Headers
+                            cell.font = { bold: true };
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFCCCCCC' } };
+                        }
+                    });
+                    currentRow++;
+                });
+                
+                // Set column widths
+                worksheet.getColumn(4).width = 10; // CTS
+                worksheet.getColumn(5).width = 8;  // ESHC
+                worksheet.getColumn(6).width = 15; // Name
+                for (let i = 7; i <= 37; i++) {
+                    worksheet.getColumn(i).width = 7; // Date columns
+                }
+                
+                // Generate and download the file
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                });
+                
+                const fileName = `AI_Generated_Roster_${startDate}_to_${endDate}_WITH_COLORS.xlsx`;
+                saveAs(blob, fileName);
                 
                 // Show success message
-                alert(`🤖 AI-Generated Roster exported successfully!\n\nFile: ${fileName}\n\nFormat: SharePoint Compatible\n📊 Includes: AI-optimized shifts, leaves, counts\n🎨 Ready for WFO highlighting in Excel\n✨ Generated using your custom rules!`);
+                alert(`🤖 AI-Generated Roster exported with FULL FORMATTING!\n\nFile: ${fileName}\n\n✅ Features:\n🟢 GREEN highlighting for WFO assignments\n� RED highlighting for leaves\n⚪ GRAY for OFF days\n📊 Professional borders and fonts\n🎯 Generated using your custom rules!\n✨ Ready for SharePoint!`);
                 
             } catch (error) {
                 console.error('Export error:', error);

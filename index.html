@@ -2539,27 +2539,7 @@ Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules
             };
             reader.readAsArrayBuffer(file);
         }
-                    
-                    // AI learns from the data and generates insights
-                    setTimeout(() => {
-                        trainingData.insights = generateAIInsights(trainingData);
-                        
-                        // Store AI learning in browser for future use
-                        Storage.set('aiTrainingData', trainingData);
-                        Storage.set('aiLastTrained', new Date().toISOString());
-                    // Remove training indicator and show results
-                    trainingIndicator.remove();
-                    showAITrainingResults(trainingData, aiRules);
-                    
-                } catch (error) {
-                    console.error('AI Training error:', error);
-                    trainingIndicator.remove();
-                    alert(`🧠 AI Training encountered an error: ${error.message}\n\nPlease check the Excel file format or try again.`);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-        
+
         // Generate AI insights from training data
         function generateAIInsights(data) {
             const insights = [];
@@ -2682,35 +2662,7 @@ Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules
             modal.appendChild(content);
             document.body.appendChild(modal);
         }
-                    <ul style="margin-left: 20px;">
-                        ${data.insights.map(insight => `<li>${insight}</li>`).join('')}
-                    </ul>
-                </div>
-                <div style="text-align: center;">
-                    <button onclick="this.closest('.ai-modal').remove()" style="
-                        background: linear-gradient(135deg, #8b5fbf, #a374d0);
-                        color: white;
-                        border: none;
-                        padding: 10px 20px;
-                        border-radius: 20px;
-                        cursor: pointer;
-                        font-weight: bold;
-                    ">Got it! 🚀</button>
-                </div>
-            `;
-            
-            modal.className = 'ai-modal';
-            modal.appendChild(content);
-            document.body.appendChild(modal);
-            
-            // Auto-close after 10 seconds
-            setTimeout(() => {
-                if (document.body.contains(modal)) {
-                    modal.remove();
-                }
-            }, 10000);
-        }
-        
+
         // Apply AI learning to current data
         function applyAILearning(data) {
             // This function would apply learned patterns to improve scheduling

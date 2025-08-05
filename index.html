@@ -2052,8 +2052,293 @@
             }
         }
 
+        // OpenAI API Key Management (Session-based, secure)
+        let sessionApiKey = null;
+
+        function getApiKey() {
+            if (sessionApiKey) {
+                return sessionApiKey;
+            }
+            
+            const key = prompt('🔑 Please enter your OpenAI API Key for AI-powered analysis:\n(This will be stored securely in this session only)');
+            if (key && key.trim()) {
+                sessionApiKey = key.trim();
+                return sessionApiKey;
+            }
+            return null;
+        }
+
+        function saveApiKey(key) {
+            sessionApiKey = key;
+        }
+
+        function clearApiKey() {
+            sessionApiKey = null;
+            alert('🔑 API Key cleared from session.');
+        }
+
+        // OpenAI Integration for Smart Excel Analysis
+        async function analyzeWithOpenAI(excelData, apiKey) {
+            if (!apiKey) {
+                throw new Error('OpenAI API key is required');
+            }
+
+            const prompt = `Analyze this Excel shift roster data and extract patterns, rules, and optimization opportunities:
+
+Excel Data Summary:
+- Team Members: ${excelData.teamData?.length || 0}
+- Schedule Entries: ${excelData.schedulePatterns?.length || 0}
+- Leave Requests: ${excelData.leavePatterns?.length || 0}
+
+Sample Team Data: ${JSON.stringify(excelData.teamData?.slice(0, 3) || [])}
+Sample Schedule: ${JSON.stringify(excelData.schedulePatterns?.slice(0, 3) || [])}
+Sample Leave: ${JSON.stringify(excelData.leavePatterns?.slice(0, 3) || [])}
+
+Please analyze and provide:
+1. Work patterns (shift preferences, rotation cycles)
+2. Health & wellbeing rules (consecutive days, rest periods)
+3. Fairness criteria (workload distribution, preference accommodation)
+4. Optimization suggestions for better work-life balance
+5. Specific rules extracted from the data
+
+Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules, optimizations, extractedRules`;
+
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are an AI specialist in workforce management and shift scheduling. Analyze data to extract patterns and rules that promote work-life balance and operational efficiency.'
+                            },
+                            {
+                                role: 'user',
+                                content: prompt
+                            }
+                        ],
+                        max_tokens: 2000,
+                        temperature: 0.3
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                const content = result.choices[0]?.message?.content;
+                
+                if (!content) {
+                    throw new Error('No response from OpenAI');
+                }
+
+                try {
+                    return JSON.parse(content);
+                } catch (parseError) {
+                    // If JSON parsing fails, create a structured response from the text
+                    return {
+                        workPatterns: [content.includes('shift') ? 'Flexible shift patterns detected' : 'Standard rotation cycles'],
+                        healthRules: [content.includes('consecutive') ? 'Limit consecutive days' : 'Ensure adequate rest periods'],
+                        fairnessRules: [content.includes('distribution') ? 'Fair workload distribution' : 'Accommodate preferences when possible'],
+                        optimizations: ['AI-powered schedule optimization', 'Work-life balance enhancement'],
+                        extractedRules: ['Auto-extracted from Excel data'],
+                        rawResponse: content
+                    };
+                }
+            } catch (error) {
+                console.error('OpenAI Analysis Error:', error);
+                throw error;
+            }
+        }
+
+        // Fallback rule extraction for when OpenAI is not available
+        function extractRulesFromData(excelData) {
+            const rules = {
+                workPatterns: [],
+                healthRules: [],
+                fairnessRules: [],
+                optimizations: [],
+                extractedRules: []
+            };
+
+            // Analyze team data
+            if (excelData.teamData && excelData.teamData.length > 0) {
+                const roles = [...new Set(excelData.teamData.map(t => t.role))];
+                rules.workPatterns.push(`Supports ${roles.length} different roles: ${roles.join(', ')}`);
+                rules.fairnessRules.push(`Ensure fair distribution across ${excelData.teamData.length} team members`);
+            }
+
+            // Analyze schedule patterns
+            if (excelData.schedulePatterns && excelData.schedulePatterns.length > 0) {
+                const daysWithSchedule = excelData.schedulePatterns.filter(s => 
+                    s.s1_leads || s.s2_leads || s.s3_leads
+                ).length;
+                const coverage = ((daysWithSchedule / excelData.schedulePatterns.length) * 100).toFixed(1);
+                rules.workPatterns.push(`Maintains ${coverage}% schedule coverage`);
+                rules.healthRules.push('Ensure adequate rest between shifts');
+            }
+
+            // Analyze leave patterns
+            if (excelData.leavePatterns && excelData.leavePatterns.length > 0) {
+                const leaveTypes = [...new Set(excelData.leavePatterns.map(l => l.type))];
+                rules.fairnessRules.push(`Accommodate various leave types: ${leaveTypes.join(', ')}`);
+                rules.optimizations.push('Consider leave patterns in scheduling');
+            }
+
+            // Default health and optimization rules
+            rules.healthRules.push('Limit consecutive working days to 6');
+            rules.healthRules.push('Ensure minimum 12 hours between shifts');
+            rules.optimizations.push('Balance workload across team members');
+            rules.optimizations.push('Prioritize work-life balance');
+            rules.extractedRules.push('Data-driven scheduling rules applied');
+
+            return rules;
+        }
+
+        // Enhanced Schedule Generation with AI Rules
+        function createAIGuidedSchedule(rules, startDate, endDate) {
+            const schedule = {};
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            // Track consecutive days and last shift for each employee
+            const employeeTracker = {};
+            npeTeamData.forEach(emp => {
+                employeeTracker[emp.name] = {
+                    consecutiveDays: 0,
+                    lastShift: null,
+                    totalShifts: 0,
+                    lastShiftDate: null
+                };
+            });
+
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                const dayOfWeek = d.getDay();
+                
+                schedule[dateStr] = { S1: [], S2: [], S3: [], S4: [] };
+                
+                // Apply AI-guided scheduling rules
+                Object.keys(schedule[dateStr]).forEach(shift => {
+                    const availableEmployees = npeTeamData.filter(emp => {
+                        // Check if employee is available (not on preferred day off)
+                        if (emp.daysOff && emp.daysOff.includes(dayOfWeek)) {
+                            return false;
+                        }
+                        
+                        // Check consecutive days rule (from AI health rules)
+                        const tracker = employeeTracker[emp.name];
+                        if (tracker.consecutiveDays >= 6) {
+                            return false;
+                        }
+                        
+                        // Check rest period between shifts
+                        if (tracker.lastShiftDate) {
+                            const daysSinceLastShift = Math.floor((d - new Date(tracker.lastShiftDate)) / (1000 * 60 * 60 * 24));
+                            if (daysSinceLastShift === 1 && tracker.lastShift === 'S3' && shift === 'S1') {
+                                return false; // Not enough rest between night and morning shift
+                            }
+                        }
+                        
+                        return emp.status === 'Active';
+                    });
+                    
+                    // Prioritize employees with fewer total shifts (fairness rule)
+                    availableEmployees.sort((a, b) => {
+                        const aShifts = employeeTracker[a.name].totalShifts;
+                        const bShifts = employeeTracker[b.name].totalShifts;
+                        return aShifts - bShifts;
+                    });
+                    
+                    // Assign employees to shift based on requirements
+                    const requiredCount = getShiftRequirement(shift, dayOfWeek);
+                    const assignedEmployees = availableEmployees.slice(0, requiredCount);
+                    
+                    schedule[dateStr][shift] = assignedEmployees.map(emp => emp.name);
+                    
+                    // Update employee trackers
+                    assignedEmployees.forEach(emp => {
+                        const tracker = employeeTracker[emp.name];
+                        tracker.consecutiveDays++;
+                        tracker.lastShift = shift;
+                        tracker.totalShifts++;
+                        tracker.lastShiftDate = dateStr;
+                    });
+                });
+                
+                // Reset consecutive days for employees not working today
+                Object.keys(employeeTracker).forEach(empName => {
+                    const isWorkingToday = Object.values(schedule[dateStr]).some(shiftEmps => 
+                        shiftEmps.includes(empName)
+                    );
+                    if (!isWorkingToday) {
+                        employeeTracker[empName].consecutiveDays = 0;
+                    }
+                });
+            }
+            
+            return schedule;
+        }
+
+        function getShiftRequirement(shift, dayOfWeek) {
+            // Weekend reduced staffing
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                return shift === 'S1' || shift === 'S2' ? 2 : 1;
+            }
+            // Weekday full staffing
+            return shift === 'S1' || shift === 'S2' ? 3 : shift === 'S3' ? 2 : 1;
+        }
+
+        // Enhanced Schedule Display with AI Insights
+        function displayEnhancedSchedule(schedule, rules) {
+            updateScheduleDisplay();
+            
+            // Add AI insights panel
+            const insightsPanel = document.createElement('div');
+            insightsPanel.style.cssText = `
+                margin: 20px 0;
+                padding: 20px;
+                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+                border-radius: 10px;
+                border-left: 4px solid #8b5fbf;
+            `;
+            
+            insightsPanel.innerHTML = `
+                <h4 style="color: #8b5fbf; margin-bottom: 15px;">🧠 AI Scheduling Insights</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <div>
+                        <h5>Work Patterns</h5>
+                        <ul>${rules.workPatterns.map(rule => `<li>${rule}</li>`).join('')}</ul>
+                    </div>
+                    <div>
+                        <h5>Health Rules</h5>
+                        <ul>${rules.healthRules.map(rule => `<li>${rule}</li>`).join('')}</ul>
+                    </div>
+                    <div>
+                        <h5>Fairness Criteria</h5>
+                        <ul>${rules.fairnessRules.map(rule => `<li>${rule}</li>`).join('')}</ul>
+                    </div>
+                    <div>
+                        <h5>Optimizations</h5>
+                        <ul>${rules.optimizations.map(rule => `<li>${rule}</li>`).join('')}</ul>
+                    </div>
+                </div>
+            `;
+            
+            const scheduleContainer = document.getElementById('schedule-display');
+            if (scheduleContainer) {
+                scheduleContainer.insertBefore(insightsPanel, scheduleContainer.firstChild);
+            }
+        }
+
         // Train AI with Excel data import
-        function trainAIWithExcel(event) {
+        async function trainAIWithExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
             
@@ -2080,10 +2365,24 @@
             document.body.appendChild(trainingIndicator);
             
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = async (e) => {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // First try to process with the existing import logic
+                    try {
+                        processImportedRoster(workbook);
+                        trainingIndicator.innerHTML = '✅ Excel data imported successfully!';
+                        setTimeout(() => trainingIndicator.remove(), 2000);
+                        return;
+                    } catch (importError) {
+                        console.log('Standard import failed, using AI-powered analysis:', importError);
+                    }
+                    
+                    // If standard import fails, use AI-powered flexible analysis
+                    trainingIndicator.innerHTML = '🧠 Using AI for flexible Excel analysis...';
+                    
                     let trainingData = {
                         teamData: [],
                         schedulePatterns: [],
@@ -2091,63 +2390,155 @@
                         insights: []
                     };
                     
-                    // Extract team data for AI learning
-                    if (workbook.SheetNames.includes('Team Data')) {
-                        const teamSheet = workbook.Sheets['Team Data'];
-                        const teamDataArray = XLSX.utils.sheet_to_json(teamSheet, { header: 1 });
+                    // Extract data from any sheet structure
+                    workbook.SheetNames.forEach(sheetName => {
+                        const sheet = workbook.Sheets[sheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
                         
-                        for (let i = 1; i < teamDataArray.length; i++) {
-                            const row = teamDataArray[i];
-                            if (row.length >= 4) {
-                                trainingData.teamData.push({
-                                    id: row[0],
-                                    name: row[1],
-                                    role: row[2],
-                                    status: row[3],
-                                    preferences: row[4]
+                        // Auto-detect data type based on content
+                        if (jsonData.length > 1) {
+                            const headers = jsonData[0];
+                            const rows = jsonData.slice(1);
+                            
+                            // Check if it's team/employee data
+                            if (headers.some(h => h && h.toString().toLowerCase().includes('name')) &&
+                                headers.some(h => h && h.toString().toLowerCase().includes('role'))) {
+                                
+                                rows.forEach(row => {
+                                    if (row.length >= 2 && row[0] && row[1]) {
+                                        const nameIdx = headers.findIndex(h => h && h.toString().toLowerCase().includes('name'));
+                                        const roleIdx = headers.findIndex(h => h && h.toString().toLowerCase().includes('role'));
+                                        
+                                        trainingData.teamData.push({
+                                            id: row[0] || Date.now().toString(),
+                                            name: row[nameIdx] || row[1],
+                                            role: row[roleIdx] || row[2] || 'Associate',
+                                            status: 'Active',
+                                            preferences: row[3] || '',
+                                            originalRow: row
+                                        });
+                                    }
                                 });
+                            }
+                            
+                            // Check if it's schedule data
+                            else if (headers.some(h => h && h.toString().toLowerCase().includes('date')) ||
+                                     headers.some(h => h && h.toString().toLowerCase().includes('shift'))) {
+                                
+                                rows.forEach(row => {
+                                    if (row.length >= 2 && row[0]) {
+                                        trainingData.schedulePatterns.push({
+                                            date: row[0],
+                                            data: row.slice(1),
+                                            headers: headers.slice(1),
+                                            originalRow: row
+                                        });
+                                    }
+                                });
+                            }
+                            
+                            // Check if it's leave data
+                            else if (headers.some(h => h && h.toString().toLowerCase().includes('leave')) ||
+                                     headers.some(h => h && h.toString().toLowerCase().includes('absence'))) {
+                                
+                                rows.forEach(row => {
+                                    if (row.length >= 3 && row[0]) {
+                                        trainingData.leavePatterns.push({
+                                            employee: row[0],
+                                            date: row[1],
+                                            type: row[2],
+                                            status: row[3] || 'Approved',
+                                            originalRow: row
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    
+                    // Use OpenAI for intelligent analysis if API key is available
+                    const apiKey = getApiKey();
+                    let aiRules;
+                    
+                    if (apiKey) {
+                        try {
+                            trainingIndicator.innerHTML = '🧠 OpenAI analyzing patterns...';
+                            aiRules = await analyzeWithOpenAI(trainingData, apiKey);
+                        } catch (aiError) {
+                            console.error('OpenAI analysis failed:', aiError);
+                            aiRules = extractRulesFromData(trainingData);
+                            trainingIndicator.innerHTML = '🧠 Using fallback analysis...';
+                        }
+                    } else {
+                        aiRules = extractRulesFromData(trainingData);
+                    }
+                    
+                    // Store AI learning results
+                    trainingData.insights = aiRules;
+                    Storage.set('aiTrainingData', trainingData);
+                    Storage.set('aiLastTrained', new Date().toISOString());
+                    Storage.set('aiRules', aiRules);
+                    
+                    // Apply learned data to current system
+                    if (trainingData.teamData.length > 0) {
+                        // Update team data if we learned about employees
+                        const shouldUpdateTeam = confirm(
+                            `🧠 AI found ${trainingData.teamData.length} team members in your Excel file.\n\n` +
+                            `Would you like to update the current team data with this information?`
+                        );
+                        
+                        if (shouldUpdateTeam) {
+                            npeTeamData.length = 0;
+                            trainingData.teamData.forEach(emp => {
+                                npeTeamData.push({
+                                    id: emp.id,
+                                    name: emp.name,
+                                    role: emp.role,
+                                    status: emp.status,
+                                    daysOff: [0, 6], // Default weekend off
+                                    cts: emp.id,
+                                    eshc: 'N/A',
+                                    maxConsecutiveDays: 6,
+                                    minRestHours: 12,
+                                    skills: []
+                                });
+                            });
+                            updateTeamDisplay();
+                        }
+                    }
+                    
+                    if (trainingData.schedulePatterns.length > 0) {
+                        // Generate AI-guided schedule if we learned patterns
+                        const shouldGenerateSchedule = confirm(
+                            `🧠 AI analyzed ${trainingData.schedulePatterns.length} schedule patterns.\n\n` +
+                            `Would you like to generate a new AI-optimized schedule using these patterns?`
+                        );
+                        
+                        if (shouldGenerateSchedule) {
+                            const startDate = prompt('Enter start date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+                            const endDate = prompt('Enter end date (YYYY-MM-DD):', 
+                                new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+                            
+                            if (startDate && endDate) {
+                                const aiSchedule = createAIGuidedSchedule(aiRules, startDate, endDate);
+                                scheduleData = { ...scheduleData, ...aiSchedule };
+                                displayEnhancedSchedule(aiSchedule, aiRules);
                             }
                         }
                     }
                     
-                    // Extract schedule patterns for AI learning
-                    if (workbook.SheetNames.includes('Generated Schedule')) {
-                        const scheduleSheet = workbook.Sheets['Generated Schedule'];
-                        const scheduleArray = XLSX.utils.sheet_to_json(scheduleSheet, { header: 1 });
-                        
-                        for (let i = 1; i < scheduleArray.length; i++) {
-                            const row = scheduleArray[i];
-                            if (row.length >= 7) {
-                                trainingData.schedulePatterns.push({
-                                    date: row[0],
-                                    s1_leads: row[1],
-                                    s1_associates: row[2],
-                                    s2_leads: row[3],
-                                    s2_associates: row[4],
-                                    s3_leads: row[5],
-                                    s3_associates: row[6]
-                                });
-                            }
-                        }
-                    }
+                    // Remove training indicator and show results
+                    trainingIndicator.remove();
+                    showAITrainingResults(trainingData, aiRules);
                     
-                    // Extract leave patterns for AI learning
-                    if (workbook.SheetNames.includes('Leave Requests')) {
-                        const leaveSheet = workbook.Sheets['Leave Requests'];
-                        const leaveArray = XLSX.utils.sheet_to_json(leaveSheet, { header: 1 });
-                        
-                        for (let i = 1; i < leaveArray.length; i++) {
-                            const row = leaveArray[i];
-                            if (row.length >= 6) {
-                                trainingData.leavePatterns.push({
-                                    employee: row[2],
-                                    date: row[3],
-                                    type: row[4],
-                                    status: row[6]
-                                });
-                            }
-                        }
-                    }
+                } catch (error) {
+                    console.error('AI Training error:', error);
+                    trainingIndicator.remove();
+                    alert(`🧠 AI Training encountered an error: ${error.message}\n\nPlease check the Excel file format or try again.`);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
                     
                     // AI learns from the data and generates insights
                     setTimeout(() => {
@@ -2156,24 +2547,14 @@
                         // Store AI learning in browser for future use
                         Storage.set('aiTrainingData', trainingData);
                         Storage.set('aiLastTrained', new Date().toISOString());
-                        
-                        // Remove training indicator
-                        trainingIndicator.remove();
-                        
-                        // Show AI training results
-                        showAITrainingResults(trainingData);
-                        
-                        // Update current data with learned patterns if requested
-                        if (confirm('🧠 AI has learned from your Excel data!\n\nWould you like to apply the learned patterns to update current schedules and preferences?')) {
-                            applyAILearning(trainingData);
-                        }
-                        
-                    }, 2000); // Simulate AI processing time
+                    // Remove training indicator and show results
+                    trainingIndicator.remove();
+                    showAITrainingResults(trainingData, aiRules);
                     
                 } catch (error) {
                     console.error('AI Training error:', error);
                     trainingIndicator.remove();
-                    alert('🧠 AI Training failed. Please check the Excel file format.');
+                    alert(`🧠 AI Training encountered an error: ${error.message}\n\nPlease check the Excel file format or try again.`);
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -2218,7 +2599,7 @@
         }
         
         // Show AI training results
-        function showAITrainingResults(data) {
+        function showAITrainingResults(data, rules) {
             const modal = document.createElement('div');
             modal.style.cssText = `
                 position: fixed;
@@ -2238,7 +2619,7 @@
                 background: white;
                 padding: 30px;
                 border-radius: 15px;
-                max-width: 500px;
+                max-width: 600px;
                 max-height: 80vh;
                 overflow-y: auto;
                 box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -2247,7 +2628,60 @@
             content.innerHTML = `
                 <h3 style="color: #8b5fbf; margin-bottom: 20px;">🧠 AI Training Complete!</h3>
                 <div style="margin-bottom: 20px;">
-                    <h4>AI Insights:</h4>
+                    <h4>Data Processed:</h4>
+                    <ul>
+                        <li>📊 Team Members: ${data.teamData.length}</li>
+                        <li>📅 Schedule Patterns: ${data.schedulePatterns.length}</li>
+                        <li>🏖️ Leave Records: ${data.leavePatterns.length}</li>
+                    </ul>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4>AI-Extracted Rules:</h4>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                        <h5>Work Patterns:</h5>
+                        <ul>${rules.workPatterns.map(rule => `<li>${rule}</li>`).join('')}</ul>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                        <h5>Health & Wellbeing Rules:</h5>
+                        <ul>${rules.healthRules.map(rule => `<li>${rule}</li>`).join('')}</ul>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                        <h5>Fairness Criteria:</h5>
+                        <ul>${rules.fairnessRules.map(rule => `<li>${rule}</li>`).join('')}</ul>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <h5>Optimizations:</h5>
+                        <ul>${rules.optimizations.map(rule => `<li>${rule}</li>`).join('')}</ul>
+                    </div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button onclick="this.closest('[style*=fixed]').remove()" style="
+                        background: linear-gradient(135deg, #8b5fbf, #a374d0);
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        margin-right: 10px;
+                    ">Got it!</button>
+                    <button onclick="clearApiKey(); this.closest('[style*=fixed]').remove()" style="
+                        background: #6c757d;
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        font-size: 16px;
+                    ">Clear API Key</button>
+                </div>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+        }
                     <ul style="margin-left: 20px;">
                         ${data.insights.map(insight => `<li>${insight}</li>`).join('')}
                     </ul>

@@ -1820,22 +1820,22 @@
         stopActivityFeed();
     }
 
-    // Hide all tab contents
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
 
-    // Remove active class from all tabs
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
+    // Hide all tab contents and remove active from all tabs
+    const tabContents = document.querySelectorAll('.tab-content');
+    const tabButtons = document.querySelectorAll('.tab');
+    tabContents.forEach(content => content.classList.remove('active'));
+    tabButtons.forEach(tab => tab.classList.remove('active'));
 
     // Show selected tab content
-    document.getElementById(tabName).classList.add('active');
+    const selectedContent = document.getElementById(tabName);
+    if (selectedContent) {
+        selectedContent.classList.add('active');
+    }
 
-    // Add active class to the correct tab
-    // Find the tab button that matches tabName and activate it
-    document.querySelectorAll('.tab').forEach(tab => {
+    // Activate the correct tab button
+    tabButtons.forEach(tab => {
+        // Use innerText or textContent to match tabName
         if (tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(`showTab('${tabName}')`)) {
             tab.classList.add('active');
         }

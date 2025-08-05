@@ -2578,16 +2578,27 @@
                         cell.alignment = { horizontal: 'center', vertical: 'middle' };
                         cell.font = { bold: assignment !== 'OFF', size: 10 };
                         
-                        // Color coding based on assignment
+                        // Color coding based on assignment and WFO policy
                         if (assignment === 'Leave') {
                             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCC' } }; // Light red
                             cell.font = { ...cell.font, color: { argb: 'FFCC0000' } };
                         } else if (assignment === 'OFF') {
                             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } }; // Light gray
                         } else {
-                            // WFO highlighting - GREEN for work assignments!
-                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF90EE90' } }; // Light green
-                            cell.font = { ...cell.font, color: { argb: 'FF006400' } }; // Dark green text
+                            // Check if it's weekend (Saturday = 6, Sunday = 0)
+                            const currentDate = new Date(2025, 7, day);
+                            const dayOfWeek = currentDate.getDay();
+                            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+                            
+                            if (isWeekend) {
+                                // Weekend work = WFH (Blue highlighting)
+                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFADD8E6' } }; // Light blue
+                                cell.font = { ...cell.font, color: { argb: 'FF000080' } }; // Dark blue text
+                            } else {
+                                // Weekday work = WFO (Green highlighting) - max 3 days per week
+                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF90EE90' } }; // Light green
+                                cell.font = { ...cell.font, color: { argb: 'FF006400' } }; // Dark green text
+                            }
                         }
                         
                         cell.border = {
@@ -2829,16 +2840,28 @@
                         cell.alignment = { horizontal: 'center', vertical: 'middle' };
                         cell.font = { bold: assignment !== 'OFF', size: 10 };
                         
-                        // Color coding based on assignment
+                        // Color coding based on assignment and WFO policy
                         if (assignment === 'Leave') {
                             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCC' } }; // Light red
                             cell.font = { ...cell.font, color: { argb: 'FFCC0000' } };
                         } else if (assignment === 'OFF') {
                             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } }; // Light gray
                         } else {
-                            // WFO highlighting - GREEN for work assignments!
-                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF90EE90' } }; // Light green
-                            cell.font = { ...cell.font, color: { argb: 'FF006400' } }; // Dark green text
+                            // Check if it's weekend (Saturday = 6, Sunday = 0)
+                            const currentDate = new Date(start);
+                            currentDate.setDate(start.getDate() + i);
+                            const dayOfWeek = currentDate.getDay();
+                            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
+                            
+                            if (isWeekend) {
+                                // Weekend work = WFH (Blue highlighting)
+                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFADD8E6' } }; // Light blue
+                                cell.font = { ...cell.font, color: { argb: 'FF000080' } }; // Dark blue text
+                            } else {
+                                // Weekday work = WFO (Green highlighting) - max 3 days per week
+                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF90EE90' } }; // Light green
+                                cell.font = { ...cell.font, color: { argb: 'FF006400' } }; // Dark green text
+                            }
                         }
                         
                         cell.border = {

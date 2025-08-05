@@ -2464,34 +2464,319 @@
             output.innerHTML = html;
         }
 
-        // Download Schedule as Excel
+        // Download Schedule as Excel in SharePoint Format
         function downloadSchedule() {
-            if (!scheduleData) {
-                alert('Please generate a schedule first!');
-                return;
-            }
-            
-            // Create Excel workbook
+            // Create Excel workbook with SharePoint format
             const wb = XLSX.utils.book_new();
-            const wsData = [['Date', 'S1 Leads', 'S1 Associates', 'S2 Leads', 'S2 Associates', 'S3 Leads', 'S3 Associates']];
             
-            Object.keys(scheduleData).forEach(date => {
-                const daySchedule = scheduleData[date];
-                const row = [date];
+            // Create the roster data in exact SharePoint format
+            const rosterData = [];
+            
+            // Row 1: Header with QA&DOD, UAT sections
+            const row1 = ['', '', '', '', '', '', '', 'QA&DOD', 'UAT'];
+            for (let i = 9; i < 35; i++) row1.push(''); // Fill remaining columns
+            rosterData.push(row1);
+            
+            // Row 2: Empty row
+            rosterData.push(new Array(35).fill(''));
+            
+            // Row 3: Date headers
+            const dateRow = ['', '', '', 'Date/Month/Year', '', ''];
+            for (let day = 1; day <= 31; day++) {
+                const formattedDate = String(day).padStart(2, '0') + '-Aug-25';
+                dateRow.push(formattedDate);
+            }
+            rosterData.push(dateRow);
+            
+            // Row 4: Day names and column headers
+            const dayRow = ['', '', '', 'CTS', 'ESHC', 'Name'];
+            for (let day = 1; day <= 31; day++) {
+                const date = new Date(2025, 7, day); // August 2025
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+                dayRow.push(dayName);
+            }
+            rosterData.push(dayRow);
+            
+            // Employee rows with actual roster data
+            npeTeamData.forEach(employee => {
+                const empRow = ['', '', '', employee.cts, employee.eshc, employee.name];
                 
-                ['S1', 'S2', 'S3'].forEach(shift => {
-                    const leads = daySchedule[shift]['Lead'] || [];
-                    const associates = daySchedule[shift]['Associate'] || [];
-                    row.push(leads.join(', '), associates.join(', '));
-                });
-                
-                wsData.push(row);
+                for (let day = 1; day <= 31; day++) {
+                    const dateStr = `2025-08-${String(day).padStart(2, '0')}`;
+                    const daySchedule = realAugust2025Schedule[dateStr] || {};
+                    
+                    let assignment = 'OFF';
+                    
+                    // Check which shift the employee is assigned to
+                    Object.keys(daySchedule).forEach(shift => {
+                        if (daySchedule[shift] && daySchedule[shift].includes(employee.name)) {
+                            assignment = shift;
+                        }
+                    });
+                    
+                    // Check for leaves
+                    const leave = realLeaveData.find(l => 
+                        l.employeeName === employee.name && 
+                        l.date === dateStr && 
+                        l.status === 'approved'
+                    );
+                    
+                    if (leave) {
+                        assignment = 'Leave';
+                    }
+                    
+                    empRow.push(assignment);
+                }
+                rosterData.push(empRow);
             });
             
-            const ws = XLSX.utils.aoa_to_sheet(wsData);
-            XLSX.utils.book_append_sheet(wb, ws, 'NPE Schedule');
-            XLSX.writeFile(wb, 'NPE_ShiftBot_Schedule.xlsx');
+            // Add summary rows for shift counts
+            const s1CountRow = ['', '', '', '', '', 'S1'];
+            const s2CountRow = ['', '', '', '', '', 'S2'];
+            const s3CountRow = ['', '', '', '', '', 'S3'];
+            
+            for (let day = 1; day <= 31; day++) {
+                const dateStr = `2025-08-${String(day).padStart(2, '0')}`;
+                const daySchedule = realAugust2025Schedule[dateStr] || {};
+                
+                const s1Count = (daySchedule.S1 || []).length;
+                const s2Count = (daySchedule.S2 || []).length;
+                const s3Count = (daySchedule.S3 || []).length;
+                
+                s1CountRow.push(s1Count);
+                s2CountRow.push(s2Count);
+                s3CountRow.push(s3Count);
+            }
+            
+            rosterData.push(s1CountRow);
+            rosterData.push(s2CountRow);
+            rosterData.push(s3CountRow);
+            
+            // Add empty rows
+            rosterData.push(new Array(35).fill(''));
+            rosterData.push(new Array(35).fill(''));
+            
+            // Add shift timing legend
+            rosterData.push(['', 'S1', '06:00 AM TO 04:00 PM IST']);
+            rosterData.push(['', 'S2', '01:00 PM TO 11:00 PM IST']);
+            rosterData.push(['', 'S3', '10:00 PM TO 08:00 AM IST']);
+            rosterData.push(['', 'S4', '12:30 PM TO 10:30 PM IST']);
+            rosterData.push(['', 'G', '09:00 AM TO 07:00 PM IST']);
+            rosterData.push(['', 'P', '06:30 PM TO 04:30 AM IST']);
+            rosterData.push(['', 'HIH', '11:30 AM TO 08:30 PM IST']);
+            
+            // Add empty row
+            rosterData.push(new Array(35).fill(''));
+            
+            // Add team structure
+            rosterData.push(['LeadS']);
+            rosterData.push(['593300', 'EH0647', 'Dinesh Anbalagan']);
+            rosterData.push(['560008', 'EG4208', 'Mano']);
+            rosterData.push(['Shift Leads']);
+            rosterData.push(['410093', 'EH6832', 'Jeyakaran']);
+            rosterData.push(['2167353', 'C7H8KH', 'Karthikeyan']);
+            rosterData.push(['2054459', 'C6X8FS', 'Panner']);
+            rosterData.push(['2240608', 'C7T7SF', 'Sai Kumar']);
+            rosterData.push(['2136623', 'C8G3CW', 'Manoj']);
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(rosterData);
+            
+            // Set column widths for better formatting
+            ws['!cols'] = [
+                { width: 8 }, { width: 8 }, { width: 8 }, { width: 10 }, 
+                { width: 8 }, { width: 15 }, // CTS, ESHC, Name columns
+                ...new Array(31).fill({ width: 7 }) // Date columns
+            ];
+            
+            // Add the worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'Shift Roster - Format');
+            
+            // Export the file with SharePoint compatible naming
+            const fileName = `Shift_Roster_Format_August_2025.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            // Show success message
+            alert(`✅ Excel exported successfully!\n\nFile: ${fileName}\n\nFormat: SharePoint Compatible\n📊 Includes: All shifts, leaves, daily counts, and team structure\n🎨 Ready for WFO highlighting in Excel`);
         }
+
+        // Export AI-generated roster to SharePoint Excel format
+        function exportGeneratedRosterToSharePoint(startDate, endDate) {
+            try {
+                // Create Excel workbook with SharePoint format for AI-generated roster
+                const wb = XLSX.utils.book_new();
+                
+                // Create the roster data in exact SharePoint format
+                const rosterData = [];
+                
+                // Row 1: Header with QA&DOD, UAT sections
+                const row1 = ['', '', '', '', '', '', '', 'QA&DOD', 'UAT'];
+                for (let i = 9; i < 35; i++) row1.push(''); // Fill remaining columns
+                rosterData.push(row1);
+                
+                // Row 2: Empty row
+                rosterData.push(new Array(35).fill(''));
+                
+                // Calculate date range for export
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                
+                // Row 3: Date headers
+                const dateRow = ['', '', '', 'Date/Month/Year', '', ''];
+                for (let i = 0; i < totalDays && i < 31; i++) {
+                    const currentDate = new Date(start);
+                    currentDate.setDate(start.getDate() + i);
+                    const day = currentDate.getDate();
+                    const formattedDate = String(day).padStart(2, '0') + '-Aug-25';
+                    dateRow.push(formattedDate);
+                }
+                // Fill remaining columns if less than 31 days
+                while (dateRow.length < 35) dateRow.push('');
+                rosterData.push(dateRow);
+                
+                // Row 4: Day names and column headers
+                const dayRow = ['', '', '', 'CTS', 'ESHC', 'Name'];
+                for (let i = 0; i < totalDays && i < 31; i++) {
+                    const currentDate = new Date(start);
+                    currentDate.setDate(start.getDate() + i);
+                    const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+                    dayRow.push(dayName);
+                }
+                // Fill remaining columns
+                while (dayRow.length < 35) dayRow.push('');
+                rosterData.push(dayRow);
+                
+                // Employee rows with AI-generated roster data
+                npeTeamData.forEach(employee => {
+                    const empRow = ['', '', '', employee.cts, employee.eshc, employee.name];
+                    
+                    for (let i = 0; i < totalDays && i < 31; i++) {
+                        const currentDate = new Date(start);
+                        currentDate.setDate(start.getDate() + i);
+                        const dateStr = currentDate.toISOString().split('T')[0];
+                        
+                        // Get assignment from the latest generated schedule
+                        // This will use the AI-generated data if available, otherwise fall back to real data
+                        const daySchedule = lastGeneratedSchedule && lastGeneratedSchedule[dateStr] 
+                            ? lastGeneratedSchedule[dateStr] 
+                            : realAugust2025Schedule[dateStr] || {};
+                        
+                        let assignment = 'OFF';
+                        
+                        // Check which shift the employee is assigned to
+                        Object.keys(daySchedule).forEach(shift => {
+                            if (daySchedule[shift] && daySchedule[shift].includes(employee.name)) {
+                                assignment = shift;
+                            }
+                        });
+                        
+                        // Check for leaves
+                        const leave = realLeaveData.find(l => 
+                            l.employeeName === employee.name && 
+                            l.date === dateStr && 
+                            l.status === 'approved'
+                        );
+                        
+                        if (leave) {
+                            assignment = 'Leave';
+                        }
+                        
+                        empRow.push(assignment);
+                    }
+                    
+                    // Fill remaining columns
+                    while (empRow.length < 35) empRow.push('OFF');
+                    rosterData.push(empRow);
+                });
+                
+                // Add summary rows for shift counts
+                const s1CountRow = ['', '', '', '', '', 'S1'];
+                const s2CountRow = ['', '', '', '', '', 'S2'];
+                const s3CountRow = ['', '', '', '', '', 'S3'];
+                
+                for (let i = 0; i < totalDays && i < 31; i++) {
+                    const currentDate = new Date(start);
+                    currentDate.setDate(start.getDate() + i);
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    
+                    const daySchedule = lastGeneratedSchedule && lastGeneratedSchedule[dateStr] 
+                        ? lastGeneratedSchedule[dateStr] 
+                        : realAugust2025Schedule[dateStr] || {};
+                    
+                    const s1Count = (daySchedule.S1 || []).length;
+                    const s2Count = (daySchedule.S2 || []).length;
+                    const s3Count = (daySchedule.S3 || []).length;
+                    
+                    s1CountRow.push(s1Count);
+                    s2CountRow.push(s2Count);
+                    s3CountRow.push(s3Count);
+                }
+                
+                // Fill remaining columns
+                while (s1CountRow.length < 35) s1CountRow.push(0);
+                while (s2CountRow.length < 35) s2CountRow.push(0);
+                while (s3CountRow.length < 35) s3CountRow.push(0);
+                
+                rosterData.push(s1CountRow);
+                rosterData.push(s2CountRow);
+                rosterData.push(s3CountRow);
+                
+                // Add empty rows
+                rosterData.push(new Array(35).fill(''));
+                rosterData.push(new Array(35).fill(''));
+                
+                // Add shift timing legend
+                rosterData.push(['', 'S1', '06:00 AM TO 04:00 PM IST']);
+                rosterData.push(['', 'S2', '01:00 PM TO 11:00 PM IST']);
+                rosterData.push(['', 'S3', '10:00 PM TO 08:00 AM IST']);
+                rosterData.push(['', 'S4', '12:30 PM TO 10:30 PM IST']);
+                rosterData.push(['', 'G', '09:00 AM TO 07:00 PM IST']);
+                rosterData.push(['', 'P', '06:30 PM TO 04:30 AM IST']);
+                rosterData.push(['', 'HIH', '11:30 AM TO 08:30 PM IST']);
+                
+                // Add empty row
+                rosterData.push(new Array(35).fill(''));
+                
+                // Add team structure
+                rosterData.push(['LeadS']);
+                rosterData.push(['593300', 'EH0647', 'Dinesh Anbalagan']);
+                rosterData.push(['560008', 'EG4208', 'Mano']);
+                rosterData.push(['Shift Leads']);
+                rosterData.push(['410093', 'EH6832', 'Jeyakaran']);
+                rosterData.push(['2167353', 'C7H8KH', 'Karthikeyan']);
+                rosterData.push(['2054459', 'C6X8FS', 'Panner']);
+                rosterData.push(['2240608', 'C7T7SF', 'Sai Kumar']);
+                rosterData.push(['2136623', 'C8G3CW', 'Manoj']);
+                
+                // Create worksheet
+                const ws = XLSX.utils.aoa_to_sheet(rosterData);
+                
+                // Set column widths for better formatting
+                ws['!cols'] = [
+                    { width: 8 }, { width: 8 }, { width: 8 }, { width: 10 }, 
+                    { width: 8 }, { width: 15 }, // CTS, ESHC, Name columns
+                    ...new Array(31).fill({ width: 7 }) // Date columns
+                ];
+                
+                // Add the worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, 'AI Generated Roster');
+                
+                // Export the file with AI-generated naming
+                const fileName = `AI_Generated_Roster_${startDate}_to_${endDate}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+                
+                // Show success message
+                alert(`🤖 AI-Generated Roster exported successfully!\n\nFile: ${fileName}\n\nFormat: SharePoint Compatible\n📊 Includes: AI-optimized shifts, leaves, counts\n🎨 Ready for WFO highlighting in Excel\n✨ Generated using your custom rules!`);
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert(`❌ Export failed: ${error.message}`);
+            }
+        }
+
+        // Store the last generated schedule for export
+        let lastGeneratedSchedule = null;
 
         // Initialize Reports
         function initReports() {
@@ -2989,6 +3274,9 @@ Also provide an explanation of how each rule was applied.`;
                     try {
                         const generatedSchedule = JSON.parse(jsonMatch[0]);
                         const explanation = content.replace(jsonMatch[0], '').trim();
+                        
+                        // Store the generated schedule for export
+                        lastGeneratedSchedule = generatedSchedule;
                         
                         return {
                             schedule: generatedSchedule,
@@ -3678,6 +3966,16 @@ ${result.explanation}
                 </div>
                 
                 <div style="text-align: center;">
+                    <button onclick="exportGeneratedRosterToSharePoint('${startDate}', '${endDate}'); this.closest('[style*=fixed]').remove()" style="
+                        background: linear-gradient(135deg, #28a745, #34ce57);
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        margin-right: 10px;
+                    ">📊 Export SharePoint Excel</button>
                     <button onclick="this.closest('[style*=fixed]').remove()" style="
                         background: linear-gradient(135deg, #8b5fbf, #a374d0);
                         color: white;

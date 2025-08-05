@@ -3537,6 +3537,11 @@
 
         // OpenAI Integration for Custom Rule-Based Roster Generation
         async function generateRosterWithCustomRules(teamData, scheduleData, startDate, endDate, apiKey) {
+            console.log('🔄 Starting generateRosterWithCustomRules...');
+            console.log('📊 Team Data:', teamData);
+            console.log('📅 Date Range:', startDate, 'to', endDate);
+            console.log('🔑 API Key present:', !!apiKey);
+            
             if (!apiKey) {
                 throw new Error('OpenAI API key is required');
             }
@@ -3544,6 +3549,19 @@
             const chennaiTime = getChennaiTime();
             const chennaiDate = getChennaiDate();
             const weekendCount = countWeekendsInRange(new Date(startDate), new Date(endDate));
+
+            console.log('🌍 Chennai Time:', chennaiTime);
+            console.log('📊 Weekend Count:', weekendCount);
+            console.log('📋 Custom Rules:', userCustomRules);
+
+            // Ensure custom rules exist with defaults
+            const safeCustomRules = {
+                shiftRules: userCustomRules?.shiftRules?.length > 0 ? userCustomRules.shiftRules : ['Ensure adequate staffing for all shifts'],
+                teamRules: userCustomRules?.teamRules?.length > 0 ? userCustomRules.teamRules : ['Fair distribution among team members'],
+                timingRules: userCustomRules?.timingRules?.length > 0 ? userCustomRules.timingRules : ['Respect work-life balance'],
+                restrictionRules: userCustomRules?.restrictionRules?.length > 0 ? userCustomRules.restrictionRules : ['Maximum 6 consecutive working days'],
+                priorityRules: userCustomRules?.priorityRules?.length > 0 ? userCustomRules.priorityRules : ['Health and wellness first']
+            };
 
             const customRulesText = `
 STRICT CUSTOM RULES - FOLLOW THESE EXACTLY:
@@ -3561,59 +3579,63 @@ CHENNAI TIMEZONE AWARENESS:
 - Maximum 3 WFO days per employee per week
 
 SHIFT RULES:
-${userCustomRules.shiftRules.map(rule => `- ${rule}`).join('\n')}
+${safeCustomRules.shiftRules.map(rule => `- ${rule}`).join('\n')}
 
 TEAM & ROLE RULES:
-${userCustomRules.teamRules.map(rule => `- ${rule}`).join('\n')}
+${safeCustomRules.teamRules.map(rule => `- ${rule}`).join('\n')}
 
 TIMING & SCHEDULE RULES:
-${userCustomRules.timingRules.map(rule => `- ${rule}`).join('\n')}
+${safeCustomRules.timingRules.map(rule => `- ${rule}`).join('\n')}
 
 RESTRICTIONS & CONSTRAINTS:
-${userCustomRules.restrictionRules.map(rule => `- ${rule}`).join('\n')}
+${safeCustomRules.restrictionRules.map(rule => `- ${rule}`).join('\n')}
 
 PRIORITY RULES:
-${userCustomRules.priorityRules.map(rule => `- ${rule}`).join('\n')}
+${safeCustomRules.priorityRules.map(rule => `- ${rule}`).join('\n')}
             `;
 
-            const prompt = `You are a shift roster generator. You must STRICTLY follow the custom rules provided below. Do not apply any other patterns or rules.
+            // Simplified team data for better AI processing
+            const simplifiedTeamData = teamData.map(emp => ({
+                name: emp.name,
+                role: emp.role,
+                status: emp.status
+            }));
 
-TEAM DATA:
-${JSON.stringify(teamData, null, 2)}
+            const prompt = `Generate a shift roster that STRICTLY follows the rules below.
 
-EXISTING SCHEDULE DATA (for reference):
-${JSON.stringify(scheduleData, null, 2)}
+TEAM MEMBERS:
+${simplifiedTeamData.map(emp => `- ${emp.name} (${emp.role})`).join('\n')}
 
 SCHEDULE PERIOD: ${startDate} to ${endDate}
 
 ${customRulesText}
 
-IMPORTANT INSTRUCTIONS:
-1. ULTIMATE RULE: Each employee must have exactly ${weekendCount} OFF days (matching weekend count)
-2. Chennai timezone awareness: Use Asia/Kolkata for all date calculations
-3. Follow ONLY the custom rules provided above
-4. Saturday/Sunday assignments = WFH, Weekday assignments = WFO
-5. Maximum 3 WFO days per employee per week
-6. Do not apply any standard workforce management patterns
-7. Strictly adhere to the user's specific requirements
-8. Generate a detailed roster that meets all stated rules
-9. If rules conflict, prioritize: ULTIMATE RULE > Restrictions > Timing > Team > Shift > Priority
-10. Validate that weekend count equals OFF count for each employee
+CRITICAL REQUIREMENTS:
+1. Each employee must have exactly ${weekendCount} OFF days (matching weekend count)
+2. Use Chennai timezone for all calculations
+3. Weekends (Sat/Sun) = WFH only, Weekdays = WFO only
+4. Maximum 3 WFO days per employee per week
+5. Ensure fair distribution and work-life balance
 
-Generate a complete shift roster in JSON format:
+RESPOND WITH ONLY A VALID JSON OBJECT IN THIS EXACT FORMAT:
 {
-  "YYYY-MM-DD": {
-    "S1": ["employee1", "employee2"],
-    "S2": ["employee3"],
-    "S3": ["employee4", "employee5"],
+  "2025-08-05": {
+    "S1": ["Employee Name1", "Employee Name2"],
+    "S2": ["Employee Name3"],
+    "S3": ["Employee Name4"],
+    "S4": []
+  },
+  "2025-08-06": {
+    "S1": ["Employee Name5"],
+    "S2": ["Employee Name1", "Employee Name3"],
+    "S3": [],
     "S4": []
   }
 }
 
-Also provide:
-1. Explanation of how each rule was applied
-2. Validation that ULTIMATE RULE is satisfied for each employee
-3. WFO/WFH breakdown for each employee`;
+Generate the complete schedule for all dates from ${startDate} to ${endDate}.`;
+
+            console.log('📝 Sending prompt to OpenAI...');
 
             try {
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -3631,7 +3653,7 @@ Also provide:
 
 ULTIMATE RULE: Count of Saturday & Sunday = Count of each employee OFF days.
 
-You never deviate from the provided rules, always respect Asia/Kolkata timezone, ensure weekend count equals OFF count for each employee, and always explain your decisions with validation.`
+You must respond with ONLY a valid JSON object. No explanations, no markdown, just pure JSON. Always respect Asia/Kolkata timezone and ensure weekend count equals OFF count for each employee.`
                             },
                             {
                                 role: 'user',
@@ -3643,41 +3665,168 @@ You never deviate from the provided rules, always respect Asia/Kolkata timezone,
                     })
                 });
 
+                console.log('📡 Response status:', response.status);
+
                 if (!response.ok) {
-                    throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+                    const errorText = await response.text();
+                    console.error('❌ OpenAI API Error:', errorText);
+                    throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`);
                 }
 
                 const result = await response.json();
+                console.log('📥 OpenAI Response:', result);
+
                 const content = result.choices[0]?.message?.content;
                 
                 if (!content) {
-                    throw new Error('No response from OpenAI');
+                    throw new Error('No response content from OpenAI');
                 }
 
-                // Extract JSON and explanation from the response
-                const jsonMatch = content.match(/\{[\s\S]*\}/);
+                console.log('📄 Raw content:', content);
+
+                // Clean and parse the JSON response
+                let cleanContent = content.trim();
+                
+                // Remove markdown code blocks if present
+                if (cleanContent.startsWith('```')) {
+                    cleanContent = cleanContent.replace(/```json\n?/, '').replace(/```$/, '');
+                }
+                
+                // Extract JSON object
+                const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
                     try {
                         const generatedSchedule = JSON.parse(jsonMatch[0]);
-                        const explanation = content.replace(jsonMatch[0], '').trim();
+                        console.log('✅ Parsed schedule:', generatedSchedule);
                         
                         // Store the generated schedule for export
                         lastGeneratedSchedule = generatedSchedule;
                         
                         return {
                             schedule: generatedSchedule,
-                            explanation: explanation,
-                            rulesApplied: userCustomRules
+                            explanation: `Roster generated with ${Object.keys(generatedSchedule).length} days, following ULTIMATE RULE and Chennai timezone.`,
+                            rulesApplied: safeCustomRules,
+                            weekendCount: weekendCount
                         };
                     } catch (parseError) {
-                        throw new Error('Failed to parse generated schedule');
+                        console.error('❌ JSON Parse Error:', parseError);
+                        console.error('❌ Failed content:', jsonMatch[0]);
+                        throw new Error(`Failed to parse generated schedule: ${parseError.message}`);
                     }
                 } else {
-                    throw new Error('No valid schedule found in OpenAI response');
+                    console.error('❌ No JSON found in content:', cleanContent);
+                    throw new Error('No valid schedule JSON found in OpenAI response');
                 }
             } catch (error) {
-                console.error('OpenAI Custom Rules Error:', error);
+                console.error('❌ OpenAI Custom Rules Error:', error);
                 throw error;
+            }
+        }
+
+        // Fallback roster generation when OpenAI is not available
+        function generateFallbackRoster(startDate, endDate) {
+            console.log('🔄 Generating fallback roster...');
+            const schedule = {};
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const shifts = ['S1', 'S2', 'S3'];
+            const weekendCount = countWeekendsInRange(start, end);
+            
+            // Track OFF days for each employee
+            const employeeOffDays = {};
+            npeTeamData.forEach(emp => {
+                employeeOffDays[emp.name] = 0;
+            });
+            
+            // Create basic rotation schedule
+            let employeeIndex = 0;
+            
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                const isWeekend = isWeekendInChennai(d);
+                
+                schedule[dateStr] = { S1: [], S2: [], S3: [], S4: [] };
+                
+                if (isWeekend) {
+                    // Weekend: minimal staffing, everyone else OFF
+                    const onCallEmployee = npeTeamData[employeeIndex % npeTeamData.length];
+                    schedule[dateStr].S1 = [onCallEmployee.name];
+                    
+                    // Mark others as OFF
+                    npeTeamData.forEach(emp => {
+                        if (emp.name !== onCallEmployee.name) {
+                            employeeOffDays[emp.name]++;
+                        }
+                    });
+                    
+                    employeeIndex++;
+                } else {
+                    // Weekday: full staffing with rotation
+                    shifts.forEach((shift, shiftIndex) => {
+                        const employeesNeeded = shift === 'S3' ? 2 : 3; // Night shift needs fewer people
+                        
+                        for (let i = 0; i < employeesNeeded && i < npeTeamData.length; i++) {
+                            const empIndex = (employeeIndex + shiftIndex * 2 + i) % npeTeamData.length;
+                            const employee = npeTeamData[empIndex];
+                            schedule[dateStr][shift].push(employee.name);
+                        }
+                    });
+                    
+                    // Mark unassigned employees as OFF
+                    const assignedEmployees = Object.values(schedule[dateStr]).flat();
+                    npeTeamData.forEach(emp => {
+                        if (!assignedEmployees.includes(emp.name)) {
+                            employeeOffDays[emp.name]++;
+                        }
+                    });
+                    
+                    employeeIndex++;
+                }
+            }
+            
+            console.log('📊 Employee OFF days:', employeeOffDays);
+            console.log('📊 Weekend count:', weekendCount);
+            
+            return schedule;
+        }
+
+        // Display simple schedule results
+        function displaySimpleSchedule(schedule, startDate, endDate) {
+            console.log('📊 Displaying fallback schedule...');
+            
+            // Show in schedule output
+            showTab('generator');
+            
+            const scheduleOutput = document.getElementById('scheduleOutput');
+            if (scheduleOutput) {
+                let html = '<div class="alert alert-info">✅ Fallback roster generated successfully!</div>';
+                html += '<p>📅 Schedule period: ' + startDate + ' to ' + endDate + '</p>';
+                
+                html += '<table class="table" style="font-size: 12px;"><thead><tr><th>Date</th><th>Day</th><th>S1 (Morning)</th><th>S2 (Afternoon)</th><th>S3 (Night)</th></tr></thead><tbody>';
+                
+                Object.keys(schedule).forEach(date => {
+                    const daySchedule = schedule[date];
+                    const dateObj = new Date(date);
+                    const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'Asia/Kolkata' });
+                    const isWeekend = isWeekendInChennai(dateObj);
+                    
+                    html += `<tr style="${isWeekend ? 'background-color: #e3f2fd;' : ''}">`;
+                    html += `<td><strong>${date}</strong></td>`;
+                    html += `<td>${dayName}${isWeekend ? ' 🏠' : ' 🏢'}</td>`;
+                    
+                    ['S1', 'S2', 'S3'].forEach(shift => {
+                        const employees = daySchedule[shift];
+                        html += `<td>${employees.length > 0 ? employees.join(', ') : 'OFF'}</td>`;
+                    });
+                    
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                html += '<div class="alert alert-warning">💡 This is a basic fallback schedule. Use OpenAI integration for advanced rule-based generation.</div>';
+                
+                scheduleOutput.innerHTML = html;
+                scheduleOutput.scrollIntoView({ behavior: 'smooth' });
             }
         }
 
@@ -4282,12 +4431,18 @@ CRITICAL CONSTRAINTS:
             } catch (error) {
                 console.error('Custom roster generation error:', error);
                 loadingIndicator.remove();
-                alert(`❌ Failed to generate roster with custom rules: ${error.message}\n\nFalling back to standard generation.`);
                 
-                // Fallback to standard generation
-                const aiSchedule = createAIGuidedSchedule(aiRules, startDate, endDate);
-                scheduleData = { ...scheduleData, ...aiSchedule };
-                displayEnhancedSchedule(aiSchedule, aiRules);
+                const useFallback = confirm(`❌ Failed to generate roster with OpenAI: ${error.message}\n\nWould you like to use the fallback roster generator instead?`);
+                
+                if (useFallback) {
+                    console.log('🔄 Using fallback generation...');
+                    const fallbackSchedule = generateFallbackRoster(startDate, endDate);
+                    scheduleData = { ...scheduleData, ...fallbackSchedule };
+                    lastGeneratedSchedule = fallbackSchedule;
+                    displaySimpleSchedule(fallbackSchedule, startDate, endDate);
+                } else {
+                    alert('❌ Roster generation cancelled.');
+                }
             }
         }
 

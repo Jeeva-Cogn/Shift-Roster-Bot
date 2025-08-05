@@ -2564,7 +2564,16 @@ Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules
 
         // Enhanced Schedule Display with AI Insights
         function displayEnhancedSchedule(schedule, rules) {
-            updateScheduleDisplay();
+            // Show the schedule in the generator tab
+            showTab('generator');
+            
+            // Display the schedule in the output area
+            const scheduleOutput = document.getElementById('scheduleOutput');
+            if (scheduleOutput) {
+                scheduleOutput.innerHTML = `
+                    <div class="alert alert-success">✅ AI-guided schedule generated successfully!</div>
+                `;
+            }
             
             // Add AI insights panel
             const insightsPanel = document.createElement('div');
@@ -2829,6 +2838,8 @@ Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules
 
         // Proceed with custom roster generation using OpenAI
         async function proceedWithCustomRosterGeneration(trainingData, aiRules) {
+            console.log('📅 Starting proceedWithCustomRosterGeneration...');
+            
             const startDate = prompt('Enter start date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
             const endDate = prompt('Enter end date (YYYY-MM-DD):', 
                 new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
@@ -2837,6 +2848,8 @@ Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules
                 alert('❌ Start and end dates are required for roster generation.');
                 return;
             }
+            
+            console.log(`📅 Dates selected: ${startDate} to ${endDate}`);
             
             // Show loading indicator
             const loadingIndicator = document.createElement('div');
@@ -2858,6 +2871,7 @@ Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules
             document.body.appendChild(loadingIndicator);
             
             try {
+                console.log('🔑 Getting API key...');
                 const apiKey = getApiKey();
                 if (!apiKey) {
                     loadingIndicator.remove();
@@ -2865,12 +2879,14 @@ Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules
                     return;
                 }
                 
+                console.log('📋 Loading custom rules...');
                 // Get saved custom rules
                 const savedRules = Storage.get('userCustomRules');
                 if (savedRules) {
                     userCustomRules = savedRules;
                 }
                 
+                console.log('🤖 Calling OpenAI for roster generation...');
                 // Generate roster using OpenAI with custom rules
                 const result = await generateRosterWithCustomRules(
                     npeTeamData, 
@@ -2880,13 +2896,28 @@ Respond in JSON format with these keys: workPatterns, healthRules, fairnessRules
                     apiKey
                 );
                 
+                console.log('✅ OpenAI generation successful!', result);
+                
                 // Apply the generated schedule
                 scheduleData = { ...scheduleData, ...result.schedule };
                 
                 // Show results with custom rules explanation
                 loadingIndicator.remove();
                 displayCustomRosterResults(result, startDate, endDate);
-                updateScheduleDisplay();
+                
+                console.log('📊 Updating schedule display...');
+                // Show the generated schedule in the reports tab or schedule generator
+                showTab('generator');
+                
+                // Scroll to schedule output
+                const scheduleOutput = document.getElementById('scheduleOutput');
+                if (scheduleOutput) {
+                    scheduleOutput.scrollIntoView({ behavior: 'smooth' });
+                    scheduleOutput.innerHTML = `
+                        <div class="alert alert-success">✅ Custom roster generated successfully with OpenAI!</div>
+                        <p>Check the modal for detailed results and rule explanations.</p>
+                    `;
+                }
                 
             } catch (error) {
                 console.error('Custom roster generation error:', error);
@@ -3266,21 +3297,35 @@ ${result.explanation}
                 generateBtn.style.boxShadow = '0 4px 12px rgba(39, 174, 96, 0.3)';
             };
             
-            generateBtn.onclick = () => {
-                // Check if custom rules exist
-                const savedRules = Storage.get('userCustomRules');
-                if (!savedRules || !savedRules.shiftRules.length) {
-                    const shouldDefineRules = confirm(
-                        '📋 No custom rules found!\n\n' +
-                        'OpenAI needs your specific rules to generate the roster exactly as you want.\n\n' +
-                        'Would you like to define your rules now?'
-                    );
-                    
-                    if (shouldDefineRules) {
-                        getCustomRulesFromUser();
+            generateBtn.onclick = (event) => {
+                console.log('🤖 Generate button clicked!');
+                
+                // Prevent any form submission or navigation
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                try {
+                    // Check if custom rules exist
+                    const savedRules = Storage.get('userCustomRules');
+                    if (!savedRules || !savedRules.shiftRules.length) {
+                        const shouldDefineRules = confirm(
+                            '📋 No custom rules found!\n\n' +
+                            'OpenAI needs your specific rules to generate the roster exactly as you want.\n\n' +
+                            'Would you like to define your rules now?'
+                        );
+                        
+                        if (shouldDefineRules) {
+                            getCustomRulesFromUser();
+                        }
+                    } else {
+                        console.log('🚀 Starting custom roster generation...');
+                        proceedWithCustomRosterGeneration({teamData: npeTeamData, schedulePatterns: [], leavePatterns: []}, {});
                     }
-                } else {
-                    proceedWithCustomRosterGeneration({teamData: npeTeamData, schedulePatterns: [], leavePatterns: []}, {});
+                } catch (error) {
+                    console.error('Generate button error:', error);
+                    alert(`❌ Error: ${error.message}`);
                 }
             };
             

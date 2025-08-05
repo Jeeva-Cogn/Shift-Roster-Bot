@@ -1088,12 +1088,12 @@
 
         <!-- Navigation Tabs -->
         <div class="tabs">
-            <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
-            <button class="tab" onclick="showTab('team')">👥 NPE Team</button>
-            <button class="tab" onclick="showTab('leaves')">🏖️ Leave Management</button>
-            <button class="tab" onclick="showTab('shifts')">⏰ Shifts</button>
-            <button class="tab" onclick="showTab('generator')">🎯 Schedule Generator</button>
-            <button class="tab" onclick="showTab('reports')">📈 Reports</button>
+            <button class="tab active" data-tab="dashboard" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab" data-tab="team" onclick="showTab('team')">👥 NPE Team</button>
+            <button class="tab" data-tab="leaves" onclick="showTab('leaves')">🏖️ Leave Management</button>
+            <button class="tab" data-tab="shifts" onclick="showTab('shifts')">⏰ Shifts</button>
+            <button class="tab" data-tab="generator" onclick="showTab('generator')">🎯 Schedule Generator</button>
+            <button class="tab" data-tab="reports" onclick="showTab('reports')">📈 Reports</button>
         </div>
 
         <!-- Dashboard Tab -->
@@ -1833,10 +1833,10 @@
         selectedContent.classList.add('active');
     }
 
-    // Activate the correct tab button
+    // Activate the correct tab button robustly
     tabButtons.forEach(tab => {
-        // Use innerText or textContent to match tabName
-        if (tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(`showTab('${tabName}')`)) {
+        // Use a data-tab attribute for reliable matching
+        if (tab.dataset.tab === tabName) {
             tab.classList.add('active');
         }
     });

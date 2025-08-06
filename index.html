@@ -2174,9 +2174,19 @@
                     <form id="scheduleForm">
                         <div class="form-group">
                             <label for="startDate">Start Date</label>
-
-                                <option value="60">2 Months</option>
+                            <input type="date" id="startDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="timePeriod">Generate Schedule For</label>
+                            <select id="timePeriod" class="form-control" required>
+                                <option value="7">1 Week (7 days)</option>
+                                <option value="30" selected>1 Month (30 days)</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-outline-primary" id="openAIRulesBtn">
+                                🤖 Define Custom Rules for OpenAI
+                            </button>
                         </div>
                         <button type="submit" class="btn">🤖 Generate AI Schedule</button>
                         <button type="button" class="btn btn-secondary" onclick="downloadSchedule()">📥 Download Excel</button>
@@ -2184,23 +2194,6 @@
                 </div>
 
                 <!-- Extra Off Management removed: leave requests are treated as leave only, not as off. -->
-
-                <div class="card">
-                    <h3>🛠️ Custom Roster Rules</h3>
-                    <form id="rosterRulesForm">
-                        <textarea id="rosterRulesText" style="width:100%;height:160px;resize:vertical;padding:10px;border-radius:8px;border:1px solid #d4c5e0;font-size:14px;">
-⚡ NPE ShiftBot Requirements
-� SHIFT_LEADS: One of first 5 members (Jeyakaran, Karthikeyan, Manoj, Panner, SaiKumar) must be in every shift
-🚫 S2_ONLY: Dinesh and Mano only work S2 (no shift coverage)
-� WEEKDAY_RULES: Mon-Fri: 3 in S1&S3, 2 in S2 | Sat: 2 in each shift | Sun: Only S2&S3 with 2 each
-🔄 WEEK_OFF_RULE: Total off days ≤ number of Saturdays + Sundays in the month
-🏖️ LEAVE REQUESTS: If a member asks for leave, it will be treated as leave only, not as "off".
-                        </textarea>
-                        <div style="margin-top:10px;text-align:right;">
-                            <button type="button" class="btn btn-success" onclick="alert('Rules saved!')">💾 Save Rules</button>
-                        </div>
-                    </form>
-                </div>
             </div>
 
             <div class="card">
@@ -2604,7 +2597,7 @@ if (scheduleForm && !document.getElementById('customRulesBox')) {
         }
 
         function initCustomRulesModal() {
-            const customRulesBtn = document.getElementById('customRulesBtn');
+            const customRulesBtn = document.getElementById('openAIRulesBtn');
             const customRulesModal = document.getElementById('customRulesModal');
             const customRulesTextarea = document.getElementById('customRulesTextarea');
             const saveCustomRulesModalBtn = document.getElementById('saveCustomRulesModalBtn');
@@ -3923,12 +3916,12 @@ if (scheduleForm && !document.getElementById('customRulesBox')) {
         document.getElementById('scheduleForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const startDate = document.getElementById('startDate').value;
-            const numDays = parseInt(document.getElementById('numDays').value);
+            const timePeriod = parseInt(document.getElementById('timePeriod').value);
             if (!startDate) {
                 alert('Please select a start date!');
                 return;
             }
-            generateSchedule(startDate, numDays);
+            generateSchedule(startDate, timePeriod);
         });
 
         // Generate AI Schedule
@@ -3987,95 +3980,252 @@ if (scheduleForm && !document.getElementById('customRulesBox')) {
             }, 2000);
         }
 
-        // Create Health-Conscious Schedule with New Requirements
+        // Display the generated schedule
+        function displaySchedule(schedule, customRules) {
+            const output = document.getElementById('scheduleOutput');
+            if (!schedule || Object.keys(schedule).length === 0) {
+                output.innerHTML = '<div class="alert alert-warning">No schedule generated. Please try again.</div>';
+                return;
+            }
+
+            const scheduleKeys = Object.keys(schedule).sort();
+            let html = `
+                <div class="schedule-header">
+                    <h4>🤖 AI-Generated Health-Conscious Schedule</h4>
+                    <p>Schedule generated for ${scheduleKeys.length} days (${new Date(scheduleKeys[0]).toLocaleDateString()} - ${new Date(scheduleKeys[scheduleKeys.length-1]).toLocaleDateString()})</p>
+                    ${customRules ? '<p><small><strong>Custom Rules Applied:</strong> Yes</small></p>' : ''}
+                </div>
+                <div class="schedule-table-container">
+                    <table class="table schedule-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>S1 (06:30-15:30)</th>
+                                <th>S2 (14:30-23:30)</th>
+                                <th>S3 (22:00-08:00)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            scheduleKeys.forEach(dateStr => {
+                const date = new Date(dateStr);
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                const dayOfWeek = date.getDay();
+                const daySchedule = schedule[dateStr];
+                
+                // Style weekend rows differently
+                const rowClass = (dayOfWeek === 0 || dayOfWeek === 6) ? 'weekend-row' : '';
+                
+                html += `
+                    <tr class="${rowClass}">
+                        <td><strong>${date.toLocaleDateString()}</strong></td>
+                        <td><span class="day-badge ${dayOfWeek === 0 || dayOfWeek === 6 ? 'weekend' : 'weekday'}">${dayName}</span></td>
+                        <td class="shift-cell">
+                            ${daySchedule.S1 && daySchedule.S1.length > 0 ? 
+                                daySchedule.S1.map(name => `<span class="employee-tag">${name}</span>`).join(' ') : 
+                                '<span class="no-staff">No staff</span>'
+                            }
+                        </td>
+                        <td class="shift-cell">
+                            ${daySchedule.S2 && daySchedule.S2.length > 0 ? 
+                                daySchedule.S2.map(name => `<span class="employee-tag">${name}</span>`).join(' ') : 
+                                '<span class="no-staff">No staff</span>'
+                            }
+                        </td>
+                        <td class="shift-cell">
+                            ${daySchedule.S3 && daySchedule.S3.length > 0 ? 
+                                daySchedule.S3.map(name => `<span class="employee-tag">${name}</span>`).join(' ') : 
+                                '<span class="no-staff">No staff</span>'
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+                <div class="schedule-summary">
+                    <h5>📊 Schedule Summary</h5>
+                    <div class="summary-stats">
+                        <span class="stat-badge">Total Days: ${scheduleKeys.length}</span>
+                        <span class="stat-badge">Weekends: ${scheduleKeys.filter(d => { const day = new Date(d).getDay(); return day === 0 || day === 6; }).length}</span>
+                        <span class="stat-badge">Team Size: ${npeTeamData.length}</span>
+                    </div>
+                </div>
+                <style>
+                    .schedule-table-container { overflow-x: auto; margin: 15px 0; }
+                    .schedule-table { width: 100%; border-collapse: collapse; }
+                    .schedule-table th, .schedule-table td { padding: 8px 12px; border: 1px solid #e0e0e0; text-align: left; }
+                    .schedule-table th { background: #8b5fbf; color: white; font-weight: bold; }
+                    .weekend-row { background-color: #f8f9fa; }
+                    .shift-cell { min-width: 200px; }
+                    .employee-tag { background: #e3f2fd; color: #1976d2; padding: 2px 6px; margin: 1px; border-radius: 4px; font-size: 12px; display: inline-block; }
+                    .no-staff { color: #999; font-style: italic; }
+                    .day-badge { padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+                    .day-badge.weekend { background: #ffecb3; color: #f57f17; }
+                    .day-badge.weekday { background: #e8f5e8; color: #2e7d32; }
+                    .schedule-summary { margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; }
+                    .summary-stats { margin-top: 10px; }
+                    .stat-badge { background: #8b5fbf; color: white; padding: 4px 8px; margin: 2px; border-radius: 4px; font-size: 12px; }
+                </style>
+            `;
+
+            output.innerHTML = html;
+        }
+
+        // Create Health-Conscious Schedule with NPE Requirements
         function createHealthConsciousSchedule(startDate, numDays) {
             const schedule = {};
-            // Track consecutive work days and week offs for each employee
-            const consecutiveDays = {};
-            const weekOffsGiven = {};
-            const lastWorkDate = {};
-            // Initialize tracking for all team members
-            npeTeamData.forEach(emp => {
-                consecutiveDays[emp.name] = 0;
-                weekOffsGiven[emp.name] = 0;
-                lastWorkDate[emp.name] = null;
-            });
-            // Get first 5 members (ShiftLeads) who must cover all shifts
-            // Exclude Dinesh and Mano from schedule generation
-            const excludedLeads = ['Dinesh', 'Mano'];
-            const shiftLeads = npeTeamData.filter(emp => emp.role === 'ShiftLead' && !excludedLeads.includes(emp.name));
-            const s2OnlyMembers = npeTeamData.filter(emp => emp.role === 'S2Only' && !excludedLeads.includes(emp.name));
-            const associates = npeTeamData.filter(emp => emp.role === 'Associate' && !excludedLeads.includes(emp.name));
-            // Custom rules are available as third argument (customRules) if needed for future logic
             
-            // Calculate total weekends (Saturdays + Sundays) in the period for week off validation
+            // NPE Team Requirements
+            const shiftLeads = ['Jeyakaran', 'Karthikeyan', 'Manoj', 'Panner', 'SaiKumar']; // First 5 members - one must be in every shift
+            const s2OnlyMembers = ['Dinesh', 'Mano']; // Only work S2 shift
+            const allMembers = npeTeamData.map(emp => emp.name);
+            const regularMembers = allMembers.filter(name => !s2OnlyMembers.includes(name));
+            
+            // Calculate total weekends for week off validation
             let totalWeekends = 0;
             for (let i = 0; i < numDays; i++) {
                 const currentDate = new Date(startDate);
                 currentDate.setDate(currentDate.getDate() + i);
                 const dayOfWeek = currentDate.getDay();
-                if (dayOfWeek === 0 || dayOfWeek === 6) totalWeekends++; // 0 = Sunday, 6 = Saturday
+                if (dayOfWeek === 0 || dayOfWeek === 6) totalWeekends++;
             }
             
-            // Week Off Rule: Each employee's total off days should not exceed total weekends
-            console.log(`Total weekends (Sat+Sun) in schedule period: ${totalWeekends}`);
-            
-            // Track work streaks and offs for each employee
-            const workStreaks = {};
-            const offsGiven = {};
-            npeTeamData.forEach(emp => {
-                workStreaks[emp.name] = 0;
-                offsGiven[emp.name] = 0;
+            // Track work patterns for each employee
+            const workTracker = {};
+            allMembers.forEach(name => {
+                workTracker[name] = {
+                    consecutiveDays: 0,
+                    totalOffDays: 0,
+                    lastWorked: null,
+                    weeklyWFODays: 0,
+                    weeklyWFHDays: 0
+                };
             });
-
+            
+            console.log(`Generating schedule for ${numDays} days with ${totalWeekends} weekends`);
+            
+            // Generate schedule day by day
             for (let i = 0; i < numDays; i++) {
                 const currentDate = new Date(startDate);
                 currentDate.setDate(currentDate.getDate() + i);
                 const dateStr = currentDate.toISOString().split('T')[0];
-                const dayOfWeek = currentDate.getDay();
-                schedule[dateStr] = {};
-
-                // Determine shifts based on day of week
-                let shiftsToday = [];
-                if (dayOfWeek === 0) {
-                    shiftsToday = ['S2', 'S3'];
-                } else {
-                    shiftsToday = ['S1', 'S2', 'S3'];
+                const dayOfWeek = currentDate.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+                const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek];
+                
+                schedule[dateStr] = { S1: [], S2: [], S3: [] };
+                
+                // Determine required shifts and staffing based on day
+                let requiredShifts, staffingRules;
+                if (dayOfWeek === 0) { // Sunday
+                    requiredShifts = ['S2', 'S3'];
+                    staffingRules = { S2: 2, S3: 2 };
+                } else if (dayOfWeek === 6) { // Saturday  
+                    requiredShifts = ['S1', 'S2', 'S3'];
+                    staffingRules = { S1: 2, S2: 2, S3: 2 };
+                } else { // Monday-Friday
+                    requiredShifts = ['S1', 'S2', 'S3'];
+                    staffingRules = { S1: 3, S2: 2, S3: 3 };
                 }
-
-                // Assign shifts and offs
-                npeTeamData.forEach(emp => {
-                    // Exclude Dinesh and Mano from schedule generation
-                    if (excludedLeads.includes(emp.name)) return;
-                    // If already reached max offs, must work
-                    if (offsGiven[emp.name] >= totalWeekends) {
-                        workStreaks[emp.name]++;
-                        // Assign to a shift (simple round robin for demo)
-                        if (shiftsToday.length > 0) {
-                            const shiftIdx = (i + npeTeamData.indexOf(emp)) % shiftsToday.length;
-                            const shift = shiftsToday[shiftIdx];
-                            if (!schedule[dateStr][shift]) schedule[dateStr][shift] = [];
-                            schedule[dateStr][shift].push(emp.name);
-                        }
-                        return;
+                
+                // Get available members (excluding those who need offs)
+                const availableMembers = regularMembers.filter(name => {
+                    const tracker = workTracker[name];
+                    // Check if member needs a week off (worked 4+ consecutive days and hasn't exceeded weekend limit)
+                    if (tracker.consecutiveDays >= 4 && tracker.totalOffDays < totalWeekends) {
+                        return false; // Give week off
                     }
-                    // If worked 4-6 days, give off
-                    if (workStreaks[emp.name] >= 4 && offsGiven[emp.name] < totalWeekends) {
-                        // Assign off (no shift)
-                        offsGiven[emp.name]++;
-                        workStreaks[emp.name] = 0;
-                        return;
-                    }
-                    // Otherwise, assign to a shift
-                    workStreaks[emp.name]++;
-                    if (shiftsToday.length > 0) {
-                        const shiftIdx = (i + npeTeamData.indexOf(emp)) % shiftsToday.length;
-                        const shift = shiftsToday[shiftIdx];
-                        if (!schedule[dateStr][shift]) schedule[dateStr][shift] = [];
-                        schedule[dateStr][shift].push(emp.name);
+                    return true;
+                });
+                
+                // Add S2-only members for S2 shift
+                const s2AvailableMembers = [...availableMembers];
+                s2OnlyMembers.forEach(name => {
+                    const tracker = workTracker[name];
+                    if (tracker.consecutiveDays >= 4 && tracker.totalOffDays < totalWeekends) {
+                        // S2-only member needs off
+                    } else {
+                        s2AvailableMembers.push(name);
                     }
                 });
+                
+                // Assign shifts ensuring rules are followed
+                requiredShifts.forEach(shift => {
+                    const requiredCount = staffingRules[shift];
+                    const membersPool = shift === 'S2' ? s2AvailableMembers : availableMembers;
+                    
+                    // Ensure at least one shift lead in each shift
+                    const availableLeads = shiftLeads.filter(lead => membersPool.includes(lead));
+                    if (availableLeads.length > 0) {
+                        // Assign one shift lead
+                        const selectedLead = availableLeads[Math.floor(Math.random() * availableLeads.length)];
+                        schedule[dateStr][shift].push(selectedLead);
+                        
+                        // Remove from available pool for this shift
+                        const leadIndex = membersPool.indexOf(selectedLead);
+                        if (leadIndex > -1) membersPool.splice(leadIndex, 1);
+                    }
+                    
+                    // Fill remaining spots
+                    const remainingSpots = requiredCount - schedule[dateStr][shift].length;
+                    for (let j = 0; j < remainingSpots && membersPool.length > 0; j++) {
+                        const randomIndex = Math.floor(Math.random() * membersPool.length);
+                        const selectedMember = membersPool[randomIndex];
+                        schedule[dateStr][shift].push(selectedMember);
+                        membersPool.splice(randomIndex, 1);
+                    }
+                });
+                
+                // Update work tracking
+                allMembers.forEach(name => {
+                    const tracker = workTracker[name];
+                    const isWorking = requiredShifts.some(shift => schedule[dateStr][shift].includes(name));
+                    
+                    if (isWorking) {
+                        tracker.consecutiveDays++;
+                        tracker.lastWorked = dateStr;
+                        // Reset if it's a new week (simplified)
+                        if (dayOfWeek === 1) { // Monday
+                            tracker.weeklyWFODays = 0;
+                            tracker.weeklyWFHDays = 0;
+                        }
+                        tracker.weeklyWFODays++; // Assuming office work for now
+                    } else {
+                        // Member is off
+                        if (tracker.consecutiveDays > 0) {
+                            tracker.totalOffDays++;
+                        }
+                        tracker.consecutiveDays = 0;
+                    }
+                });
+                
+                console.log(`${dayName} ${dateStr}: S1(${schedule[dateStr].S1.length}), S2(${schedule[dateStr].S2.length}), S3(${schedule[dateStr].S3.length})`);
             }
+            
+            // Validate schedule against rules
+            console.log('=== Schedule Validation ===');
+            let validationErrors = [];
+            
+            allMembers.forEach(name => {
+                const tracker = workTracker[name];
+                if (tracker.totalOffDays > totalWeekends) {
+                    validationErrors.push(`${name}: ${tracker.totalOffDays} offs > ${totalWeekends} weekends`);
+                }
+            });
+            
+            if (validationErrors.length > 0) {
+                console.warn('Schedule validation warnings:', validationErrors);
+            } else {
+                console.log('✅ Schedule passes all validation rules');
+            }
+
+            return schedule;
+        }
                 
         // Initialize Reports
         function initReports() {
@@ -4424,14 +4574,12 @@ if (scheduleForm && !document.getElementById('customRulesBox')) {
                     });
                 });
             }
-        }
 
         // ...Extra Off Management functions removed...
-// Extra Off Management removed as per requirements. Leave/off logic clarified: if member asks leave, it is leave only, not off. All extra off UI and logic removed.
-        }
+        // Extra Off Management removed as per requirements. Leave/off logic clarified: if member asks leave, it is leave only, not off. All extra off UI and logic removed.
         
         function useMainScheduleDates() {
-    // Extra Off Management removed. No custom date pickers. Main schedule dates and number of days/months selection now works for roster generation.
+            // Extra Off Management removed. No custom date pickers. Main schedule dates and number of days/months selection now works for roster generation.
         }
         
         function addExtraOffs() {
@@ -7142,6 +7290,43 @@ ${result.explanation}
             
             console.log('Tab navigation initialized successfully');
         });
+    }
     </script>
+
+    <!-- OpenAI Custom Rules Modal -->
+    <div id="customRulesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #8b5fbf; padding-bottom: 15px;">
+                <h3 style="color: #8b5fbf; margin: 0;">🤖 Define Custom Rules for OpenAI</h3>
+                <button type="button" id="closeCustomRulesModalBtn" style="background: none; border: none; font-size: 24px; color: #999; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <p style="color: #666; margin-bottom: 15px;">Define custom scheduling rules that will be used by the AI to generate optimal work schedules. These rules will be processed by OpenAI to ensure intelligent roster management.</p>
+                <label for="customRulesTextarea" style="display: block; font-weight: bold; margin-bottom: 10px; color: #333;">Custom Roster Rules:</label>
+                <textarea id="customRulesTextarea" style="width: 100%; height: 200px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; line-height: 1.5; resize: vertical;" placeholder="Enter your custom roster rules here...
+
+Example rules:
+• Ensure at least 1 team lead in every shift
+• S2-only members: Dinesh, Mano
+• Weekend rules: Reduced staff on Sat/Sun
+• Maximum 6 consecutive working days
+• Minimum 24-hour gap between night shifts
+
+The AI will interpret and apply these rules intelligently.">⚡ NPE ShiftBot Requirements
+🎯 SHIFT_LEADS: One of first 5 members (Jeyakaran, Karthikeyan, Manoj, Panner, SaiKumar) must be in every shift
+🚫 S2_ONLY: Dinesh and Mano only work S2 (no shift coverage)
+📅 WEEKDAY_RULES: Mon-Fri: 3 in S1&S3, 2 in S2 | Sat: 2 in each shift | Sun: Only S2&S3 with 2 each
+🔄 WEEK_OFF_RULE: Total off days ≤ number of Saturdays + Sundays in the month
+🏖️ LEAVE REQUESTS: If a member asks for leave, it will be treated as leave only, not as "off"
+🏢 OFFICE CAPACITY: Max 8 seats, normally 7 members in office daily
+🔄 HYBRID WORK: 3 days WFO, 2 days WFH per week (minimum 2 members in office per shift)</textarea>
+            </div>
+            <div style="text-align: right; border-top: 1px solid #eee; padding-top: 15px;">
+                <button type="button" id="saveCustomRulesModalBtn" style="background: linear-gradient(135deg, #8b5fbf, #a374d0); color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-right: 10px; transition: all 0.3s ease;">💾 Save Rules</button>
+                <button type="button" onclick="document.getElementById('customRulesModal').style.display='none'" style="background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer;">Cancel</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
+

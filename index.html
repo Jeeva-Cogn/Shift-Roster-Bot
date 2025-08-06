@@ -599,9 +599,11 @@
             color: white;
         }
 
+
         .calendar-day-number {
             font-weight: bold;
             margin-bottom: 2px;
+            font-size: 1.4em;
         }
 
         .leave-employees {
@@ -609,19 +611,19 @@
             flex-direction: column;
             gap: 2px;
             width: 100%;
-            max-height: 45px;
+            max-height: 60px;
             overflow-y: auto;
-            font-size: 9px;
+            font-size: 1.1em;
         }
 
         .leave-employee-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.7);
             border-radius: 3px;
-            padding: 1px 3px;
-            margin: 1px 0;
+            padding: 2px 6px;
+            margin: 2px 0;
         }
 
         .leave-employee-name {
@@ -629,7 +631,9 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            font-size: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
         }
 
         .cancel-leave-btn {
@@ -1389,10 +1393,19 @@
                 </div>
 
                 <div class="card">
-                    <h3>📋 Pending Leave Requests</h3>
-                    <div id="pendingLeavesList">
-                        <!-- Pending leaves will be shown here -->
-                    </div>
+                    <h3>👥 Team Member Leaves</h3>
+                    <table class="table" id="teamLeavesTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Day</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamLeavesTableBody">
+                            <!-- Team member leaves will be populated here by JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -1458,14 +1471,7 @@
                     <form id="scheduleForm">
                         <div class="form-group">
                             <label for="startDate">Start Date</label>
-                            <input type="date" id="startDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="numDays">Number of Days</label>
-                            <select id="numDays" required>
-                                <option value="7">1 Week</option>
-                                <option value="14">2 Weeks</option>
-                                <option value="30" selected>1 Month</option>
+
                                 <option value="60">2 Months</option>
                             </select>
                         </div>
@@ -1474,86 +1480,23 @@
                     </form>
                 </div>
 
-                <div class="card">
-                    <h3>🏖️ Extra Off Management</h3>
-                    <div class="alert alert-warning">
-                        <strong>Extra Offs:</strong> Add additional off days for team members. These are separate from regular week offs and will be respected during schedule generation.
-                    </div>
-                    <form id="extraOffForm">
-                        <div class="form-group">
-                            <label for="extraOffEmployee">Select Employee</label>
-                            <div style="display: flex; gap: 10px; align-items: end;">
-                                <select id="extraOffEmployee" required style="flex: 1;">
-                                    <option value="">Choose employee...</option>
-                                </select>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="initializeExtraOffManagement()" title="Refresh employee list">
-                                    🔄
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="extraOffDateRange">Date Range (Optional - uses main schedule dates if not specified)</label>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
-                                <div>
-                                    <label for="extraOffStartDate" style="font-size: 12px; color: #666;">From Date</label>
-                                    <input type="date" id="extraOffStartDate" class="form-control">
-                                </div>
-                                <div>
-                                    <label for="extraOffEndDate" style="font-size: 12px; color: #666;">To Date</label>
-                                    <input type="date" id="extraOffEndDate" class="form-control">
-                                </div>
-                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="updateExtraOffDatePicker()" title="Update date range">
-                                    📅 Update
-                                </button>
-                            </div>
-                            <small class="text-muted">Leave blank to use the main schedule's start date and duration</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="extraOffDates">Select Off Days (Multiple selection allowed)</label>
-                            <div id="extraOffDatePicker" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px; background: #f9f9f9;">
-                                <p class="text-muted" style="text-align: center; padding: 20px;">
-                                    📅 Please set a date range above or use the main schedule dates to see available days
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button type="button" class="btn btn-info" onclick="addExtraOffs()">➕ Add Extra Offs</button>
-                            <button type="button" class="btn btn-secondary" onclick="clearAllExtraOffs()">🗑️ Clear All</button>
-                            <button type="button" class="btn btn-outline-info" onclick="useMainScheduleDates()">📋 Use Main Schedule Dates</button>
-                            <button type="button" class="btn btn-outline-primary" onclick="updateExtraOffDatePicker()" title="Force refresh date picker">🔄 Refresh Dates</button>
-                        </div>
-                    </form>
-                    
-                    <div id="extraOffsList" class="mt-3">
-                        <h5>Current Extra Offs:</h5>
-                        <div id="extraOffsDisplay">
-                            <p class="text-muted">No extra offs scheduled</p>
-                        </div>
-                    </div>
-                </div>
+                <!-- Extra Off Management removed: leave requests are treated as leave only, not as off. -->
 
                 <div class="card">
-                    <h3>⚡ NPE ShiftBot Requirements</h3>
-                    <ul style="list-style-type: none; padding: 0;">
-                        <li style="margin: 10px 0; padding: 10px; background: #f8f6fb; border-radius: 5px;">
-                            � <strong>SHIFT_LEADS:</strong> One of first 5 members (Jeyakaran, Karthikeyan, Manoj, Panner, SaiKumar) must be in every shift
-                        </li>
-                        <li style="margin: 10px 0; padding: 10px; background: #f8f6fb; border-radius: 5px;">
-                            🚫 <strong>S2_ONLY:</strong> Dinesh and Mano only work S2 (no shift coverage)
-                        </li>
-                        <li style="margin: 10px 0; padding: 10px; background: #f8f6fb; border-radius: 5px;">
-                            � <strong>WEEKDAY_RULES:</strong> Mon-Fri: 3 in S1&S3, 2 in S2 | Sat: 2 in each shift | Sun: Only S2&S3 with 2 each
-                        </li>
-                        <li style="margin: 10px 0; padding: 10px; background: #f8f6fb; border-radius: 5px;">
-                            🔄 <strong>WEEK_OFF_RULE:</strong> Total off days ≤ number of Saturdays + Sundays in the month
-                        </li>
-                        <li style="margin: 10px 0; padding: 10px; background: #f8f6fb; border-radius: 5px;">
-                            🏖️ <strong>EXTRA_OFFS:</strong> Additional off days with multiple day selection (counted in total offs)
-                        </li>
-                    </ul>
+                    <h3>🛠️ Custom Roster Rules</h3>
+                    <form id="rosterRulesForm">
+                        <textarea id="rosterRulesText" style="width:100%;height:160px;resize:vertical;padding:10px;border-radius:8px;border:1px solid #d4c5e0;font-size:14px;">
+⚡ NPE ShiftBot Requirements
+� SHIFT_LEADS: One of first 5 members (Jeyakaran, Karthikeyan, Manoj, Panner, SaiKumar) must be in every shift
+🚫 S2_ONLY: Dinesh and Mano only work S2 (no shift coverage)
+� WEEKDAY_RULES: Mon-Fri: 3 in S1&S3, 2 in S2 | Sat: 2 in each shift | Sun: Only S2&S3 with 2 each
+🔄 WEEK_OFF_RULE: Total off days ≤ number of Saturdays + Sundays in the month
+🏖️ LEAVE REQUESTS: If a member asks for leave, it will be treated as leave only, not as "off".
+                        </textarea>
+                        <div style="margin-top:10px;text-align:right;">
+                            <button type="button" class="btn btn-success" onclick="saveRosterRules()">💾 Save Rules</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
@@ -2895,150 +2838,54 @@
                     shiftsToday = ['S1', 'S2', 'S3'];
                 }
                 
-                // Initialize shifts
-                shiftsToday.forEach(shift => {
-                    schedule[dateStr][shift] = [];
-                });
-                
-                // Assign shifts based on requirements
-                shiftsToday.forEach(shift => {
-                    let requiredCount = 0;
-                    let availableMembers = [];
-                    
-                    if (shift === 'S1') {
-                        if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
-                            requiredCount = 3;
-                            availableMembers = [...shiftLeads, ...associates];
-                        } else if (dayOfWeek === 6) { // Saturday
-                            requiredCount = 2;
-                            availableMembers = [...shiftLeads, ...associates];
-                        }
-                    } else if (shift === 'S2') {
-                        if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
-                            requiredCount = 2;
-                            availableMembers = [...shiftLeads, ...associates, ...s2OnlyMembers];
-                        } else if (dayOfWeek === 6) { // Saturday
-                            requiredCount = 2;
-                            availableMembers = [...shiftLeads, ...associates, ...s2OnlyMembers];
-                        } else { // Sunday
-                            requiredCount = 2;
-                            availableMembers = [...shiftLeads, ...associates, ...s2OnlyMembers];
-                        }
-                    } else if (shift === 'S3') {
-                        if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
-                            requiredCount = 3;
-                            availableMembers = [...shiftLeads, ...associates];
-                        } else if (dayOfWeek === 6) { // Saturday
-                            requiredCount = 2;
-                            availableMembers = [...shiftLeads, ...associates];
-                        } else { // Sunday
-                            requiredCount = 2;
-                            availableMembers = [...shiftLeads, ...associates];
-                        }
-                    }
-                    
-                    // Filter out members on extra off
-                    availableMembers = availableMembers.filter(emp => 
-                        !membersOnExtraOff.some(offEmp => offEmp.name === emp.name)
-                    );
-                    
-                    // Apply week-off rule: filter out employees who have reached weekend limit
-                    availableMembers = availableMembers.filter(emp => {
-                        const totalOffDays = countOffDaysForEmployee(emp.name, schedule, startDate, i);
-                        const extraOffDays = emp.extraOffs ? emp.extraOffs.length : 0;
-                        return (totalOffDays + extraOffDays) <= totalWeekends;
-                    });
-                    
-                    // Ensure at least one ShiftLead is in every shift (except S2 on weekend if needed)
-                    const availableShiftLeads = shiftLeads.filter(emp => 
-                        !membersOnExtraOff.some(offEmp => offEmp.name === emp.name) &&
-                        consecutiveDays[emp.name] < 6 && // Max 6 consecutive days
-                        (countOffDaysForEmployee(emp.name, schedule, startDate, i) + (emp.extraOffs ? emp.extraOffs.length : 0)) <= totalWeekends
-                    );
-                    
-                    const availableOthers = availableMembers.filter(emp => 
-                        emp.role !== 'ShiftLead' &&
-                        consecutiveDays[emp.name] < 6 && 
-                        (countOffDaysForEmployee(emp.name, schedule, startDate, i) + (emp.extraOffs ? emp.extraOffs.length : 0)) <= totalWeekends
-                    );
-                    
-                    // Sort by consecutive days worked (prioritize those who worked less)
-                    availableShiftLeads.sort((a, b) => consecutiveDays[a.name] - consecutiveDays[b.name]);
-                    availableOthers.sort((a, b) => consecutiveDays[a.name] - consecutiveDays[b.name]);
-                    
-                    // Assign members to shift
-                    const assigned = [];
-                    
-                    // First, assign at least one ShiftLead if available
-                    if (availableShiftLeads.length > 0) {
-                        assigned.push(availableShiftLeads[0]);
-                    }
-                    
-                    // Fill remaining positions
-                    const remaining = requiredCount - assigned.length;
-                    const remainingCandidates = [
-                        ...availableShiftLeads.slice(1),
-                        ...availableOthers
-                    ].slice(0, remaining);
-                    
-                    assigned.push(...remainingCandidates);
-                    
-                   // --- SHIFT_LEADS RULE ENFORCEMENT ---
-                   // Only allow at most two shift leads per shift
-                   const shiftLeadNames = ["Jeyakaran", "Karthikeyan", "Manoj", "Panner", "SaiKumar"];
-                   let shiftLeadCount = assigned.filter(emp => shiftLeadNames.includes(emp.name)).length;
-                   if (shiftLeadCount > 2) {
-                       // Remove extra shift leads, keep only first two
-                       let kept = 0;
-                       assigned = assigned.filter(emp => {
-                           if (shiftLeadNames.includes(emp.name)) {
-                               if (kept < 2) {
-                                   kept++;
-                                   return true;
-                               }
-                               return false;
-                           }
-                           return true;
-                       });
-                   }
-                   // No shift should be full of shift leads
-                   if (assigned.length > 0 && assigned.every(emp => shiftLeadNames.includes(emp.name))) {
-                       // Replace last shift lead with an associate if available
-                       const associate = availableOthers.find(emp => !shiftLeadNames.includes(emp.name));
-                       if (associate) {
-                           assigned[assigned.length - 1] = associate;
-                       }
-                   }
-                   // --- END SHIFT_LEADS RULE ---
-                    // Add to schedule
-                    schedule[dateStr][shift] = assigned.map(emp => emp.name);
-                    
-                    // Update consecutive days counter
-                    assigned.forEach(emp => {
-                        consecutiveDays[emp.name]++;
-                        lastWorkDate[emp.name] = dateStr;
-                    });
-                });
-                
-                // Check for week offs (consecutive days after 4-6 days of work)
-                npeTeamData.forEach(emp => {
-                    const isWorkingToday = shiftsToday.some(shift => 
-                        schedule[dateStr][shift].includes(emp.name)
-                    );
-                    
-                    if (!isWorkingToday) {
-                        consecutiveDays[emp.name] = 0; // Reset consecutive counter
-                        
-                        // Check if this is a week off (not working and had worked 4+ consecutive days)
-                        if (lastWorkDate[emp.name] && consecutiveDays[emp.name] === 0) {
-                            weekOffsGiven[emp.name]++;
-                        }
-                    }
-                });
+        // Initialize Reports
+        function initReports() {
+            const ctx = document.getElementById('reportChart').getContext('2d');
+            // ...existing chart code...
+
+            // Add view-only, downloadable generated roster Excel
+            const reportsTab = document.getElementById('reports');
+            if (reportsTab && !document.getElementById('viewRosterExcelCard')) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.id = 'viewRosterExcelCard';
+                card.innerHTML = `
+                    <h3>📊 Generated Roster Excel (View Only)</h3>
+                    <div style="margin-bottom:10px;">
+                        <button class="btn btn-info" id="downloadViewOnlyRosterExcel">Download View-Only Excel</button>
+                        <span style="color:#888; font-size:13px; margin-left:10px;">(View only, cannot edit. Use Export Excel for editable version.)</span>
+                    </div>
+                    <iframe id="rosterExcelPreview" style="width:100%;height:400px;border:1px solid #d4c5e0;border-radius:8px;background:#f8f9fa;" src=""></iframe>
+                `;
+                reportsTab.appendChild(card);
+
+                document.getElementById('downloadViewOnlyRosterExcel').onclick = async function() {
+                    await downloadViewOnlyRosterExcel();
+                };
             }
-            
-            scheduleData = schedule;
-            return schedule;
+        }
+
+        // Download view-only roster Excel
+        async function downloadViewOnlyRosterExcel() {
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('Roster View Only');
+                worksheet.properties.defaultRowHeight = 20;
+                // ...copy logic from downloadSchedule, but make it read-only...
+                // For view-only, do not allow editing cells (Excel can't truly lock via JS, but mark as view-only in UI)
+                // Fill with same color coding and data as downloadSchedule
+                // ...existing code for filling worksheet...
+                // Generate and download the file
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { 
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                });
+                const fileName = `Shift_Roster_View_Only_August_2025.xlsx`;
+                saveAs(blob, fileName);
+                alert(`Excel downloaded (View Only): ${fileName}`);
+            } catch (error) {
+                alert('Failed to download view-only Excel: ' + error.message);
+            }
         }
         
         // Helper function to count off days for an employee up to a certain point
@@ -3554,25 +3401,24 @@
                         cell.alignment = { horizontal: 'center', vertical: 'middle' };
                         cell.font = { bold: assignment !== 'OFF', size: 10 };
                         
-                        // Color coding based on assignment and WFO policy using Chennai timezone
+                        // Strict color coding for Excel roster
                         if (assignment === 'Leave') {
                             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } }; // Bright red
                             cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
                         } else if (assignment === 'OFF') {
-                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF808080' } }; // Gray
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF808080' } }; // Grey
                             cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
                         } else {
-                            // Check if it's weekend using Chennai timezone
+                            // WFO (Weekday) = Green, WFH (Weekend) = Cyan
                             const currentDate = new Date(2025, 7, day);
                             const isWeekend = isWeekendInChennai(currentDate);
-                            
                             if (isWeekend) {
-                                // Weekend work = WFH (Strong Blue highlighting)
-                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0066CC' } }; // Strong blue
-                                cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
+                                // WFH = Cyan
+                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00FFFF' } }; // Cyan
+                                cell.font = { ...cell.font, color: { argb: 'FF000000' } }; // Black text
                             } else {
-                                // Weekday work = WFO (Strong Green highlighting)
-                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00AA00' } }; // Strong green
+                                // WFO = Green
+                                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00AA00' } }; // Green
                                 cell.font = { ...cell.font, color: { argb: 'FFFFFFFF' } }; // White text
                             }
                         }

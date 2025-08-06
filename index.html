@@ -50,7 +50,7 @@
         // Chennai timezone utilities - Ultimate rule awareness
         function getChennaiTime() {
             return new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
-        }
+        // ...existing code...
         
         function getChennaiDate() {
             const chennaiTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
@@ -1176,6 +1176,10 @@
 
         <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content active">
+            <div id="importExportRosterBar" style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:18px;">
+                <button id="importRosterBtn" class="btn btn-outline-primary" type="button">⬆️ Import Roster (Excel/CSV)</button>
+                <button id="exportRosterBtn" class="btn btn-outline-success" type="button">⬇️ Export Roster (CSV)</button>
+            </div>
             <!-- Modern Analytics Header -->
             <div class="analytics-header">
                 <h2>Team Performance Analytics</h2>
@@ -1699,55 +1703,65 @@
         };
 
         function processImportedRoster(workbook) {
-            // Show loading state
-            document.body.style.cursor = 'wait';
-            const loadingAlert = document.createElement('div');
-            loadingAlert.className = 'alert alert-info';
-            loadingAlert.style.position = 'fixed';
-            loadingAlert.style.top = '20px';
-            loadingAlert.style.right = '20px';
-            loadingAlert.style.zIndex = '1000';
-            loadingAlert.innerHTML = '🔄 Analyzing roster data...';
-            document.body.appendChild(loadingAlert);
+// ...existing code...
+// Remove any references to handleImportRoster and saveRosterRules from the HTML
+document.addEventListener('DOMContentLoaded', function() {
+    // Remove buttons or elements with onclick="handleImportRoster" or onclick="saveRosterRules"
+    document.querySelectorAll('[onclick*="handleImportRoster"], [onclick*="saveRosterRules"]').forEach(el => {
+        el.removeAttribute('onclick');
+        // Optionally hide or disable the button if it serves no other purpose
+        el.style.display = 'none';
+    });
+});
 
-            try {
-                const sheetProcessors = {
-                    [EXCEL_TEMPLATE.SHEETS.EMPLOYEES.name]: (sheet) => {
-                        const employeeData = XLSX.utils.sheet_to_json(sheet);
-                        npeTeamData.length = 0;
-                        
-                        employeeData.forEach(emp => {
-                            // Check for required fields
-                            if (!emp['Name'] || !emp['Role']) {
-                                console.warn('Skipping employee record: Name and Role are required fields');
-                                return;
-                            }
-                            
-                            // Generate ID if not provided
-                            const id = emp['Employee ID'] || Date.now().toString();
-                            
-                            npeTeamData.push({
-                                id: id,
-                                name: emp['Name'],
-                                role: emp['Role'],
-                                status: 'Active',
-                                // All other fields are optional with defaults
-                                daysOff: emp['Preferred Days Off'] ? 
-                                    emp['Preferred Days Off'].split(',').map(d => parseInt(d.trim())) : 
-                                    [0, 6], // Default weekend off
-                                cts: emp['Employee ID'] || id, // Use ID as CTS if not provided
-                                eshc: emp['ESHC'] || 'N/A',   // ESHC is optional
-                                maxConsecutiveDays: 6,        // Default values for health rules
-                                minRestHours: 12,
-                                skills: emp['Skills'] ? emp['Skills'].split(',').map(s => s.trim()) : []
-                            });
-                        });
-                    },
+// Move custom rules textarea to a hidden panel toggled by a button in the top right of the schedule form
+const scheduleForm = document.getElementById('scheduleForm');
+if (scheduleForm && !document.getElementById('customRulesBox')) {
+    // Create the toggle button
+    const rulesBtn = document.createElement('button');
+    rulesBtn.type = 'button';
+    rulesBtn.id = 'toggleCustomRulesBtn';
+    rulesBtn.className = 'btn btn-sm btn-outline-secondary';
+    rulesBtn.style.cssText = 'position:absolute;top:8px;right:12px;z-index:10;font-size:13px;padding:2px 10px;';
+    rulesBtn.innerHTML = '🛠️ Custom Roster Rules';
 
-                    [EXCEL_TEMPLATE.SHEETS.SHIFTS.name]: (sheet) => {
-                        const shiftData = XLSX.utils.sheet_to_json(sheet);
-                        window.shiftConfig = {};
-                        
+    // Create the rules box (hidden by default)
+    const customRulesBox = document.createElement('div');
+    customRulesBox.id = 'customRulesBox';
+    customRulesBox.className = 'mb-3';
+    customRulesBox.style.display = 'none';
+    customRulesBox.style.position = 'absolute';
+    customRulesBox.style.top = '40px';
+    customRulesBox.style.right = '12px';
+    customRulesBox.style.width = '320px';
+    customRulesBox.style.background = '#fff';
+    customRulesBox.style.border = '1px solid #d4c5e0';
+    customRulesBox.style.borderRadius = '8px';
+    customRulesBox.style.boxShadow = '0 2px 12px rgba(139,95,191,0.08)';
+    customRulesBox.style.padding = '16px';
+    customRulesBox.style.zIndex = '1001';
+    customRulesBox.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <label for="customRulesTextarea" class="form-label" style="margin-bottom:0;"><strong>Custom Roster Rules</strong></label>
+          <button type="button" id="closeCustomRulesBox" class="btn btn-sm btn-link" style="color:#dc3545;font-size:18px;line-height:1;">&times;</button>
+        </div>
+        <textarea id="customRulesTextarea" class="form-control" rows="5" placeholder="Enter custom roster rules here..."></textarea>
+        <div style="font-size:12px;color:#888;margin-top:4px;">Editable, applies to next schedule generation.</div>
+    `;
+
+    // Insert the button and box into the schedule form (button at top right, box after button)
+    scheduleForm.style.position = 'relative';
+    scheduleForm.insertBefore(rulesBtn, scheduleForm.firstChild);
+    scheduleForm.appendChild(customRulesBox);
+
+    // Toggle logic
+    rulesBtn.onclick = () => {
+        customRulesBox.style.display = customRulesBox.style.display === 'none' ? 'block' : 'none';
+    };
+    customRulesBox.querySelector('#closeCustomRulesBox').onclick = () => {
+        customRulesBox.style.display = 'none';
+    };
+}
                         shiftData.forEach(shift => {
                             window.shiftConfig[shift['Shift Code']] = {
                                 startTime: shift['Start Time'],
@@ -2051,6 +2065,9 @@ saveCustomRulesModalBtn.onclick = () => {
 
         // Initialize Dashboard
         function initDashboard() {
+            // Remove Import/Export buttons and logic from Dashboard as per user request
+            // Only Excel export (in Reports tab) is supported now
+        // Import/Export functions removed as per user request
             // Start activity feed auto-refresh
             stopActivityFeed(); // Stop any existing timer
             startActivityFeed(); // Start new timer
@@ -2691,26 +2708,188 @@ saveCustomRulesModalBtn.onclick = () => {
             
             // Add empty cells for days before month start
             const firstDay = new Date(year, month, 1).getDay();
-            for (let i = 0; i < firstDay; i++) {
-                const emptyDay = document.createElement('div');
-                container.appendChild(emptyDay);
+    // Strict week off/leave logic
+    // 1. Track for each member: consecutive work days, week offs given, leave days
+    // 2. After 4-6 consecutive work days, assign week off (if not on leave)
+    // 3. If leave is approved for a day, mark as leave (not off, not working)
+    // 4. Week offs per member <= total weekends
+    // 5. Leave and week off never overlap
+    // 6. Leave days are not counted as week off
+    // 7. Dinesh/Mano only in S2
+
+    // Precompute leave map for fast lookup
+    const leaveMap = {};
+    (window.leaveRequests || []).forEach(l => {
+        if (l.status === 'approved') {
+            if (!leaveMap[l.employeeName]) leaveMap[l.employeeName] = new Set();
+            leaveMap[l.employeeName].add(l.date);
+        }
+    });
+
+    // Precompute total weekends in period
+    let totalWeekends = 0;
+    for (let i = 0; i < numDays; i++) {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+        const dow = d.getDay();
+        if (dow === 0 || dow === 6) totalWeekends++;
+    }
+
+    // For each member, track state
+    const memberState = {};
+    npeTeamData.forEach(emp => {
+        memberState[emp.name] = {
+            streak: 0,
+            weekOffs: 0,
+            lastWasOff: false
+        };
+    });
+
+    // Track WFO/WFH assignments per member per week
+    const wfoCount = {};
+    npeTeamData.forEach(emp => { wfoCount[emp.name] = 0; });
+
+    for (let i = 0; i < numDays; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(currentDate.getDate() + i);
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const dayOfWeek = currentDate.getDay();
+        schedule[dateStr] = { S1: [], S2: [], S3: [], S4: [] };
+
+        // Assign S2-only members (Dinesh, Mano) to S2 only
+        const s2OnlyNames = ['Dinesh', 'Mano'];
+        s2OnlyNames.forEach(name => {
+            const emp = npeTeamData.find(e => e.name === name);
+            if (emp) schedule[dateStr]['S2'].push(name);
+        });
+
+        // Prepare WFO/WFH assignment for the day
+        // 1. Get eligible members (not on leave, not off, not S2-only)
+        let eligible = npeTeamData.filter(emp => !s2OnlyNames.includes(emp.name));
+        // Exclude those on leave or week off today
+        eligible = eligible.filter(emp => {
+            if (leaveMap[emp.name] && leaveMap[emp.name].has(dateStr)) return false;
+            // If already assigned as OFF for today, skip
+            let streak = memberState[emp.name].streak;
+            let weekOffs = memberState[emp.name].weekOffs;
+            let offThreshold = 5;
+            if (streak >= 4 && weekOffs < totalWeekends) {
+                offThreshold = 4 + (emp.name.charCodeAt(0) % 3);
+                if (streak >= offThreshold) return false;
             }
-            
-            // Add days of the month
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayElement = document.createElement('div');
-                dayElement.className = 'calendar-day';
-                
-                // Add day number
-                const dayNumber = document.createElement('div');
-                dayNumber.className = 'calendar-day-number';
-                dayNumber.textContent = day;
-                dayElement.appendChild(dayNumber);
-                
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const leavesForDay = leaveRequests.filter(l => l.date === dateStr && l.status === 'approved');
-                
-                if (leavesForDay.length > 0) {
+            return true;
+        });
+
+        // 2. Sort by who needs more WFO this week (to ensure 3 per week)
+        // Calculate week number for each day
+        const weekNum = Math.floor(i / 7);
+        // For each member, count WFO in this week
+        const wfoThisWeek = {};
+        npeTeamData.forEach(emp => { wfoThisWeek[emp.name] = 0; });
+        for (let j = i - (i % 7); j < i; j++) {
+            if (j < 0) continue;
+            const prevDate = new Date(startDate);
+            prevDate.setDate(prevDate.getDate() + j);
+            const prevDateStr = prevDate.toISOString().split('T')[0];
+            npeTeamData.forEach(emp => {
+                if (schedule[prevDateStr] && schedule[prevDateStr][emp.name] && schedule[prevDateStr][emp.name].endsWith('WFO')) {
+                    wfoThisWeek[emp.name]++;
+                }
+            });
+        }
+
+        // 3. Assign up to 8 (normally 7) WFO for the day
+        let wfoToday = [];
+        eligible = eligible.sort((a, b) => wfoThisWeek[a.name] - wfoThisWeek[b.name]);
+        for (let k = 0; k < eligible.length && wfoToday.length < 8; k++) {
+            // Ensure each member gets at least 3 WFO per week
+            if (wfoThisWeek[eligible[k].name] < 3 || wfoToday.length < 7) {
+                wfoToday.push(eligible[k].name);
+                wfoThisWeek[eligible[k].name]++;
+            }
+        }
+
+        // 4. Assign WFH to the rest
+        let wfhToday = eligible.filter(emp => !wfoToday.includes(emp.name)).map(emp => emp.name);
+
+        // 5. Assign shifts and mark WFO/WFH
+        npeTeamData.forEach(emp => {
+            if (s2OnlyNames.includes(emp.name)) return; // Already handled
+
+            // If leave is approved for this day, mark as leave, reset streak, do not assign shift or off
+            if (leaveMap[emp.name] && leaveMap[emp.name].has(dateStr)) {
+                memberState[emp.name].lastWasOff = false;
+                memberState[emp.name].streak = 0;
+                schedule[dateStr][emp.name] = 'Leave';
+                return;
+            }
+
+            // If streak >= 4, 5, or 6, and week offs < totalWeekends, assign week off
+            let streak = memberState[emp.name].streak;
+            let weekOffs = memberState[emp.name].weekOffs;
+            let assignOff = false;
+            let offThreshold = 5;
+            if (streak >= 4 && weekOffs < totalWeekends) {
+                offThreshold = 4 + (emp.name.charCodeAt(0) % 3);
+                if (streak >= offThreshold) assignOff = true;
+            }
+            if (assignOff) {
+                memberState[emp.name].streak = 0;
+                memberState[emp.name].weekOffs++;
+                memberState[emp.name].lastWasOff = true;
+                schedule[dateStr][emp.name] = 'OFF';
+                return;
+            }
+
+            // Assign to a shift (simple round robin for now)
+            let shiftIdx = (i + emp.name.length) % 3;
+            let shift = ['S1', 'S2', 'S3'][shiftIdx];
+            if (shift === 'S2' && s2OnlyNames.some(n => schedule[dateStr]['S2'].includes(n))) {
+                shift = shiftIdx === 0 ? 'S1' : 'S3';
+            }
+
+            // Assign WFO/WFH
+            let wfoOrWfh = wfoToday.includes(emp.name) ? 'WFO' : 'WFH';
+            schedule[dateStr][shift].push(emp.name + ' (' + wfoOrWfh + ')');
+            schedule[dateStr][emp.name] = wfoOrWfh;
+            memberState[emp.name].streak++;
+            memberState[emp.name].lastWasOff = false;
+        });
+
+        // Ensure at least 2 WFO per shift
+        ['S1', 'S2', 'S3'].forEach(shift => {
+            let wfoInShift = schedule[dateStr][shift].filter(n => n.endsWith('(WFO)')).length;
+            if (wfoInShift < 2) {
+                // Promote WFH to WFO in this shift if possible
+                let toPromote = 2 - wfoInShift;
+                for (let idx = 0; idx < schedule[dateStr][shift].length && toPromote > 0; idx++) {
+                    if (schedule[dateStr][shift][idx].endsWith('(WFH)')) {
+                        let name = schedule[dateStr][shift][idx].replace(' (WFH)', '');
+                        schedule[dateStr][shift][idx] = name + ' (WFO)';
+                        schedule[dateStr][name] = 'WFO';
+                        toPromote--;
+                    }
+                }
+            }
+        });
+    }
+
+    // For Excel/UI, fill in 'Leave' and 'OFF' for each member per day
+    Object.keys(schedule).forEach(dateStr => {
+        npeTeamData.forEach(emp => {
+            if (s2OnlyNames.includes(emp.name)) return;
+            if (!schedule[dateStr][emp.name]) {
+                // If not assigned to a shift, check if marked as leave or off
+                if (schedule[dateStr][emp.name] !== 'Leave' && schedule[dateStr][emp.name] !== 'OFF') {
+                    // Not assigned, not leave, not off: must be off (e.g. after max week offs used)
+                    schedule[dateStr][emp.name] = '';
+                }
+            }
+        });
+    });
+
+    return schedule;
+}
                     dayElement.classList.add('has-leave');
                     
                     // Create employees container
@@ -2807,17 +2986,71 @@ saveCustomRulesModalBtn.onclick = () => {
         }
 
         // Schedule Generation
+        // Ensure start date is always editable
+        const startDateInput = document.getElementById('startDate');
+        if (startDateInput) {
+            startDateInput.removeAttribute('readonly');
+            startDateInput.removeAttribute('disabled');
+            startDateInput.style.pointerEvents = 'auto';
+        }
+
+        // Move custom rules textarea to a hidden panel toggled by a button in the top right of the schedule form
+        const scheduleForm = document.getElementById('scheduleForm');
+        if (scheduleForm && !document.getElementById('customRulesBox')) {
+            // Create the toggle button
+            const rulesBtn = document.createElement('button');
+            rulesBtn.type = 'button';
+            rulesBtn.id = 'toggleCustomRulesBtn';
+            rulesBtn.className = 'btn btn-sm btn-outline-secondary';
+            rulesBtn.style.cssText = 'position:absolute;top:8px;right:12px;z-index:10;font-size:13px;padding:2px 10px;';
+            rulesBtn.innerHTML = '🛠️ Custom Roster Rules';
+
+            // Create the rules box (hidden by default)
+            const customRulesBox = document.createElement('div');
+            customRulesBox.id = 'customRulesBox';
+            customRulesBox.className = 'mb-3';
+            customRulesBox.style.display = 'none';
+            customRulesBox.style.position = 'absolute';
+            customRulesBox.style.top = '40px';
+            customRulesBox.style.right = '12px';
+            customRulesBox.style.width = '320px';
+            customRulesBox.style.background = '#fff';
+            customRulesBox.style.border = '1px solid #d4c5e0';
+            customRulesBox.style.borderRadius = '8px';
+            customRulesBox.style.boxShadow = '0 2px 12px rgba(139,95,191,0.08)';
+            customRulesBox.style.padding = '16px';
+            customRulesBox.style.zIndex = '1001';
+            customRulesBox.innerHTML = `
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                  <label for="customRulesTextarea" class="form-label" style="margin-bottom:0;"><strong>Custom Roster Rules</strong></label>
+                  <button type="button" id="closeCustomRulesBox" class="btn btn-sm btn-link" style="color:#dc3545;font-size:18px;line-height:1;">&times;</button>
+                </div>
+                <textarea id="customRulesTextarea" class="form-control" rows="5" placeholder="Enter custom roster rules here..."></textarea>
+                <div style="font-size:12px;color:#888;margin-top:4px;">Editable, applies to next schedule generation.</div>
+            `;
+
+            // Insert the button and box into the schedule form (button at top right, box after button)
+            scheduleForm.style.position = 'relative';
+            scheduleForm.insertBefore(rulesBtn, scheduleForm.firstChild);
+            scheduleForm.appendChild(customRulesBox);
+
+            // Toggle logic
+            rulesBtn.onclick = () => {
+                customRulesBox.style.display = customRulesBox.style.display === 'none' ? 'block' : 'none';
+            };
+            customRulesBox.querySelector('#closeCustomRulesBox').onclick = () => {
+                customRulesBox.style.display = 'none';
+            };
+        }
+
         document.getElementById('scheduleForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
             const startDate = document.getElementById('startDate').value;
             const numDays = parseInt(document.getElementById('numDays').value);
-            
             if (!startDate) {
                 alert('Please select a start date!');
                 return;
             }
-            
             generateSchedule(startDate, numDays);
         });
 
@@ -3000,10 +3233,100 @@ saveCustomRulesModalBtn.onclick = () => {
                 const workbook = new ExcelJS.Workbook();
                 const worksheet = workbook.addWorksheet('Roster View Only');
                 worksheet.properties.defaultRowHeight = 20;
-                // ...copy logic from downloadSchedule, but make it read-only...
-                // For view-only, do not allow editing cells (Excel can't truly lock via JS, but mark as view-only in UI)
-                // Fill with same color coding and data as downloadSchedule
-                // ...existing code for filling worksheet...
+
+                // Prepare header rows
+                const dates = Object.keys(scheduleData);
+                if (dates.length === 0) throw new Error('No schedule data to export.');
+                // First row: Date
+                const headerRow = ['CTS', 'ESHC', 'Name', ...dates];
+                worksheet.addRow(headerRow);
+                // Second row: Day of week
+                const dayRow = ['','','', ...dates.map(d => {
+                    const dt = new Date(d);
+                    return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
+                })];
+                worksheet.addRow(dayRow);
+
+                // Color map
+                const colorMap = {
+                    'WFO': 'FF28a745', // Green
+                    'WFH': 'FF17a2b8', // Cyan
+                    'OFF': 'FF6c757d', // Grey
+                    'Leave': 'FFdc3545', // Red
+                    '': 'FFFFFFFF' // White
+                };
+
+                // For each member, fill row
+                npeTeamData.forEach(member => {
+                    const row = [member.cts, member.eshc, member.name];
+                    dates.forEach(date => {
+                        let val = '';
+                        // S2-only logic
+                        if ((member.name === 'Dinesh' || member.name === 'Mano') && scheduleData[date]['S2'] && scheduleData[date]['S2'].includes(member.name)) {
+                            val = 'S2 (WFO)';
+                        } else if (scheduleData[date][member.name]) {
+                            if (scheduleData[date][member.name] === 'Leave') val = 'Leave';
+                            else if (scheduleData[date][member.name] === 'OFF') val = 'OFF';
+                            else if (scheduleData[date][member.name] === 'WFO') val = 'WFO';
+                            else if (scheduleData[date][member.name] === 'WFH') val = 'WFH';
+                        } else {
+                            // Try to find in shift arrays
+                            let found = false;
+                            ['S1','S2','S3'].forEach(shift => {
+                                if (scheduleData[date][shift] && Array.isArray(scheduleData[date][shift])) {
+                                    scheduleData[date][shift].forEach(n => {
+                                        if (typeof n === 'string' && n.startsWith(member.name)) {
+                                            if (n.includes('WFO')) val = 'WFO';
+                                            else if (n.includes('WFH')) val = 'WFH';
+                                            found = true;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        row.push(val);
+                    });
+                    worksheet.addRow(row);
+                });
+
+                // Style cells
+                worksheet.eachRow((row, rowNumber) => {
+                    if (rowNumber <= 2) {
+                        row.font = { bold: true };
+                        row.alignment = { vertical: 'middle', horizontal: 'center' };
+                        row.height = 22;
+                        row.eachCell(cell => {
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'FFF3F0FA' }
+                            };
+                        });
+                    } else {
+                        row.eachCell((cell, colNumber) => {
+                            if (colNumber <= 3) {
+                                cell.font = { bold: true };
+                                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                            } else {
+                                let val = cell.value;
+                                let color = colorMap[val] || 'FFFFFFFF';
+                                cell.fill = {
+                                    type: 'pattern',
+                                    pattern: 'solid',
+                                    fgColor: { argb: color }
+                                };
+                                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                                if (val === 'Leave' || val === 'OFF') cell.font = { bold: true };
+                            }
+                        });
+                    }
+                });
+
+                worksheet.columns.forEach((col, idx) => {
+                    if (idx < 3) col.width = 12;
+                    else col.width = 10;
+                });
+
                 // Generate and download the file
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { 
@@ -3226,69 +3549,7 @@ saveCustomRulesModalBtn.onclick = () => {
             }
         }
 
-        // Extra Off Management Functions
-        function initializeExtraOffManagement() {
-            // Ensure we have a slight delay to make sure DOM is ready
-            const employeeSelect = document.getElementById('extraOffEmployee');
-            if (!employeeSelect) {
-                console.warn('Employee select not found, retrying...');
-                setTimeout(initializeExtraOffManagement, 100);
-                return;
-            }
-            
-            // Clear and populate employee dropdown
-            employeeSelect.innerHTML = '<option value="">Choose employee...</option>';
-            
-            // Check if npeTeamData is available
-            if (typeof npeTeamData !== 'undefined' && npeTeamData && npeTeamData.length > 0) {
-                npeTeamData.forEach(emp => {
-                    const option = document.createElement('option');
-                    option.value = emp.name;
-                    option.textContent = `${emp.name} (${emp.role})`;
-                    employeeSelect.appendChild(option);
-                });
-            } else {
-                // If npeTeamData is not available, add a placeholder
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'Team data not loaded yet...';
-                option.disabled = true;
-                employeeSelect.appendChild(option);
-            }
-            
-            // Set up event listeners for date picker updates
-            const startDateEl = document.getElementById('startDate');
-            const numDaysEl = document.getElementById('numDays');
-            const extraOffStartDateEl = document.getElementById('extraOffStartDate');
-            const extraOffEndDateEl = document.getElementById('extraOffEndDate');
-            
-            if (startDateEl && !startDateEl.dataset.extraOffListener) {
-                startDateEl.addEventListener('change', () => {
-                    console.log('Start date changed to:', startDateEl.value);
-                    updateExtraOffDatePicker();
-                });
-                startDateEl.dataset.extraOffListener = 'true';
-            }
-            if (numDaysEl && !numDaysEl.dataset.extraOffListener) {
-                numDaysEl.addEventListener('change', () => {
-                    console.log('Number of days changed to:', numDaysEl.value);
-                    updateExtraOffDatePicker();
-                });
-                numDaysEl.dataset.extraOffListener = 'true';
-            }
-            if (extraOffStartDateEl && !extraOffStartDateEl.dataset.extraOffListener) {
-                extraOffStartDateEl.addEventListener('change', updateExtraOffDatePicker);
-                extraOffStartDateEl.dataset.extraOffListener = 'true';
-            }
-            if (extraOffEndDateEl && !extraOffEndDateEl.dataset.extraOffListener) {
-                extraOffEndDateEl.addEventListener('change', updateExtraOffDatePicker);
-                extraOffEndDateEl.dataset.extraOffListener = 'true';
-            }
-            
-            updateExtraOffDisplay();
-        }
-        
-        function updateExtraOffDatePicker() {
+        // ...Extra Off Management functions removed...
 // Extra Off Management removed as per requirements. Leave/off logic clarified: if member asks leave, it is leave only, not off. All extra off UI and logic removed.
         }
         

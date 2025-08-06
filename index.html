@@ -2401,62 +2401,75 @@
 // ...existing code...
 // Remove any references to handleImportRoster and saveRosterRules from the HTML
 document.addEventListener('DOMContentLoaded', function() {
+
     // Remove buttons or elements with onclick="handleImportRoster" or onclick="saveRosterRules"
     document.querySelectorAll('[onclick*="handleImportRoster"], [onclick*="saveRosterRules"]').forEach(el => {
         el.removeAttribute('onclick');
-        // Optionally hide or disable the button if it serves no other purpose
         el.style.display = 'none';
     });
-});
 
-// Move custom rules textarea to a hidden panel toggled by a button in the top right of the schedule form
-const scheduleForm = document.getElementById('scheduleForm');
-if (scheduleForm && !document.getElementById('customRulesBox')) {
-    // Create the toggle button
-    const rulesBtn = document.createElement('button');
-    rulesBtn.type = 'button';
-    rulesBtn.id = 'toggleCustomRulesBtn';
-    rulesBtn.className = 'btn btn-sm btn-outline-secondary';
-    rulesBtn.style.cssText = 'position:absolute;top:8px;right:12px;z-index:10;font-size:13px;padding:2px 10px;';
-    rulesBtn.innerHTML = '🛠️ Custom Roster Rules';
+    // Schedule form and custom rules initialization
+    const scheduleForm = document.getElementById('scheduleForm');
+    if (scheduleForm && !document.getElementById('customRulesBox')) {
+        // Create the toggle button
+        const rulesBtn = document.createElement('button');
+        rulesBtn.type = 'button';
+        rulesBtn.id = 'toggleCustomRulesBtn';
+        rulesBtn.className = 'btn btn-sm btn-outline-secondary';
+        rulesBtn.style.cssText = 'position:absolute;top:8px;right:12px;z-index:10;font-size:13px;padding:2px 10px;';
+        rulesBtn.innerHTML = '🛠️ Custom Roster Rules';
 
-    // Create the rules box (hidden by default)
-    const customRulesBox = document.createElement('div');
-    customRulesBox.id = 'customRulesBox';
-    customRulesBox.className = 'mb-3';
-    customRulesBox.style.display = 'none';
-    customRulesBox.style.position = 'absolute';
-    customRulesBox.style.top = '40px';
-    customRulesBox.style.right = '12px';
-    customRulesBox.style.width = '320px';
-    customRulesBox.style.background = '#fff';
-    customRulesBox.style.border = '1px solid #d4c5e0';
-    customRulesBox.style.borderRadius = '8px';
-    customRulesBox.style.boxShadow = '0 2px 12px rgba(139,95,191,0.08)';
-    customRulesBox.style.padding = '16px';
-    customRulesBox.style.zIndex = '1001';
-    customRulesBox.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <label for="customRulesTextarea" class="form-label" style="margin-bottom:0;"><strong>Custom Roster Rules</strong></label>
-          <button type="button" id="closeCustomRulesBox" class="btn btn-sm btn-link" style="color:#dc3545;font-size:18px;line-height:1;">&times;</button>
-        </div>
-        <textarea id="customRulesTextarea" class="form-control" rows="5" placeholder="Enter custom roster rules here..."></textarea>
-        <div style="font-size:12px;color:#888;margin-top:4px;">Editable, applies to next schedule generation.</div>
-    `;
-
-    // Insert the button and box into the schedule form (button at top right, box after button)
-    scheduleForm.style.position = 'relative';
-    scheduleForm.insertBefore(rulesBtn, scheduleForm.firstChild);
-    scheduleForm.appendChild(customRulesBox);
-
-    // Toggle logic
-    rulesBtn.onclick = () => {
-        customRulesBox.style.display = customRulesBox.style.display === 'none' ? 'block' : 'none';
-    };
-    customRulesBox.querySelector('#closeCustomRulesBox').onclick = () => {
+        // Create the rules box (hidden by default)
+        const customRulesBox = document.createElement('div');
+        customRulesBox.id = 'customRulesBox';
+        customRulesBox.className = 'mb-3';
         customRulesBox.style.display = 'none';
-    };
-}
+        customRulesBox.style.position = 'absolute';
+        customRulesBox.style.top = '40px';
+        customRulesBox.style.right = '12px';
+        customRulesBox.style.width = '320px';
+        customRulesBox.style.background = '#fff';
+        customRulesBox.style.border = '1px solid #d4c5e0';
+        customRulesBox.style.borderRadius = '8px';
+        customRulesBox.style.boxShadow = '0 2px 12px rgba(139,95,191,0.08)';
+        customRulesBox.style.padding = '16px';
+        customRulesBox.style.zIndex = '1001';
+        customRulesBox.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <label for="customRulesTextarea" class="form-label" style="margin-bottom:0;"><strong>Custom Roster Rules</strong></label>
+              <button type="button" id="closeCustomRulesBox" class="btn btn-sm btn-link" style="color:#dc3545;font-size:18px;line-height:1;">&times;</button>
+            </div>
+            <textarea id="customRulesTextarea" class="form-control" rows="5" placeholder="Enter custom roster rules here..."></textarea>
+            <div style="font-size:12px;color:#888;margin-top:4px;">Editable, applies to next schedule generation.</div>
+        `;
+
+        // Insert the button and box into the schedule form (button at top right, box after button)
+        scheduleForm.style.position = 'relative';
+        scheduleForm.insertBefore(rulesBtn, scheduleForm.firstChild);
+        scheduleForm.appendChild(customRulesBox);
+
+        // Toggle logic
+        rulesBtn.onclick = () => {
+            customRulesBox.style.display = customRulesBox.style.display === 'none' ? 'block' : 'none';
+        };
+        customRulesBox.querySelector('#closeCustomRulesBox').onclick = () => {
+            customRulesBox.style.display = 'none';
+        };
+    }
+
+    if (scheduleForm) {
+        scheduleForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const startDate = document.getElementById('startDate').value;
+            const timePeriod = parseInt(document.getElementById('timePeriod').value);
+            if (!startDate) {
+                alert('Please select a start date!');
+                return;
+            }
+            generateSchedule(startDate, timePeriod);
+        });
+    }
+});
 
         // Excel Template and Import Processing
         const EXCEL_TEMPLATE = {
@@ -3955,23 +3968,25 @@ if (scheduleForm && !document.getElementById('customRulesBox')) {
                 let strictWarnings = [];
                 npeTeamData.forEach(emp => {
                     let offDays = 0;
+                    let leaveDays = 0;
                     scheduleKeys.forEach(dateStr => {
                         const daySchedule = schedule[dateStr];
                         const dayOfWeek = new Date(dateStr).getDay();
                         const shiftsToday = dayOfWeek === 0 ? ['S2', 'S3'] : ['S1', 'S2', 'S3'];
                         const isWorking = shiftsToday.some(shift => daySchedule[shift] && daySchedule[shift].includes(emp.name));
-                        if (!isWorking) offDays++;
+                        // Approved leave logic
+                        const hasLeave = (window.leaveRequests || []).some(l => l.employeeName === emp.name && l.status === 'approved' && l.date === dateStr);
+                        if (hasLeave) leaveDays++;
+                        else if (!isWorking) offDays++;
                     });
-                    // Count approved leaves
-                    const leaves = (window.leaveRequests || []).filter(l => l.employeeName === emp.name && l.status === 'approved' && scheduleKeys.includes(l.date)).length;
-                    const totalOffs = offDays + leaves;
-                    if (totalOffs > totalWeekends) {
+                    // Week off and leave are strictly separate
+                    if (offDays > totalWeekends) {
                         strictValid = false;
-                        strictWarnings.push(`${emp.name}: ${totalOffs} offs (week offs + leaves) > ${totalWeekends} weekends`);
+                        strictWarnings.push(`${emp.name}: ${offDays} week offs > ${totalWeekends} weekends`);
                     }
                 });
                 if (!strictValid) {
-                    let warnMsg = '❌ Schedule cannot be generated. The following members exceed allowed offs (week offs + leaves):\n' + strictWarnings.join('\n') + '\nRule: Total offs (week offs + leaves) must not exceed number of weekends.';
+                    let warnMsg = '❌ Schedule cannot be generated. The following members exceed allowed week offs (not counting leave):\n' + strictWarnings.join('\n') + '\nRule: Week offs must not exceed number of weekends. Leave is separate.';
                     output.innerHTML = `<div class='alert alert-danger' style='white-space:pre-line;'>${warnMsg}</div>`;
                     return;
                 }
@@ -4099,62 +4114,64 @@ if (scheduleForm && !document.getElementById('customRulesBox')) {
                 const currentDate = new Date(startDate);
                 currentDate.setDate(currentDate.getDate() + i);
                 const dateStr = currentDate.toISOString().split('T')[0];
-                const dayOfWeek = currentDate.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+                const dayOfWeek = currentDate.getDay();
                 const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek];
-                
                 schedule[dateStr] = { S1: [], S2: [], S3: [] };
-                
+
                 // Determine required shifts and staffing based on day
                 let requiredShifts, staffingRules;
                 if (dayOfWeek === 0) { // Sunday
                     requiredShifts = ['S2', 'S3'];
                     staffingRules = { S2: 2, S3: 2 };
-                } else if (dayOfWeek === 6) { // Saturday  
+                } else if (dayOfWeek === 6) { // Saturday
                     requiredShifts = ['S1', 'S2', 'S3'];
                     staffingRules = { S1: 2, S2: 2, S3: 2 };
-                } else { // Monday-Friday
+                } else {
                     requiredShifts = ['S1', 'S2', 'S3'];
                     staffingRules = { S1: 3, S2: 2, S3: 3 };
                 }
-                
-                // Get available members (excluding those who need offs)
+
+                // Get available members (excluding those who need offs or are on leave)
                 const availableMembers = regularMembers.filter(name => {
                     const tracker = workTracker[name];
                     // Check if member needs a week off (worked 4+ consecutive days and hasn't exceeded weekend limit)
                     if (tracker.consecutiveDays >= 4 && tracker.totalOffDays < totalWeekends) {
                         return false; // Give week off
                     }
+                    // Check if member is on approved leave for this date
+                    if ((window.leaveRequests || []).some(l => l.employeeName === name && l.status === 'approved' && l.date === dateStr)) {
+                        return false;
+                    }
                     return true;
                 });
-                
-                // Add S2-only members for S2 shift
-                const s2AvailableMembers = [...availableMembers];
+
+                // Add S2-only members for S2 shift if not on leave or week off
+                const s2AvailableMembers = [];
                 s2OnlyMembers.forEach(name => {
                     const tracker = workTracker[name];
                     if (tracker.consecutiveDays >= 4 && tracker.totalOffDays < totalWeekends) {
                         // S2-only member needs off
-                    } else {
+                    } else if (!(window.leaveRequests || []).some(l => l.employeeName === name && l.status === 'approved' && l.date === dateStr)) {
                         s2AvailableMembers.push(name);
                     }
                 });
-                
+
                 // Assign shifts ensuring rules are followed
                 requiredShifts.forEach(shift => {
                     const requiredCount = staffingRules[shift];
-                    const membersPool = shift === 'S2' ? s2AvailableMembers : availableMembers;
-                    
+                    const membersPool = shift === 'S2' ? s2AvailableMembers.slice() : availableMembers.slice();
+
                     // Ensure at least one shift lead in each shift
                     const availableLeads = shiftLeads.filter(lead => membersPool.includes(lead));
                     if (availableLeads.length > 0) {
                         // Assign one shift lead
                         const selectedLead = availableLeads[Math.floor(Math.random() * availableLeads.length)];
                         schedule[dateStr][shift].push(selectedLead);
-                        
                         // Remove from available pool for this shift
                         const leadIndex = membersPool.indexOf(selectedLead);
                         if (leadIndex > -1) membersPool.splice(leadIndex, 1);
                     }
-                    
+
                     // Fill remaining spots
                     const remainingSpots = requiredCount - schedule[dateStr][shift].length;
                     for (let j = 0; j < remainingSpots && membersPool.length > 0; j++) {
@@ -4164,12 +4181,19 @@ if (scheduleForm && !document.getElementById('customRulesBox')) {
                         membersPool.splice(randomIndex, 1);
                     }
                 });
-                
+
+                // Enforce hybrid/WFO seat rules: max 8 in office, at least 2 per shift, 3 days/week in office per member (not implemented in this demo, but can be added)
+
                 // Update work tracking
                 allMembers.forEach(name => {
                     const tracker = workTracker[name];
                     const isWorking = requiredShifts.some(shift => schedule[dateStr][shift].includes(name));
-                    
+                    // Check if on leave
+                    const isOnLeave = (window.leaveRequests || []).some(l => l.employeeName === name && l.status === 'approved' && l.date === dateStr);
+                    if (isOnLeave) {
+                        // Do not increment consecutiveDays or totalOffDays
+                        return;
+                    }
                     if (isWorking) {
                         tracker.consecutiveDays++;
                         tracker.lastWorked = dateStr;
@@ -4187,8 +4211,6 @@ if (scheduleForm && !document.getElementById('customRulesBox')) {
                         tracker.consecutiveDays = 0;
                     }
                 });
-                
-                console.log(`${dayName} ${dateStr}: S1(${schedule[dateStr].S1.length}), S2(${schedule[dateStr].S2.length}), S3(${schedule[dateStr].S3.length})`);
             }
             
             // Validate schedule against rules

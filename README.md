@@ -70,28 +70,14 @@ python -m http.server 8000
 # Visit: http://localhost:8000
 
 # Or with Node.js
-npx http-server .
-```
-
 ## 📊 Real NPE Data (August 2025)
 
-### Team Structure
-- **2 Leads**: Dinesh, Mano
-- **5 Shift Leads**: Jeyakaran, Karthikeyan, Panner, Sai Kumar, Manoj
-- **7 Associates**: Sai Krishna, Jeeva, Saran, Akshay, Murugan, Sahana P, Rengadurai
 
 ### Shift Timings (IST)
-- **S1 Morning**: 06:00 AM - 04:00 PM
-- **S2 Afternoon**: 01:00 PM - 11:00 PM
-- **S3 Night**: 10:00 PM - 08:00 AM
 - **S4 Special**: 12:30 PM - 10:30 PM
 
 ### August 2025 Data
 - **31 days** of actual roster assignments
-- **8 approved leaves** integrated
-- **Real employee preferences** and availability
-
-## 📱 Progressive Web App (PWA)
 
 Your deployed NPE ShiftBot can be installed as a mobile app:
 - **Add to Home Screen** on iOS/Android
@@ -109,26 +95,12 @@ Your deployed NPE ShiftBot can be installed as a mobile app:
 | **SSL/HTTPS** | Automatic security certificates |
 | **Global CDN** | Fast loading worldwide |
 | **Analytics** | Track usage and performance |
-| **Forms** | Handle contact forms (if needed) |
-| **Edge Functions** | Serverless capabilities |
-
-## 🔒 Security & Performance
-
-Your Netlify deployment includes:
 - **HTTPS** encryption by default
 - **Security headers** (XSS protection, CSP)
 - **GZIP compression** for faster loading
 - **Cache optimization** for better performance
-- **CDN delivery** for global speed
-- **DDoS protection** included
-
-## 📈 Excel Features
 
 ### Import Capabilities
-- **Multi-sheet Excel files** (.xlsx format)
-- **Team data** with CTS IDs and ESHC codes
-- **Schedule data** with shift assignments
-- **Leave records** with approval status
 
 ### Export Capabilities
 - **Complete backup** in Excel format
@@ -154,24 +126,11 @@ Your Netlify deployment includes:
 
 ### `_redirects`
 ```
-/* /index.html 200
-```
-
-## 🆘 Troubleshooting
 
 ### Common Issues
-- **Charts not loading?** Check CDN connections in browser console
-- **PWA not installing?** Verify HTTPS and manifest.json
-- **Mobile issues?** Test responsive design on various devices
 - **Excel import fails?** Ensure .xlsx format and proper structure
 
 ### Netlify Support
-- Check deployment logs in Netlify dashboard
-- Test in different browsers
-- Verify all external dependencies load correctly
-
-## 📚 Technology Stack
-
 - **Frontend**: Pure HTML5, CSS3, JavaScript (ES6+)
 - **Charts**: Chart.js with gradient animations
 - **Excel**: XLSX.js for import/export
@@ -183,11 +142,7 @@ Your Netlify deployment includes:
 
 1. **Prepare**: Ensure all files are ready
 2. **Deploy**: Use Netlify drag & drop or GitHub integration
-3. **Share**: Your NPE ShiftBot is live!
 
-**Fast. Reliable. Professional.** 🚀
-
-## 📞 Support
 
 - **Repository**: https://github.com/Jeeva-Cogn/Shift-Roster-Bot
 - **Issues**: Create GitHub issues for bugs/features

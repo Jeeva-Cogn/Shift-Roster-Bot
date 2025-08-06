@@ -46,11 +46,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     
     <script>
-// Tab navigation test script removed to restore manual tab switching
+        // Tab navigation test script removed to restore manual tab switching
         // Chennai timezone utilities - Ultimate rule awareness
         function getChennaiTime() {
             return new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
-        // ...existing code...
+        }
         
         function getChennaiDate() {
             const chennaiTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
@@ -1647,7 +1647,6 @@
             };
 
             input.click();
-        }
 
         // Excel Template Structure Definition
         const EXCEL_TEMPLATE = {
@@ -3025,6 +3024,43 @@ if (scheduleForm && !document.getElementById('customRulesBox')) {
 
     return schedule;
 }
+
+        // Generate Leave Calendar
+        function generateLeaveCalendar() {
+            const calendarContainer = document.getElementById('leaveCalendar');
+            if (!calendarContainer) return;
+            
+            calendarContainer.innerHTML = '';
+            
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth();
+            const currentYear = currentDate.getFullYear();
+            
+            // Generate calendar for current month
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Add calendar days
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendarContainer.appendChild(emptyDay);
+            }
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'calendar-day-number';
+                dayNumber.textContent = day;
+                dayElement.appendChild(dayNumber);
+                
+                // Check for leaves on this day
+                const leavesForDay = leaveRequests.filter(leave => leave.date === dateStr);
+                
+                if (leavesForDay.length > 0) {
                     dayElement.classList.add('has-leave');
                     
                     // Create employees container
@@ -3056,7 +3092,7 @@ if (scheduleForm && !document.getElementById('customRulesBox')) {
                     dayElement.appendChild(employeesContainer);
                 }
                 
-                container.appendChild(dayElement);
+                calendarContainer.appendChild(dayElement);
             }
         }
 

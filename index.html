@@ -7252,16 +7252,16 @@ ${result.explanation}
             executeStep();
         }
         
-        // Auto-start demo mode on first load (for hackathon presentation)
-        window.addEventListener('load', function() {
-            // Check if it's the first visit
-            if (!localStorage.getItem('demoShown')) {
-                setTimeout(() => {
-                    startHackathonDemo();
-                    localStorage.setItem('demoShown', 'true');
-                }, 2000);
-            }
-        });
+        // Auto-start demo mode on first load (for hackathon presentation) - DISABLED
+        // window.addEventListener('load', function() {
+        //     // Check if it's the first visit
+        //     if (!localStorage.getItem('demoShown')) {
+        //         setTimeout(() => {
+        //             startHackathonDemo();
+        //             localStorage.setItem('demoShown', 'true');
+        //         }, 2000);
+        //     }
+        // });
         
         // Initialize tab navigation on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -7273,8 +7273,11 @@ ${result.explanation}
             // Initialize custom rules modal
             initCustomRulesModal();
             
-            // Make sure dashboard tab is active on load
-            showTab('dashboard');
+            // Make sure generator tab is active on load (where user works primarily)
+            showTab('generator');
+            
+            // Load team data immediately to ensure it's available
+            loadTeamData();
             
             // Add click listeners to all tab buttons as backup
             document.querySelectorAll('.tab').forEach(btn => {
@@ -7329,4 +7332,3 @@ The AI will interpret and apply these rules intelligently.">⚡ NPE ShiftBot Req
     </div>
 </body>
 </html>
-
